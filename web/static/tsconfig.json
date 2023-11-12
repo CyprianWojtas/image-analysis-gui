@@ -1,0 +1,11 @@
+{
+	"compilerOptions":
+	{
+	  "outDir": "./js",
+	  "allowJs": true,
+	  "target": "es2017",
+	  "moduleResolution": "node",
+	  "sourceMap": true
+	},
+	"include": ["./src/**/*"]
+}

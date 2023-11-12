@@ -1,0 +1,95 @@
+html
+{
+	font-size: 12px;
+}
+
+body
+{
+	margin: 0;
+	background:
+		repeating-linear-gradient(#fff1, #fff1 1px, #fff0 1px, #fff0 1.5rem),
+		repeating-linear-gradient(90deg, #fff1, #fff1 1px, #fff0 1px, #fff0 1.5rem);
+	background-color: #222;
+	background-size: 1.5rem 1.5rem;
+	color: #fff;
+	font-family: sans-serif;
+	line-height: 1.25;
+}
+
+.nodeEditor
+{
+	display: grid;
+}
+
+.nodeEditor canvas,
+.nodeEditor .nodeContiner
+{
+	grid-column: 1 / 2;
+	grid-row: 1 / 2;
+}
+
+.nodeEditor canvas
+{
+	filter: drop-shadow(0 0 1rem #000);
+}
+
+.nodeEditor .node
+{
+	position: absolute;
+	width: 200px;
+	box-sizing: border-box;
+	padding: 10px;
+	background: #444;
+	border-radius: 6px;
+	box-shadow: 0 0 1rem #0008;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+}
+
+.nodeEditor .node .nodeTitle
+{
+	margin: -10px -10px 10px;
+	background: #333;
+	padding: 5px 10px;
+	border-radius: 6px 6px 0 0;
+	grid-column: 1 / -1;
+	cursor: default;
+	user-select: none;
+}
+
+.nodeEditor .node .nodeInput,
+.nodeEditor .node .nodeOutput
+{
+	position: relative;
+	font-size: 11px;
+}
+
+.nodeEditor .node .nodeInput .handle,
+.nodeEditor .node .nodeOutput .handle
+{
+	content: "";
+	display: block;
+	width: 8px;
+	height: 8px;
+	background: #666;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	border-radius: 100%;
+	user-select: none;
+}
+
+.nodeEditor .node .nodeInput .handle
+{
+	left: -14px;
+}
+
+.nodeEditor .node .nodeOutput .handle
+{
+	right: -14px;
+}
+
+.nodeEditor .node .nodeVariableType_int .handle
+{
+	background: #06f;
+}

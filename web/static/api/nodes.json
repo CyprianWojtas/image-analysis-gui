@@ -1,0 +1,56 @@
+{
+	"test/int_input":
+	{
+		"name": "Test integer input",
+		"inputs":
+		[
+			{
+				"id": "num_in",
+				"type": "int",
+				"name": "Example Input",
+				"description": "Input just for example purposes"
+			}
+		]
+	},
+	"test/int_output":
+	{
+		"name": "Test integer output",
+		"outputs":
+		[
+			{
+				"id": "num_out",
+				"type": "int",
+				"name": "Example Output",
+				"description": "Output just for example purposes"
+			}
+		]
+	},
+	"test/int_inout":
+	{
+		"name": "Test integer in/out",
+		"inputs":
+		[
+			{
+				"id": "num_in",
+				"type": "int",
+				"name": "Example Input",
+				"description": "Input just for example purposes"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "num_out1",
+				"type": "int",
+				"name": "Example Output 1",
+				"description": "Output just for example purposes"
+			},
+			{
+				"id": "num_out2",
+				"type": "int",
+				"name": "Example Output 2",
+				"description": "Output just for example purposes"
+			}
+		]
+	}
+}
