@@ -1,7 +1,29 @@
 import { createElement, createNodeTree } from "../Utils.js";
 import { NodeInput, NodeOutput, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
+class NodeDragEvent extends Event {
+    constructor(eventName, node) {
+        super(eventName, { bubbles: true });
+        this.node = node;
+        this.nodeId = node.id;
+    }
+}
+export class NodeDragStartEvent extends NodeDragEvent {
+    constructor(node) {
+        super("node_drag_start", node);
+    }
+}
+export class NodeDragEndEvent extends NodeDragEvent {
+    constructor(node) {
+        super("node_drag_end", node);
+    }
+}
+export class NodeMoveEvent extends NodeDragEvent {
+    constructor(node) {
+        super("node_move", node);
+    }
+}
 export default class Node extends EventTarget {
-    constructor(id, nodeData = {}) {
+    constructor(id, type, nodeData = {}) {
         super();
         this.inputsContainer = createElement("div", { class: "inputsContainer" });
         this.outputsContainer = createElement("div", { class: "outputsContainer" });
@@ -9,10 +31,11 @@ export default class Node extends EventTarget {
         this.inputs = {};
         this.outputs = {};
         this.id = id;
+        this.type = type;
         this.element = createNodeTree({
             name: "div",
             attributes: {
-                class: "node"
+                class: `node nodeId_${this.id}`
             },
             childNodes: [
                 {
@@ -42,10 +65,10 @@ export default class Node extends EventTarget {
     addInput(id, type, name, description) {
         const input = new NodeInput(id, type, name, description);
         input.addEventListener("variable_drag_start", (e) => {
-            this.dispatchEvent(new VariableDragStartEvent(e.variableId, this.id));
+            this.dispatchEvent(new VariableDragStartEvent(e.variable, this.id));
         });
         input.addEventListener("variable_drag_end", (e) => {
-            this.dispatchEvent(new VariableDragEndEvent(e.variableId, this.id));
+            this.dispatchEvent(new VariableDragEndEvent(e.variable, this.id));
         });
         this.inputs[id] = input;
         this.inputsContainer.append(input.element);
@@ -53,10 +76,10 @@ export default class Node extends EventTarget {
     addOutput(id, type, name, description) {
         const output = new NodeOutput(id, type, name, description);
         output.addEventListener("variable_drag_start", (e) => {
-            this.dispatchEvent(new VariableDragStartEvent(e.variableId, this.id));
+            this.dispatchEvent(new VariableDragStartEvent(e.variable, this.id));
         });
         output.addEventListener("variable_drag_end", (e) => {
-            this.dispatchEvent(new VariableDragEndEvent(e.variableId, this.id));
+            this.dispatchEvent(new VariableDragEndEvent(e.variable, this.id));
         });
         this.outputs[id] = output;
         this.outputsContainer.append(output.element);
@@ -67,29 +90,29 @@ export default class Node extends EventTarget {
         this.posY = posY;
         this.element.style.top = posY + "px";
         this.element.style.left = posX + "px";
-        this.dispatchEvent(new Event("node_move"));
+        this.dispatchEvent(new NodeMoveEvent(this));
     }
     dragStart(e) {
+        e.stopPropagation();
         let startPosX = this.posX;
         let startPosY = this.posY;
         let dragPosX = e.clientX;
         let dragPosY = e.clientY;
         const moveEvent = (e) => {
-            let newX = startPosX + e.clientX - dragPosX;
-            let newY = startPosY + e.clientY - dragPosY;
-            if (newX < 0)
-                newX = 0;
-            if (newY < 0)
-                newY = 0;
-            this.moveTo(newX, newY);
+            this.moveTo(startPosX + e.clientX - dragPosX, startPosY + e.clientY - dragPosY);
         };
         const mouseupEvent = (e) => {
             moveEvent(e);
             window.removeEventListener("mousemove", moveEvent);
             window.removeEventListener("mouseup", mouseupEvent);
+            this.dispatchEvent(new NodeDragEndEvent(this));
         };
         window.addEventListener("mousemove", moveEvent);
         window.addEventListener("mouseup", mouseupEvent);
+        this.dispatchEvent(new NodeDragStartEvent(this));
+    }
+    getVariable(varaibleId) {
+        return this.inputs[varaibleId] || this.outputs[varaibleId] || null;
     }
     getHandlePosition(handleId) {
         const variable = this.inputs[handleId] || this.outputs[handleId];

@@ -2,6 +2,7 @@
 	"test/int_input":
 	{
 		"name": "Test integer input",
+		"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip",
 		"inputs":
 		[
 			{
@@ -12,9 +13,24 @@
 			}
 		]
 	},
+	"test/float_input":
+	{
+		"name": "Test float input",
+		"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip",
+		"inputs":
+		[
+			{
+				"id": "num_in",
+				"type": "float",
+				"name": "Example Input",
+				"description": "Input just for example purposes"
+			}
+		]
+	},
 	"test/int_output":
 	{
 		"name": "Test integer output",
+		"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip",
 		"outputs":
 		[
 			{
@@ -28,6 +44,7 @@
 	"test/int_inout":
 	{
 		"name": "Test integer in/out",
+		"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip",
 		"inputs":
 		[
 			{
@@ -50,6 +67,215 @@
 				"type": "int",
 				"name": "Example Output 2",
 				"description": "Output just for example purposes"
+			},
+			{
+				"id": "num_out3",
+				"type": "float",
+				"name": "Float Output",
+				"description": "Output just for example purposes"
+			}
+		]
+	},
+	"var_out/string":
+	{
+		"name": "String Input",
+		"outputs":
+		[
+			{
+				"id": "string",
+				"type": "string",
+				"name": "String"
+			}
+		]
+	},
+	"var_out/int":
+	{
+		"name": "Integer Input",
+		"outputs":
+		[
+			{
+				"id": "int",
+				"type": "int",
+				"name": "Integer"
+			}
+		]
+	},
+	"var_int/image":
+	{
+		"name": "Image Output",
+		"inputs":
+		[
+			{
+				"id": "image",
+				"type": "image_bin",
+				"name": "Image"
+			}
+		]
+	},
+	"var_duplicate/image_rgb_256":
+	{
+		"name": "Split",
+		"description": "Splits input into 2 outputs",
+		"inputs":
+		[
+			{
+				"id": "image_in",
+				"type": "image_rgb_256",
+				"name": "Image"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "image_out_1",
+				"type": "image_rgb_256",
+				"name": "Image"
+			},
+			{
+				"id": "image_out_2",
+				"type": "image_rgb_256",
+				"name": "Image"
+			}
+		]
+	},
+	"file/input":
+	{
+		"name": "File Input",
+		"description": "Reads a file from specified location",
+		"inputs":
+		[
+			{
+				"id": "file_name",
+				"type": "string",
+				"name": "File Name"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "image",
+				"type": "image_rgb_256",
+				"name": "Image"
+			}
+		]
+	},
+	"filter/gaussian_blur":
+	{
+		"name": "Gaussian Blur",
+		"inputs":
+		[
+			{
+				"id": "image_in",
+				"type": "image_rgb_256",
+				"name": "Image"
+			},
+			{
+				"id": "blur_radius",
+				"type": "int",
+				"name": "Blur Radius"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "image_out",
+				"type": "image_rgb_256",
+				"name": "Blurred Image"
+			}
+		]
+	},
+	"filter/subtraction":
+	{
+		"name": "Image Subtraction",
+		"inputs":
+		[
+			{
+				"id": "image_in",
+				"type": "image_rgb_256",
+				"name": "Image 1"
+			},
+			{
+				"id": "subtracted_image",
+				"type": "image_rgb_256",
+				"name": "Image 2"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "image_out",
+				"type": "image_rgb_256",
+				"name": "Out Image"
+			}
+		]
+	},
+	"filter/inversion":
+	{
+		"name": "Image Inversion",
+		"inputs":
+		[
+			{
+				"id": "image_in",
+				"type": "image_rgb_256",
+				"name": "Image"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "image_out",
+				"type": "image_rgb_256",
+				"name": "Inverted Image"
+			}
+		]
+	},
+	"filter/binarisation":
+	{
+		"name": "Binarisation",
+		"inputs":
+		[
+			{
+				"id": "image_in",
+				"type": "image_rgb_256",
+				"name": "Image"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "image_out",
+				"type": "image_bin",
+				"name": "Binarised Image"
+			}
+		]
+	},
+	"filter/brightness_contrast":
+	{
+		"name": "Brightness and Contrast",
+		"inputs":
+		[
+			{
+				"id": "image_in",
+				"type": "image_rgb_256",
+				"name": "Image"
+			},
+			{
+				"id": "brightness",
+				"type": "int",
+				"name": "Brightness"
+			},
+			{
+				"id": "contrast",
+				"type": "int",
+				"name": "Contrast"
+			}
+		],
+		"outputs":
+		[
+			{
+				"id": "image_out",
+				"type": "image_rgb_256",
+				"name": "Out Image"
 			}
 		]
 	}

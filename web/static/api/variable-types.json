@@ -1,0 +1,27 @@
+{
+	"int":
+	{
+		"name": "Integer",
+		"color": "#08f"
+	},
+	"float":
+	{
+		"name": "Float",
+		"color": "#a4f"
+	},
+	"string":
+	{
+		"name": "String",
+		"color": "#f80"
+	},
+	"image_rgb_256":
+	{
+		"name": "RGB Image (256)",
+		"color": "#ff0"
+	},
+	"image_bin":
+	{
+		"name": "Black/White Image (1)",
+		"color": "#ccc"
+	}
+}

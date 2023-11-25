@@ -4,13 +4,15 @@ import { createElement, createNodeTree } from "../Utils.js";
 class VarDragEvent extends Event
 {
 	variableId: string;
+	variable: NodeVariable;
 	nodeId: string;
 
-	constructor(eventName: string, variableId: string, nodeId: string = null)
+	constructor(eventName: string, variable: NodeVariable, nodeId: string = null)
 	{
 		super(eventName, { bubbles: true });
 
-		this.variableId = variableId;
+		this.variable = variable;
+		this.variableId = variable.id;
 		this.nodeId = nodeId;
 	}
 
@@ -23,29 +25,32 @@ class VarDragEvent extends Event
 
 export class VariableDragStartEvent extends VarDragEvent
 {
-	constructor(variableId: string, nodeId: string = null)
+	constructor(variable: NodeVariable, nodeId: string = null)
 	{
-		super("variable_drag_start", variableId, nodeId);
+		super("variable_drag_start", variable, nodeId);
 	}
 }
 
 export class VariableDragEndEvent extends VarDragEvent
 {
-	constructor(variableId: string, nodeId: string = null)
+	constructor(variable: NodeVariable, nodeId: string = null)
 	{
-		super("variable_drag_end", variableId, nodeId);
+		super("variable_drag_end", variable, nodeId);
 	}
 }
 
 
-abstract class NodeVariable extends EventTarget
+export abstract class NodeVariable extends EventTarget
 {
 	id: string;
 	type: string;
+	input: boolean;
 	name: string;
 	description: string;
 
 	element: HTMLDivElement;
+
+	protected _connectedTo: string;
 
 	protected handleEl: HTMLDivElement;
 
@@ -66,23 +71,39 @@ abstract class NodeVariable extends EventTarget
 
 		this.handleEl = <HTMLDivElement>createElement(
 			"div",
-			{ class: "handle" },
-			{
-				mousedown: () =>
-				{
-					this.dispatchEvent(new VariableDragStartEvent(this.id));
-				},
-				mouseup: () =>
-				{
-					this.dispatchEvent(new VariableDragEndEvent(this.id));
-				}
-			}
+			{ class: "handle" }
 		);
 	}
 
 	public getHandleBoundingClientRect()
 	{
 		return this.handleEl.getBoundingClientRect();
+	}
+
+	protected onDragStartEvent(e)
+	{
+		e.stopPropagation();
+		this.dispatchEvent(new VariableDragStartEvent(this));
+	}
+
+	protected onDragEndEvent(e)
+	{
+		this.dispatchEvent(new VariableDragEndEvent(this));
+	}
+
+	public get connectedTo(): string
+	{
+		return this._connectedTo;
+	}
+
+	public set connectedTo(newValue: string)
+	{
+		if (!newValue)
+			this.element.classList.remove("connected");
+		else
+			this.element.classList.add("connected");
+
+		this._connectedTo = newValue;
 	}
 }
 
@@ -92,6 +113,7 @@ class NodeInput extends NodeVariable
 	constructor(id: string, type: string, name = null, description = null)
 	{
 		super(id, type, name, description);
+		this.input = true;
 
 		this.element = <HTMLDivElement>createNodeTree(
 			{
@@ -115,7 +137,12 @@ class NodeInput extends NodeVariable
 						]
 					},
 					this.handleEl
-				]
+				],
+				listeners:
+				{
+					mousedown: e => this.onDragStartEvent(e),
+					mouseup: e => this.onDragEndEvent(e)
+				}
 			}
 		);
 	}
@@ -127,6 +154,7 @@ class NodeOutput extends NodeVariable
 	constructor(id: string, type: string, name = null, description = null)
 	{
 		super(id, type, name, description);
+		this.input = false;
 
 		this.element = <HTMLDivElement>createNodeTree(
 			{
@@ -150,7 +178,12 @@ class NodeOutput extends NodeVariable
 						]
 					},
 					this.handleEl
-				]
+				],
+				listeners:
+				{
+					mousedown: e => this.onDragStartEvent(e),
+					mouseup: e => this.onDragEndEvent(e)
+				}
 			}
 		);
 	}

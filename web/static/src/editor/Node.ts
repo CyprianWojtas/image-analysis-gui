@@ -1,10 +1,51 @@
 import { createElement, createNodeTree } from "../Utils.js";
-import { NodeInput, NodeOutput, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
+import { NodeInput, NodeOutput, NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
+
+
+class NodeDragEvent extends Event
+{
+	node: Node;
+	nodeId: string;
+
+	constructor(eventName: string, node: Node)
+	{
+		super(eventName, { bubbles: true });
+
+		this.node = node;
+		this.nodeId = node.id;
+	}
+}
+
+
+export class NodeDragStartEvent extends NodeDragEvent
+{
+	constructor(node: Node)
+	{
+		super("node_drag_start", node);
+	}
+}
+
+export class NodeDragEndEvent extends NodeDragEvent
+{
+	constructor(node: Node)
+	{
+		super("node_drag_end", node);
+	}
+}
+
+export class NodeMoveEvent extends NodeDragEvent
+{
+	constructor(node: Node)
+	{
+		super("node_move", node);
+	}
+}
 
 export default
 class Node extends EventTarget
 {
 	id: string;
+	type: string;
 	element: HTMLDivElement;
 
 	posX: number;
@@ -13,18 +54,19 @@ class Node extends EventTarget
 	private inputsContainer:  HTMLDivElement = <HTMLDivElement>createElement("div", { class: "inputsContainer" });
 	private outputsContainer: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "outputsContainer" });
 
-	constructor(id: string, nodeData: any = {})
+	constructor(id: string, type: string, nodeData: any = {})
 	{
 		super();
 
 		this.id = id;
+		this.type = type;
 
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
 				attributes:
 				{
-					class: "node"
+					class: `node nodeId_${ this.id }`
 				},
 				childNodes:
 				[
@@ -73,12 +115,12 @@ class Node extends EventTarget
 
 		input.addEventListener("variable_drag_start", (e: VariableDragStartEvent) =>
 		{
-			this.dispatchEvent(new VariableDragStartEvent(e.variableId, this.id));
+			this.dispatchEvent(new VariableDragStartEvent(e.variable, this.id));
 		});
 
 		input.addEventListener("variable_drag_end", (e: VariableDragEndEvent) =>
 		{
-			this.dispatchEvent(new VariableDragEndEvent(e.variableId, this.id));
+			this.dispatchEvent(new VariableDragEndEvent(e.variable, this.id));
 		});
 
 		this.inputs[id] = input;
@@ -91,12 +133,12 @@ class Node extends EventTarget
 
 		output.addEventListener("variable_drag_start", (e: VariableDragStartEvent) =>
 		{
-			this.dispatchEvent(new VariableDragStartEvent(e.variableId, this.id));
+			this.dispatchEvent(new VariableDragStartEvent(e.variable, this.id));
 		});
 
 		output.addEventListener("variable_drag_end", (e: VariableDragEndEvent) =>
 		{
-			this.dispatchEvent(new VariableDragEndEvent(e.variableId, this.id));
+			this.dispatchEvent(new VariableDragEndEvent(e.variable, this.id));
 		});
 
 		this.outputs[id] = output;
@@ -113,11 +155,13 @@ class Node extends EventTarget
 		this.element.style.top  = posY + "px";
 		this.element.style.left = posX + "px";
 
-		this.dispatchEvent(new Event("node_move"));
+		this.dispatchEvent(new NodeMoveEvent(this));
 	}
 
 	private dragStart(e: MouseEvent)
 	{
+		e.stopPropagation();
+
 		let startPosX = this.posX;
 		let startPosY = this.posY;
 
@@ -126,13 +170,7 @@ class Node extends EventTarget
 
 		const moveEvent = (e: MouseEvent) =>
 		{
-			let newX = startPosX + e.clientX - dragPosX;
-			let newY = startPosY + e.clientY - dragPosY;
-
-			if (newX < 0) newX = 0;
-			if (newY < 0) newY = 0;
-
-			this.moveTo(newX, newY);
+			this.moveTo(startPosX + e.clientX - dragPosX, startPosY + e.clientY - dragPosY);
 		}
 
 		const mouseupEvent = (e: MouseEvent) =>
@@ -141,10 +179,19 @@ class Node extends EventTarget
 
 			window.removeEventListener("mousemove", moveEvent);
 			window.removeEventListener("mouseup", mouseupEvent);
+
+			this.dispatchEvent(new NodeDragEndEvent(this));
 		}
 
 		window.addEventListener("mousemove", moveEvent);
 		window.addEventListener("mouseup", mouseupEvent);
+
+		this.dispatchEvent(new NodeDragStartEvent(this));
+	}
+
+	getVariable(varaibleId: string): NodeVariable
+	{
+		return this.inputs[varaibleId] || this.outputs[varaibleId] || null;
 	}
 
 	getHandlePosition(handleId: string)

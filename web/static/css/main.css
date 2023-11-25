@@ -16,16 +16,22 @@ body
 	line-height: 1.25;
 }
 
-.nodeEditor
+.nodeEditor .nodesBox
 {
 	display: grid;
+	overflow: hidden;
 }
 
 .nodeEditor canvas,
-.nodeEditor .nodeContiner
+.nodeEditor .nodeContainer
 {
 	grid-column: 1 / 2;
 	grid-row: 1 / 2;
+}
+
+.nodeEditor .nodeContainer
+{
+	position: relative;
 }
 
 .nodeEditor canvas
@@ -62,6 +68,27 @@ body
 {
 	position: relative;
 	font-size: 11px;
+	user-select: none;
+	cursor: grab;
+}
+
+.nodeEditor.variableDragged,
+.nodeEditor.variableDragged *
+{
+	cursor: grabbing !important;
+}
+
+.nodeEditor .node .nodeInput
+{
+	margin-left: -10px;
+	padding-left: 10px;
+}
+
+.nodeEditor .node .nodeOutput
+{
+	text-align: right;
+	margin-right: -10px;
+	padding-right: 10px;
 }
 
 .nodeEditor .node .nodeInput .handle,
@@ -77,19 +104,83 @@ body
 	transform: translateY(-50%);
 	border-radius: 100%;
 	user-select: none;
+	transition: 0.2s filter, 0.2s box-shadow;
+}
+
+.nodeEditor.variableDragged .node .nodeInput .handle,
+.nodeEditor.variableDragged .node .nodeOutput .handle
+{
+	filter: brightness(0.5);
+}
+
+.nodeEditor.variableDragged .node .nodeInput.connected .handle,
+.nodeEditor.variableDragged .node .nodeOutput.connected .handle
+{
+	filter: brightness(0.5) !important;
+	box-shadow: none !important;
+}
+
+.nodeEditor.variableDragged .node .nodeInput.dragged .handle,
+.nodeEditor.variableDragged .node .nodeOutput.dragged .handle
+{
+	filter: none;
 }
 
 .nodeEditor .node .nodeInput .handle
 {
-	left: -14px;
+	left: -4px;
 }
 
 .nodeEditor .node .nodeOutput .handle
 {
-	right: -14px;
+	right: -4px;
 }
 
-.nodeEditor .node .nodeVariableType_int .handle
+.nodeShelf
 {
-	background: #06f;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background: #111;
+	padding: 10px;
+}
+
+.nodeShelf .nodeType
+{
+	width: 200px;
+	box-sizing: border-box;
+	background: #444;
+	border-radius: 6px;
+	box-shadow: 0 0 1rem #0008;
+	display: grid;
+	grid-template-rows: auto 0fr;
+	margin-bottom: 10px;
+	transition: grid-template-rows 0.5s;
+	overflow: hidden;
+}
+.nodeEditor .nodeType.expanded
+{
+	grid-template-rows: auto 1fr;
+}
+
+.nodeEditor .nodeType .nodeTitle
+{
+	padding: 10px;
+	background: #333;
+	padding: 5px 10px;
+	border-radius: 6px 6px 0 0;
+	user-select: none;
+}
+
+.nodeEditor .nodeType .nodeDescription
+{
+	padding: 0 10px;
+	box-sizing: border-box;
+	overflow: hidden;
+	transition: padding 0.5s;
+}
+.nodeEditor .nodeType.expanded .nodeDescription
+{
+	padding: 10px;
 }
