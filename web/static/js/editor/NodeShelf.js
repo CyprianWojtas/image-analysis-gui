@@ -1,4 +1,5 @@
 import { createElement, createNodeTree } from "../Utils.js";
+import Wiki from "./Wiki.js";
 export default class NodeShelf {
     constructor() {
         this.nodesBox = createElement("div", { class: "nodes" });
@@ -47,7 +48,20 @@ export default class NodeShelf {
                         class: "nodeTitle"
                     },
                     childNodes: [
-                        (node === null || node === void 0 ? void 0 : node.name) || "New Node"
+                        (node === null || node === void 0 ? void 0 : node.name) || "New Node",
+                        {
+                            name: "button",
+                            attributes: {
+                                class: "wikiLink"
+                            },
+                            childNodes: ["?"],
+                            listeners: {
+                                click: e => {
+                                    e.stopPropagation();
+                                    Wiki.openArticle(nodeId);
+                                }
+                            }
+                        }
                     ],
                     listeners: {
                         click: () => {

@@ -1,0 +1,47 @@
+from flask import Blueprint, request, make_response
+
+import files
+import modules
+
+api = Blueprint('api', __name__, url_prefix='/api')
+
+
+@api.route('/nodes')
+def api_nodes():
+	mods = modules.get_list()
+	print(mods)
+	return mods
+
+
+@api.route('/files')
+def api_files():
+	path = request.args.get('path') or ''
+	return files.get_path(path)
+
+
+@api.route('/files/<path:file_path>')
+def api_files_get(file_path):
+	file_contents = files.get(file_path)
+
+	if file_contents:
+		resp = make_response(file_contents, 200)
+		resp.headers['Content-Type'] = 'application/json'
+		return resp
+
+	return "File not found", 404
+
+
+@api.route('/files/<path:file_path>', methods=['CREATE'])
+def api_files_create(file_path):
+	if files.create(file_path):
+		return "OK", 200
+
+	return "File exists", 400
+
+
+@api.route('/files/<path:file_path>', methods=['PUT'])
+def api_files_put(file_path):
+	if files.put(file_path, request.data.decode('utf-8')):
+		return "OK", 200
+
+	return "File not found", 404

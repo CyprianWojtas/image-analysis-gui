@@ -1,4 +1,5 @@
 import { createElement, createNodeTree } from "../Utils.js";
+import Wiki from "./Wiki.js";
 
 export default
 class NodeShelf
@@ -76,7 +77,23 @@ class NodeShelf
 						},
 						childNodes:
 						[
-							node?.name || "New Node"
+							node?.name || "New Node",
+							{
+								name: "button",
+								attributes:
+								{
+									class: "wikiLink"
+								},
+								childNodes: [ "?" ],
+								listeners:
+								{
+									click: e =>
+									{
+										e.stopPropagation();
+										Wiki.openArticle(nodeId);
+									}
+								}
+							}
 						],
 						listeners:
 						{

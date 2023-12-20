@@ -2,6 +2,7 @@ import { createElement, createNodeTree } from "../Utils.js";
 import Node from "./Node.js";
 import NodeShelf from "./NodeShelf.js";
 import { NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
+import Wiki from "./Wiki.js";
 
 export default
 class NodeEditor
@@ -20,6 +21,9 @@ class NodeEditor
 
 	nodes: {[key: string]: Node} = {};
 	nodeConnections: [string, string][] = [];
+
+	filePath: string;
+	history: string[] = [];
 
 	constructor()
 	{
@@ -56,6 +60,7 @@ class NodeEditor
 									return;
 								
 								this.addNode(nodeId, null, e.clientX - this.posX, e.clientY - this.posY);
+								this.historyPush();
 							},
 							mousedown: e => this.dragStart(e)
 						}
@@ -64,6 +69,18 @@ class NodeEditor
 				]
 			}
 		);
+
+		document.body.addEventListener("keydown", e =>
+		{
+			if (e.ctrlKey && !e.shiftKey && e.code == "KeyZ")
+				this.historyUndo();
+			if
+			(
+				(e.ctrlKey && e.shiftKey && e.code == "KeyZ") ||
+				(e.ctrlKey && !e.shiftKey && e.code == "KeyY")
+			)
+				this.historyRedo();
+		});
 
 		window.addEventListener("resize", () => this.resizeEditor());
 		this.resizeEditor();
@@ -76,9 +93,10 @@ class NodeEditor
 
 	async loadNodeTypes()
 	{
-		this.avaliableNodes         = await (await fetch("/api/nodes.json")).json();
+		this.avaliableNodes         = await (await fetch("/api/nodes")).json();
 		this.avaliableVariableTypes = await (await fetch("/api/variable-types.json")).json();
 
+		Wiki.addNodes(this.avaliableNodes);
 		this.nodeShelf.addNodes(this.avaliableNodes, this.avaliableVariableTypes);
 	}
 
@@ -155,10 +173,13 @@ class NodeEditor
 			this.nodeContainer.append(node.element);
 		});
 
+		node.addEventListener("node_drag_end", () =>
+		{
+			this.historyPush();
+		});
+
 		node.addEventListener("variable_drag_start", (e: VariableDragStartEvent) =>
 		{
-			console.log("Drag start", e.nodeVarId);
-
 			this.draggedVariableType = e.variable.type;
 			let isInput = e.variable.input;
 
@@ -209,6 +230,8 @@ class NodeEditor
 				window.removeEventListener("mouseup", mouseupEvent);
 
 				this.redrawConnestions();
+				
+				this.historyPush();
 			}
 
 			window.addEventListener("mousemove", moveEvent);
@@ -255,8 +278,6 @@ class NodeEditor
 
 	addConnection(nodeVarIdOutput: string, nodeVarIdInput: string)
 	{
-		console.log(nodeVarIdOutput, nodeVarIdInput);
-
 		const [nodeIdInput,  variableIdInput ] = nodeVarIdInput.split("?");
 		const [nodeIdOutput, variableIdOutput] = nodeVarIdOutput.split("?");
 
@@ -393,13 +414,13 @@ class NodeEditor
 
 		this.nodeContainer.style.top  = posY + "px";
 		this.nodeContainer.style.left = posX + "px";
+
+		this.element.style.setProperty('--background-position', `${ posX }px ${ posY }px`);
 	}
 
 	private dragStart(e: MouseEvent)
 	{
 		e.stopPropagation();
-
-		console.log(e);
 
 		let startPosX = this.posX;
 		let startPosY = this.posY;
@@ -447,8 +468,14 @@ class NodeEditor
 		});
 	}
 
-	loadJSON(json: string)
+	loadJSON(json: string, updateHistory: boolean = true)
 	{
+		
+		this.nodes = {};
+		this.nodeConnections = [];
+		this.nodeContainer.innerHTML = "";
+		this.ctx.clearRect(0, 0, this.c.width, this.c.height);
+
 		const data = JSON.parse(json);
 		for (const nodeId in data.nodes)
 		{
@@ -463,7 +490,77 @@ class NodeEditor
 		}
 
 		this.redrawConnestions();
+
+		if (updateHistory)
+			this.historyPush();
+	}
+
+	async openFile(filePath: string)
+	{
+		this.filePath = filePath;
+
+		const resp = await fetch(`/api/files/${ filePath }`);
+		if (resp.status != 200)
+			return false;
+		
+		this.history = [];
+		this.undoHistory = [];
+		this.loadJSON(await resp.text());
+	}
+
+	async saveFile()
+	{
+		const resp = await fetch(`/api/files/${ this.filePath }`,
+		{
+			method: 'PUT',
+			body: this.history[this.history.length - 1]
+		});
+
+		if (resp.status != 200)
+			return false;
+	}
+
+	// ===== Data Import/Export ===== //
+
+	undoHistory: string[] = [];
+	
+	historyPush()
+	{
+		const status = this.toJSON();
+		if (status == this.history[this.history.length - 1])
+			return;
+		
+		this.history.push(status);
+		if (this.history.length > 100)
+			this.history.shift();
+
+		this.undoHistory = [];
+		this.saveFile();
+	}
+
+	historyUndo()
+	{
+		if (this.history.length < 2)
+			return;
+
+		const undoStatus = this.history.pop();
+		const status = this.history[this.history.length - 1];
+		
+		this.loadJSON(status, false);
+
+		this.undoHistory.push(undoStatus);
+		this.saveFile();
+	}
+
+	historyRedo()
+	{
+		if (this.undoHistory.length < 1)
+			return;
+
+		const status = this.undoHistory.pop();
+		this.loadJSON(status, false);
+
+		this.history.push(status);
+		this.saveFile();
 	}
 }
-
-// {"nodes":{"test/int_input#upht":{"type":"test/int_input","posX":880,"posY":592},"test/float_input#gm9c":{"type":"test/float_input","posX":823,"posY":314},"test/int_output#3kxh":{"type":"test/int_output","posX":155,"posY":443},"test/int_inout#f8m":{"type":"test/int_inout","posX":524,"posY":392},"test/int_input#bnp6":{"type":"test/int_input","posX":1004,"posY":475}},"connections":[["test/int_inout#f8m?num_out1","test/int_input#bnp6?num_in"],["test/int_inout#f8m?num_out2","test/int_input#upht?num_in"],["test/int_inout#f8m?num_out3","test/float_input#gm9c?num_in"],["test/int_output#3kxh?num_out","test/int_inout#f8m?num_in"]]}

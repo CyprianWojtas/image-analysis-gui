@@ -1,3 +1,18 @@
+/* Style Reset */
+button
+{
+	border: none;
+	padding: 0;
+	margin: 0;
+	text-align: left;
+	font-family: inherit;
+	font-size: inherit;
+	color: inherit;
+	background-color: transparent;
+}
+
+/* Styles */
+
 html
 {
 	font-size: 12px;
@@ -6,13 +21,9 @@ html
 body
 {
 	margin: 0;
-	background:
-		repeating-linear-gradient(#fff1, #fff1 1px, #fff0 1px, #fff0 1.5rem),
-		repeating-linear-gradient(90deg, #fff1, #fff1 1px, #fff0 1px, #fff0 1.5rem);
 	background-color: #222;
-	background-size: 1.5rem 1.5rem;
 	color: #fff;
-	font-family: sans-serif;
+	font-family: system-ui, sans-serif;
 	line-height: 1.25;
 }
 
@@ -20,6 +31,12 @@ body
 {
 	display: grid;
 	overflow: hidden;
+	background:
+		repeating-linear-gradient(#fff1, #fff1 1px, #fff0 1px, #fff0 1.5rem),
+		repeating-linear-gradient(90deg, #fff1, #fff1 1px, #fff0 1px, #fff0 1.5rem);
+	background-color: #222;
+	background-size: 1.5rem 1.5rem;
+	background-position: var(--background-position, 0px 0px);
 }
 
 .nodeEditor canvas,
@@ -166,11 +183,34 @@ body
 
 .nodeEditor .nodeType .nodeTitle
 {
-	padding: 10px;
 	background: #333;
-	padding: 5px 10px;
+	padding: 5px 2.5rem 5px 10px;
 	border-radius: 6px 6px 0 0;
 	user-select: none;
+	position: relative;
+}
+
+.nodeEditor .nodeType .nodeTitle .wikiLink
+{
+	position: absolute;
+	right: 0.5rem;
+	border: none;
+	width: 1.25rem;
+	height: 1.25rem;
+	text-align: center;
+	padding: 0;
+	font-size: 0.9rem;
+	border-radius: 100%;
+	cursor: pointer;
+	background: #888;
+	color: #000;
+	transition: 0.2s background-color;
+	
+}
+.nodeEditor .nodeType .nodeTitle .wikiLink:hover,
+.nodeEditor .nodeType .nodeTitle .wikiLink:focus
+{
+	background: #fff;
 }
 
 .nodeEditor .nodeType .nodeDescription
@@ -183,4 +223,191 @@ body
 .nodeEditor .nodeType.expanded .nodeDescription
 {
 	padding: 10px;
+}
+
+/* Wiki */
+
+.wikiBox
+{
+	position: fixed;
+	background: #1118;
+	backdrop-filter: blur(1rem);
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 100;
+	padding: 4rem;
+	display: grid;
+	grid-template-columns: 16rem auto;
+	overflow: hidden;
+}
+.wikiBox.hidden
+{
+	display: none;
+}
+
+.wikiBox .nodes
+{
+	background: #333;
+	padding: 1rem 0.25rem 1rem 1rem;
+	overflow: hidden;
+	display: grid;
+	grid-template-rows: auto 1fr;
+}
+.wikiBox .nodesSearchBox
+{
+	margin-right: 0.75rem;
+	font-family: inherit;
+	font-size: inherit;
+	border: 1px solid #888;
+	background: #fff;
+	outline: none;
+}
+
+.wikiBox .nodes .nodesListBox
+{
+	overflow: auto;
+}
+.wikiBox .nodes .nodesListBox .node
+{
+	padding: 0.5rem;
+	background: none;
+	border: none;
+	font-family: inherit;
+	font-size: inherit;
+	color: inherit;
+	display: block;
+	cursor: pointer;
+	transition: 0.2s background-color;
+	width: calc(100% - 1rem);
+	text-align: left;
+	position: relative;
+}
+.wikiBox .nodes .nodesListBox .node::after
+{
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 100%;
+	bottom: 0;
+	width: 0;
+	background: transparent;
+	clip-path: polygon(0 0, 100% 50%, 0 100%);
+	transition: 0.2s width, background-color 0.2s;
+}
+.wikiBox .nodes .nodesListBox .node.selected
+{
+	background: #555;
+}
+.wikiBox .nodes .nodesListBox .node.selected::after
+{
+	width: 1rem;
+	background: #555;
+}
+
+.wikiBox .nodes .nodesListBox .node:hover
+{
+	background: #555;
+}
+
+.wikiBox .article
+{
+	background: #222;
+	padding: 1rem;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto 1fr;
+	overflow: hidden;
+}
+
+.wikiBox .article .closeButton
+{
+	width: 2rem;
+	height: 2rem;
+	background: #444;
+	color: #fff;
+	font-weight: 900;
+	border: none;
+	transition: 0.2s background-color;
+	margin-left: 1rem;
+	cursor: pointer;
+	text-align: center;
+}
+.wikiBox .article .closeButton:hover,
+.wikiBox .article .closeButton:focus
+{
+	background: #d00;
+}
+
+.wikiBox .article .title
+{
+	font-size: 2rem;
+	font-weight: 700;
+	border-bottom: 1px solid #fff4;
+}
+
+.wikiBox .article .articleContent
+{
+	overflow: auto;
+	max-height: 100%;
+	grid-column: 1 / -1;
+	padding: 0 1rem 0 0;
+	line-height: 1.5;
+}
+
+.wikiBox .article .articleContent h2
+{
+	border-bottom: 1px solid #fff2;
+}
+.wikiBox .article .articleContent pre
+{
+	background: #111;
+	padding: 0.75rem 1rem;
+	overflow: auto;
+}
+
+/* File Picker */
+
+.filePicker
+{
+	position: fixed;
+	background: #1118;
+	backdrop-filter: blur(1rem);
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 100;
+	padding: 4rem;
+	display: grid;
+	overflow: hidden;
+}
+.filePicker.hidden
+{
+	display: none;
+}
+
+.filePicker .filesListBox
+{
+	background: #222;
+	padding: 1rem;
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fill, 16rem);
+}
+.filePicker .file
+{
+	background: #333;
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+	transition: background-color 0.2s, color 0.2s;
+}
+.filePicker .file:focus,
+.filePicker .file:hover
+{
+	background: #fff;
+	color: #000;
 }
