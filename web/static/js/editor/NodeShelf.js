@@ -1,4 +1,5 @@
 import { createElement, createNodeTree } from "../Utils.js";
+import AssetLoader from "./AssetLoader.js";
 import Wiki from "./Wiki.js";
 export default class NodeShelf {
     constructor() {
@@ -18,12 +19,8 @@ export default class NodeShelf {
                 this.nodesBox
             ]
         });
-    }
-    addNodes(avaliableNodes, avaliableVariableTypes) {
-        this.avaliableNodes = avaliableNodes;
-        this.avaliableVariableTypes = avaliableVariableTypes;
-        for (const nodeId in this.avaliableNodes) {
-            const nodeType = this.avaliableNodes[nodeId];
+        for (const nodeId in AssetLoader.nodesData) {
+            const nodeType = AssetLoader.nodesData[nodeId];
             this.nodesBox.append(this.createNodeBox(nodeId, nodeType));
         }
     }

@@ -54,3 +54,15 @@ export function createNodeTree(nodeTree: ElementParams): HTMLElement
 	return rootNode;
 }
 
+/**
+ * Converts UNIX timestamp to time date string
+ */
+export function unixToStr(timestamp: number)
+{
+	if (!timestamp)
+		return "—";
+
+	const date = new Date(timestamp * 1000);
+
+	return `${ date.getHours() }:${ date.getMinutes().toString().padStart(2, "0") } ${ date.getFullYear() }-${ (date.getMonth() + 1).toString().padStart(2, "0") }-${ date.getDate().toString().padStart(2, "0") }`;
+}

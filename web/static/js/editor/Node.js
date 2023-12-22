@@ -1,37 +1,54 @@
 import { createElement, createNodeTree } from "../Utils.js";
+import AssetLoader from "./AssetLoader.js";
 import { NodeInput, NodeOutput, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
-class NodeDragEvent extends Event {
+import Wiki from "./Wiki.js";
+class NodeEvent extends Event {
     constructor(eventName, node) {
         super(eventName, { bubbles: true });
         this.node = node;
         this.nodeId = node.id;
     }
 }
-export class NodeDragStartEvent extends NodeDragEvent {
+export class NodeDragStartEvent extends NodeEvent {
     constructor(node) {
         super("node_drag_start", node);
     }
 }
-export class NodeDragEndEvent extends NodeDragEvent {
+export class NodeDragEndEvent extends NodeEvent {
     constructor(node) {
         super("node_drag_end", node);
     }
 }
-export class NodeMoveEvent extends NodeDragEvent {
+export class NodeMoveEvent extends NodeEvent {
     constructor(node) {
         super("node_move", node);
     }
 }
+export class NodeRemoveEvent extends NodeEvent {
+    constructor(node) {
+        super("node_remove", node);
+    }
+}
+export class NodeChangeEvent extends NodeEvent {
+    constructor(node, pushToHistory = true) {
+        super("node_change", node);
+        this.pushToHistory = pushToHistory;
+    }
+}
 export default class Node extends EventTarget {
-    constructor(id, type, nodeData = {}) {
+    constructor(id, type, attributes = {}) {
         super();
+        this.attributes = {};
+        this.nodeContents = createElement("div", { class: "nodeContents" });
         this.inputsContainer = createElement("div", { class: "inputsContainer" });
         this.outputsContainer = createElement("div", { class: "outputsContainer" });
         //===== Variables =====//
         this.inputs = {};
         this.outputs = {};
+        const nodeData = AssetLoader.nodesData[type];
         this.id = id;
         this.type = type;
+        this.attributes = attributes;
         this.element = createNodeTree({
             name: "div",
             attributes: {
@@ -40,27 +57,58 @@ export default class Node extends EventTarget {
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "nodeTitle"
-                    },
+                    attributes: { class: "nodeTitle" },
                     listeners: {
                         mousedown: e => this.dragStart(e)
                     },
                     childNodes: [
-                        (nodeData === null || nodeData === void 0 ? void 0 : nodeData.name) || "New Node"
+                        (nodeData === null || nodeData === void 0 ? void 0 : nodeData.name) || "New Node",
+                        {
+                            name: "div",
+                            attributes: { class: "buttons" },
+                            childNodes: [
+                                {
+                                    name: "button",
+                                    childNodes: ["?"],
+                                    listeners: {
+                                        mousedown: e => e.stopPropagation(),
+                                        click: e => {
+                                            e.stopPropagation();
+                                            Wiki.openArticle(this.type);
+                                        }
+                                    }
+                                },
+                                {
+                                    name: "button",
+                                    childNodes: ["x"],
+                                    attributes: { class: "btn-close" },
+                                    listeners: {
+                                        mousedown: e => e.stopPropagation(),
+                                        click: e => {
+                                            e.stopPropagation();
+                                            this.remove();
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     ]
                 },
-                this.inputsContainer,
-                this.outputsContainer
+                this.nodeContents
             ]
         });
+        this.renderContents();
+        this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
+    }
+    renderContents() {
+        this.nodeContents.append(this.inputsContainer, this.outputsContainer);
+        const nodeData = AssetLoader.nodesData[this.type];
         for (const input of nodeData.inputs || []) {
             this.addInput(input.id, input.type, input.name, input.description);
         }
         for (const output of nodeData.outputs || []) {
             this.addOutput(output.id, output.type, output.name, output.description);
         }
-        this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
     }
     addInput(id, type, name, description) {
         const input = new NodeInput(id, type, name, description);
@@ -105,10 +153,13 @@ export default class Node extends EventTarget {
             moveEvent(e);
             window.removeEventListener("mousemove", moveEvent);
             window.removeEventListener("mouseup", mouseupEvent);
+            this.element.classList.remove("dragged");
             this.dispatchEvent(new NodeDragEndEvent(this));
+            this.sendUpdate();
         };
         window.addEventListener("mousemove", moveEvent);
         window.addEventListener("mouseup", mouseupEvent);
+        this.element.classList.add("dragged");
         this.dispatchEvent(new NodeDragStartEvent(this));
     }
     getVariable(varaibleId) {
@@ -126,6 +177,32 @@ export default class Node extends EventTarget {
             x: this.posX + variable.posX,
             y: this.posY + variable.posY
         };
+    }
+    updateHandlePositions() {
+        for (const id in this.inputs) {
+            this.inputs[id].posX = null;
+            this.inputs[id].posY = null;
+        }
+        for (const id in this.outputs) {
+            this.outputs[id].posX = null;
+            this.outputs[id].posY = null;
+        }
+        this.dispatchEvent(new NodeChangeEvent(this, false));
+    }
+    toJSONObj() {
+        return {
+            type: this.type,
+            attributes: this.attributes,
+            posX: this.posX,
+            posY: this.posY
+        };
+    }
+    sendUpdate() {
+        this.dispatchEvent(new NodeChangeEvent(this));
+    }
+    remove() {
+        this.element.remove();
+        this.dispatchEvent(new NodeRemoveEvent(this));
     }
 }
 //# sourceMappingURL=Node.js.map

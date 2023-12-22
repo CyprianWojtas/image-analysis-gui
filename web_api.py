@@ -13,6 +13,18 @@ def api_nodes():
 	return mods
 
 
+@api.route('/nodes/<path:node_id>')
+def api_node_custom_class(node_id):
+	custom_class = modules.get_custom_class(node_id)
+
+	if custom_class:
+		resp = make_response(custom_class, 200)
+		resp.headers['Content-Type'] = 'application/javascript'
+		return resp
+
+	return "File not found", 404
+
+
 @api.route('/files')
 def api_files():
 	path = request.args.get('path') or ''

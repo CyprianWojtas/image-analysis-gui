@@ -1,8 +1,10 @@
 import { createElement, createNodeTree } from "../Utils.js";
+import AssetLoader from "./AssetLoader.js";
 import { NodeInput, NodeOutput, NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
+import Wiki from "./Wiki.js";
 
 
-class NodeDragEvent extends Event
+class NodeEvent extends Event
 {
 	node: Node;
 	nodeId: string;
@@ -17,7 +19,7 @@ class NodeDragEvent extends Event
 }
 
 
-export class NodeDragStartEvent extends NodeDragEvent
+export class NodeDragStartEvent extends NodeEvent
 {
 	constructor(node: Node)
 	{
@@ -25,7 +27,7 @@ export class NodeDragStartEvent extends NodeDragEvent
 	}
 }
 
-export class NodeDragEndEvent extends NodeDragEvent
+export class NodeDragEndEvent extends NodeEvent
 {
 	constructor(node: Node)
 	{
@@ -33,11 +35,30 @@ export class NodeDragEndEvent extends NodeDragEvent
 	}
 }
 
-export class NodeMoveEvent extends NodeDragEvent
+export class NodeMoveEvent extends NodeEvent
 {
 	constructor(node: Node)
 	{
 		super("node_move", node);
+	}
+}
+
+export class NodeRemoveEvent extends NodeEvent
+{
+	constructor(node: Node)
+	{
+		super("node_remove", node);
+	}
+}
+
+export class NodeChangeEvent extends NodeEvent
+{
+	pushToHistory: boolean;
+
+	constructor(node: Node, pushToHistory: boolean = true)
+	{
+		super("node_change", node);
+		this.pushToHistory = pushToHistory;
 	}
 }
 
@@ -50,16 +71,23 @@ class Node extends EventTarget
 
 	posX: number;
 	posY: number;
+
+	attributes: any = {};
+
+	private nodeContents: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodeContents" });
 	
 	private inputsContainer:  HTMLDivElement = <HTMLDivElement>createElement("div", { class: "inputsContainer" });
 	private outputsContainer: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "outputsContainer" });
 
-	constructor(id: string, type: string, nodeData: any = {})
+	constructor(id: string, type: string, attributes: any = {})
 	{
 		super();
 
+		const nodeData = AssetLoader.nodesData[type];
+
 		this.id = id;
 		this.type = type;
+		this.attributes = attributes;
 
 		this.element = <HTMLDivElement>createNodeTree(
 			{
@@ -72,24 +100,68 @@ class Node extends EventTarget
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "nodeTitle"
-						},
+						attributes: { class: "nodeTitle" },
 						listeners:
 						{
 							mousedown: e => this.dragStart(e)
 						},
 						childNodes:
 						[
-							nodeData?.name || "New Node"
+							nodeData?.name || "New Node",
+							{
+								name: "div",
+								attributes: { class: "buttons" },
+								childNodes:
+								[
+									{
+										name: "button",
+										childNodes: [ "?" ],
+										listeners:
+										{
+											mousedown: e => e.stopPropagation(),
+											click: e =>
+											{
+												e.stopPropagation();
+												Wiki.openArticle(this.type);
+											}
+										}
+									},
+									{
+										name: "button",
+										childNodes: [ "x" ],
+										attributes: { class: "btn-close" },
+										listeners:
+										{
+											mousedown: e => e.stopPropagation(),
+											click: e =>
+											{
+												e.stopPropagation();
+												this.remove();
+											}
+										}
+									}
+								]
+							}
 						]
 					},
-					this.inputsContainer,
-					this.outputsContainer
+					this.nodeContents
 				]
 			}
 		);
+
+		this.renderContents();
+
+		this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
+	}
+
+	protected renderContents()
+	{
+		this.nodeContents.append(
+			this.inputsContainer,
+			this.outputsContainer
+		);
+
+		const nodeData = AssetLoader.nodesData[this.type];
 
 		for (const input of nodeData.inputs || [])
 		{
@@ -100,8 +172,6 @@ class Node extends EventTarget
 		{
 			this.addOutput(output.id, output.type, output.name, output.description);
 		}
-
-		this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
 	}
 
 	//===== Variables =====//
@@ -109,7 +179,7 @@ class Node extends EventTarget
 	inputs:  {[key: string]: NodeInput}  = {};
 	outputs: {[key: string]: NodeOutput} = {};
 
-	private addInput(id: string, type: string, name: string, description: string)
+	protected addInput(id: string, type: string, name: string, description: string)
 	{
 		const input = new NodeInput(id, type, name, description);
 
@@ -127,7 +197,7 @@ class Node extends EventTarget
 		this.inputsContainer.append(input.element);
 	}
 
-	private addOutput(id: string, type: string, name: string, description: string)
+	protected addOutput(id: string, type: string, name: string, description: string)
 	{
 		const output = new NodeOutput(id, type, name, description);
 
@@ -180,11 +250,16 @@ class Node extends EventTarget
 			window.removeEventListener("mousemove", moveEvent);
 			window.removeEventListener("mouseup", mouseupEvent);
 
+			this.element.classList.remove("dragged");
+
 			this.dispatchEvent(new NodeDragEndEvent(this));
+			this.sendUpdate();
 		}
 
 		window.addEventListener("mousemove", moveEvent);
 		window.addEventListener("mouseup", mouseupEvent);
+
+		this.element.classList.add("dragged");
 
 		this.dispatchEvent(new NodeDragStartEvent(this));
 	}
@@ -211,5 +286,42 @@ class Node extends EventTarget
 			x: this.posX + variable.posX,
 			y: this.posY + variable.posY
 		};
+	}
+
+	protected updateHandlePositions()
+	{
+		for (const id in this.inputs)
+		{
+			this.inputs[id].posX = null;
+			this.inputs[id].posY = null;
+		}
+		for (const id in this.outputs)
+		{
+			this.outputs[id].posX = null;
+			this.outputs[id].posY = null;
+		}
+
+		this.dispatchEvent(new NodeChangeEvent(this, false));
+	}
+
+	toJSONObj()
+	{
+		return {
+			type: this.type,
+			attributes: this.attributes,
+			posX: this.posX,
+			posY: this.posY
+		};
+	}
+
+	protected sendUpdate()
+	{
+		this.dispatchEvent(new NodeChangeEvent(this));
+	}
+
+	remove()
+	{
+		this.element.remove();
+		this.dispatchEvent(new NodeRemoveEvent(this));
 	}
 }

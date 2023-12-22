@@ -54,8 +54,8 @@ def get_module_info(module_path='', base_path=os.path.join(os.path.dirname(__fil
 
 	return {
 		'id': module_id,
-		'name': module_data['name'] if 'name' in module_data else 'Unnamed Node',
-		
+		'name': module_data.get('name', 'Unnamed Node'),
+		'customClass': module_data.get('custom_class', False),
 		'description':
 			module_desc_parts['description']
 			if 'description' in module_desc_parts
@@ -66,6 +66,16 @@ def get_module_info(module_path='', base_path=os.path.join(os.path.dirname(__fil
 		'outputs': outputs
 	}
 
+
+def get_custom_class(module_id, base_path=os.path.join(os.path.dirname(__file__), 'modules')):
+	path = os.path.join(base_path, module_id + '.js')
+	if os.path.exists(path) and os.path.isfile(path):
+		with open(path, 'r') as f:
+			module_class = f.read()
+
+		return module_class
+
+	return None
 
 def get_list(module_path='', base_path=os.path.join(os.path.dirname(__file__), 'modules')):
 

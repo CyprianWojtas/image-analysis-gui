@@ -1,5 +1,6 @@
 import { createElement, createNodeTree } from "../Utils.js";
-import Node from "./Node.js";
+import AssetLoader from "./AssetLoader.js";
+import Node, { NodeChangeEvent } from "./Node.js";
 import NodeShelf from "./NodeShelf.js";
 import { NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
 import Wiki from "./Wiki.js";
@@ -21,6 +22,7 @@ class NodeEditor
 
 	nodes: {[key: string]: Node} = {};
 	nodeConnections: [string, string][] = [];
+	metadata: {[key: string]: any} = {};
 
 	filePath: string;
 	history: string[] = [];
@@ -86,27 +88,13 @@ class NodeEditor
 		this.resizeEditor();
 	}
 
-	//===== Node loading =====//
-
-	avaliableNodes: any;
-	avaliableVariableTypes: any;
-
-	async loadNodeTypes()
-	{
-		this.avaliableNodes         = await (await fetch("/api/nodes")).json();
-		this.avaliableVariableTypes = await (await fetch("/api/variable-types.json")).json();
-
-		Wiki.addNodes(this.avaliableNodes);
-		this.nodeShelf.addNodes(this.avaliableNodes, this.avaliableVariableTypes);
-	}
-
 	createEditorStyles(): HTMLStyleElement
 	{
 		const styleEl = document.createElement("style");
 
-		for (const vairiableTypeId in this.avaliableVariableTypes)
+		for (const vairiableTypeId in AssetLoader.variableTypes)
 		{
-			const vairiableType = this.avaliableVariableTypes[vairiableTypeId];
+			const vairiableType = AssetLoader.variableTypes[vairiableTypeId];
 			styleEl.innerHTML += `.nodeEditor .node .nodeVariableType_${ vairiableTypeId } .handle { background: ${ vairiableType.color }; }`;
 			styleEl.innerHTML +=
 			`
@@ -146,9 +134,9 @@ class NodeEditor
 	 * Adds node of a given type
 	 * @returns Added node or null on fail
 	 */
-	addNode(nodeType: string, nodeId: string = null, nodePosX: number = 0, nodePosY: number = 0): Node | null
+	addNode(nodeType: string, nodeId: string = null, nodePosX: number = 0, nodePosY: number = 0, attributes: any = {}): Node | null
 	{
-		if (!this.avaliableNodes[nodeType])
+		if (!AssetLoader.nodesData[nodeType])
 			return null;
 		
 		if (!nodeId)
@@ -157,9 +145,28 @@ class NodeEditor
 			if (this.nodes[nodeId])
 				return null;
 
-		const node = new Node(nodeId, nodeType, this.avaliableNodes[nodeType]);
+		const node: Node = AssetLoader.nodesData[nodeType].class ?
+			new AssetLoader.nodesData[nodeType].class(nodeId, nodeType, attributes) :
+			new Node(nodeId, nodeType, attributes);
+
 		this.nodes[nodeId] = node;
 		this.nodeContainer.append(node.element);
+
+		node.addEventListener("node_change", (e: NodeChangeEvent) =>
+		{
+			if (e.pushToHistory)
+				this.historyPush();
+			
+			this.redrawConnestions();
+		});
+
+		node.addEventListener("node_remove", () =>
+		{
+			this.removeNodeConnections(nodeId);
+			delete this.nodes[nodeId];
+			this.historyPush();
+			this.redrawConnestions();
+		});
 
 		node.moveTo(nodePosX, nodePosY);
 
@@ -172,28 +179,26 @@ class NodeEditor
 		{
 			this.nodeContainer.append(node.element);
 		});
-
-		node.addEventListener("node_drag_end", () =>
-		{
-			this.historyPush();
-		});
+		
 
 		node.addEventListener("variable_drag_start", (e: VariableDragStartEvent) =>
 		{
 			this.draggedVariableType = e.variable.type;
 			let isInput = e.variable.input;
 
-			const conectedVariable = this.getConnectedVariable(e.nodeVarId);
-
-			if (conectedVariable)
+			if (isInput)
 			{
-				this.draggedVariableId = conectedVariable;
-				if (e.variable.input)
-					this.removeConnection(conectedVariable, e.nodeVarId);
-				else
-					this.removeConnection(e.nodeVarId, conectedVariable);
+				const conectedVariable = this.getConnectedVariable(e.nodeVarId);
 
-				isInput = !isInput;
+				if (conectedVariable)
+				{
+					this.draggedVariableId = conectedVariable;
+					this.removeConnection(conectedVariable, e.nodeVarId);
+
+					isInput = !isInput;
+				}
+				else
+					this.draggedVariableId = e.nodeVarId;
 			}
 			else
 				this.draggedVariableId = e.nodeVarId;
@@ -212,9 +217,9 @@ class NodeEditor
 				const pos = this.nodes[nodeId].getHandlePosition(variableId);
 
 				if (isInput)
-					this.drawConnection(pos.x, pos.y, e.clientX - this.posX, e.clientY - this.posY, this.avaliableVariableTypes[this.draggedVariableType].color);
+					this.drawConnection(pos.x, pos.y, e.clientX - this.posX, e.clientY - this.posY, AssetLoader.variableTypes[this.draggedVariableType].color);
 				else
-					this.drawConnection(e.clientX - this.posX, e.clientY - this.posY, pos.x, pos.y, this.avaliableVariableTypes[this.draggedVariableType].color);
+					this.drawConnection(e.clientX - this.posX, e.clientY - this.posY, pos.x, pos.y, AssetLoader.variableTypes[this.draggedVariableType].color);
 			}
 
 			const mouseupEvent = (e: MouseEvent) =>
@@ -242,7 +247,7 @@ class NodeEditor
 		{
 			if (this.draggedVariableId)
 			{
-				if (this.draggedVariableType != e.variable.type || this.getConnectedVariable(e.nodeVarId))
+				if (this.draggedVariableType != e.variable.type || (e.variable.input && this.getConnectedVariable(e.nodeVarId)))
 				{
 					this.redrawConnestions();
 					return;
@@ -309,6 +314,26 @@ class NodeEditor
 				this.getVariable(nodeVarIdInput).connectedTo = null;
 				return true;
 			}
+		}
+	}
+
+	removeNodeConnections(nodeId: string)
+	{
+		const toRemove = [];
+		for (const connectionId in this.nodeConnections)
+		{
+			const connection = this.nodeConnections[connectionId];
+			const node1 = connection[0].split("?")[0];
+			const node2 = connection[1].split("?")[0];
+			if (node1 == nodeId || node2 == nodeId)
+			{
+				toRemove.push(connectionId);
+			}
+		}
+
+		for (const id of toRemove.reverse())
+		{
+			this.nodeConnections.splice(id, 1);
 		}
 	}
 
@@ -401,7 +426,7 @@ class NodeEditor
 			const posOutput = this.nodes[nodeIdOutput].getHandlePosition(variableIdOutput);
 			const variableType = this.getVariable(connection[0])?.type;
 
-			this.drawConnection(posInput.x, posInput.y, posOutput.x, posOutput.y, this.avaliableVariableTypes[variableType]?.color || "#fff");
+			this.drawConnection(posInput.x, posInput.y, posOutput.x, posOutput.y, AssetLoader.variableTypes[variableType]?.color || "#fff");
 		}
 	}
 
@@ -453,18 +478,12 @@ class NodeEditor
 		const nodes = {};
 
 		for (const node in this.nodes)
-		{
-			nodes[node] =
-			{
-				type: this.nodes[node].type,
-				posX: this.nodes[node].posX,
-				posY: this.nodes[node].posY
-			};
-		}
+			nodes[node] = this.nodes[node].toJSONObj();
 
 		return JSON.stringify({
 			nodes: nodes,
-			connections: this.nodeConnections
+			connections: this.nodeConnections,
+			...this.metadata
 		});
 	}
 
@@ -477,17 +496,21 @@ class NodeEditor
 		this.ctx.clearRect(0, 0, this.c.width, this.c.height);
 
 		const data = JSON.parse(json);
-		for (const nodeId in data.nodes)
+		for (const nodeId in data.nodes || [])
 		{
 			const node = data.nodes[nodeId];
 
-			this.addNode(node.type, nodeId, node.posX, node.posY);
+			this.addNode(node.type, nodeId, node.posX, node.posY, node.attributes);
 		}
 
-		for (const connection of data.connections)
+		for (const connection of data.connections || [])
 		{
 			this.addConnection(connection[0], connection[1]);
 		}
+
+		this.metadata = data;
+		delete this.metadata.nodes;
+		delete this.metadata.connections;
 
 		this.redrawConnestions();
 
@@ -505,7 +528,8 @@ class NodeEditor
 		
 		this.history = [];
 		this.undoHistory = [];
-		this.loadJSON(await resp.text());
+		this.loadJSON(await resp.text(), false);
+		this.history.push(this.toJSON());
 	}
 
 	async saveFile()

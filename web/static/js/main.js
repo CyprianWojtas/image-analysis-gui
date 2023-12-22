@@ -1,11 +1,12 @@
+import AssetLoader from "./editor/AssetLoader.js";
 import NodeEditor from "./editor/NodeEditor.js";
 import Wiki from "./editor/Wiki.js";
 import FilePicker from "./files/FilePicker.js";
 (async () => {
+    Wiki.init();
+    await AssetLoader.loadNodeTypes();
     const editor = new NodeEditor();
     const filePicker = new FilePicker();
-    Wiki.init();
-    await editor.loadNodeTypes();
     const editorStyles = editor.createEditorStyles();
     document.head.append(editorStyles);
     document.body.append(editor.element);

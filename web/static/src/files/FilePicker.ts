@@ -1,4 +1,4 @@
-import { createElement, createNodeTree } from "../Utils.js";
+import { createElement, createNodeTree, unixToStr } from "../Utils.js";
 
 export
 class FileOpenEvent extends Event
@@ -17,8 +17,11 @@ class FilePicker extends EventTarget
 {
 	element: HTMLDivElement;
 
+	private dirsListBox: HTMLDivElement;
 	private filesListBox: HTMLDivElement;
-	private titleEl: HTMLDivElement;
+	private pathEl: HTMLDivElement;
+
+	private createFileBox: HTMLDivElement;
 	private nameInput: HTMLInputElement;
 
 	private path: string;
@@ -27,9 +30,29 @@ class FilePicker extends EventTarget
 	{
 		super();
 
+		this.dirsListBox = <HTMLDivElement>createElement("div", { class: "dirsListBox" } );
 		this.filesListBox = <HTMLDivElement>createElement("div", { class: "filesListBox" } );
-		this.titleEl = <HTMLDivElement>createElement("div", { class: "title" } );
-		this.nameInput = <HTMLInputElement>createElement("input");
+		this.pathEl = <HTMLDivElement>createElement("div", { class: "path" } );
+		this.nameInput = <HTMLInputElement>createElement("input", { placeholder: "New file name" });
+		this.createFileBox = <HTMLDivElement>createNodeTree(
+			{
+				name: "div",
+				attributes: { class: "createFileBox" },
+				childNodes:
+				[
+					this.nameInput,
+					".json",
+					{
+						name: "button",
+						childNodes: [ "Create" ],
+						listeners:
+						{
+							click: () => this.createFile()
+						}
+					}
+				]
+			}
+		);
 		
 		this.element = <HTMLDivElement>createNodeTree(
 			{
@@ -43,29 +66,18 @@ class FilePicker extends EventTarget
 						childNodes:
 						[
 							{
+								name: "h1",
+								childNodes: [ "Image Analysis Tool" ]
+							},
+							{
 								name: "div",
 								attributes: { class: "header" },
 								childNodes:
 								[
-									this.titleEl,
-									{
-										name: "div",
-										attributes: { class: "createBox" },
-										childNodes:
-										[
-											this.nameInput,
-											{
-												name: "button",
-												childNodes: [ "Create" ],
-												listeners:
-												{
-													click: () => this.createFile()
-												}
-											}
-										]
-									}
+									this.pathEl
 								]
 							},
+							this.dirsListBox,
 							this.filesListBox
 						]
 					}
@@ -89,34 +101,108 @@ class FilePicker extends EventTarget
 
 	async loadPath(path: string = "")
 	{
+		console.log(`File Picker: Loading path "${ path }"`);
 		this.path = path;
+		this.dirsListBox.innerHTML = "";
 		this.filesListBox.innerHTML = "";
 
 		const resp = await (await fetch(`/api/files?path=${ path }`)).json();
+
+		let pathUrl = "";
+
+		this.pathEl.innerHTML = "";
+		this.pathEl.append(createNodeTree(
+			{
+				name: "a",
+				attributes: { class: "dir", href: `#` },
+				listeners: {
+					click: e =>
+					{
+						e.preventDefault();
+						this.loadPath("");
+					}
+				},
+				childNodes: [ "Root" ]
+			}
+		));
+
+		for (const pathPart of path.split("/"))
+		{
+			if (!pathPart)
+				continue;
+
+			pathUrl += (pathUrl ? "/" : "" ) + pathPart;
+			const dirUrl = pathUrl;
+
+			this.pathEl.append(createNodeTree(
+				{
+					name: "a",
+					attributes: { class: "dir", href: `#${ dirUrl }` },
+					listeners: {
+						click: e =>
+						{
+							e.preventDefault();
+							this.loadPath(dirUrl);
+						}
+					},
+					childNodes: [ pathPart ]
+				}
+			));
+		}
+
+		for (const dir of resp.dirs)
+		{
+			this.dirsListBox.append(createNodeTree(
+				{
+					name: "button",
+					attributes: { class: "file dir" },
+					childNodes: [ dir.name ],
+					listeners:
+					{
+						click: () => this.loadPath(dir.path)
+					}
+				}
+			));
+		}
 		
-		for (const file of resp)
+		for (const file of resp.files)
 		{
 			this.filesListBox.append(createNodeTree(
 				{
 					name: "button",
 					attributes: { class: "file" },
-					childNodes: [ file.name ],
+					childNodes:
+					[
+						{
+							name: "div",
+							childNodes:
+							[
+								{ name: "div", attributes: { class: "tile" }, childNodes: [ file.title ] },
+								{ name: "div", attributes: { class: "name" }, childNodes: [ file.name ] }
+							]
+						},
+						{
+							name: "div",
+							childNodes:
+							[
+								{ name: "div", attributes: { class: "utime" }, childNodes: [ "Last update: " + unixToStr(file.updateTime) ] },
+								{ name: "div", attributes: { class: "ctime" }, childNodes: [ "Created: ", unixToStr(file.creationTime) ] }
+							]
+						}
+					],
 					listeners:
 					{
 						click: () =>
 						{
-							if (file.type == "dir")
-								this.loadPath(file.path);
-							else if (file.type == "file")
-							{
-								this.dispatchEvent(new FileOpenEvent(file.path));
-								this.close();
-							}
+							this.dispatchEvent(new FileOpenEvent(file.path));
+							this.close();
 						}
 					}
 				}
 			));
 		}
+
+		this.filesListBox.append(this.createFileBox);
 	}
 
 	async createFile()
@@ -127,7 +213,7 @@ class FilePicker extends EventTarget
 		if (!fileName)
 			return;
 
-		const resp = await fetch(`/api/files/${ this.path }/${ fileName }`, { method: "CREATE" });
+		const resp = await fetch(`/api/files/${ this.path }/${ fileName }.json`, { method: "CREATE" });
 
 		if (resp.status == 200)
 			this.loadPath(this.path);

@@ -1,4 +1,5 @@
 import { createElement, createNodeTree } from "../Utils.js";
+import AssetLoader from "./AssetLoader.js";
 import Wiki from "./Wiki.js";
 
 export default
@@ -30,19 +31,10 @@ class NodeShelf
 				]
 			}
 		);
-	}
 
-	avaliableNodes: any;
-	avaliableVariableTypes: any;
-
-	public addNodes(avaliableNodes, avaliableVariableTypes)
-	{
-		this.avaliableNodes = avaliableNodes;
-		this.avaliableVariableTypes = avaliableVariableTypes;
-
-		for (const nodeId in this.avaliableNodes)
+		for (const nodeId in AssetLoader.nodesData)
 		{
-			const nodeType = this.avaliableNodes[nodeId];
+			const nodeType = AssetLoader.nodesData[nodeId];
 			this.nodesBox.append(this.createNodeBox(nodeId, nodeType));
 		}
 	}
