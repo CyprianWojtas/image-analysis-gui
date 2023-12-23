@@ -1,7 +1,11 @@
+import importlib.util
 import os
 import re
+import sys
 
 import yaml
+
+import config
 
 
 def find_md_parts(text):
@@ -12,7 +16,6 @@ def find_md_parts(text):
 		march = re.search(r'\n!(\w+)\n([\w\W]*?)(\n!\w+\n)', text)
 
 		if march:
-			print(march.start(3))
 			text = text[march.start(3):]
 			parts[march.group(1)] = march.group(2).strip()
 		else:
@@ -22,10 +25,10 @@ def find_md_parts(text):
 			return parts
 
 
-def get_module_info(module_path='', base_path=os.path.join(os.path.dirname(__file__), 'modules')):
+def get_module_info(module_path=''):
 
 	module_id = module_path[0:-3]
-	with open(os.path.join(base_path, module_path), 'r') as f:
+	with open(os.path.join(config.MODULES_PATH, module_path), 'r') as f:
 		module_data_str = f.read()
 
 	_, module_yml, module_description = module_data_str.split('---', 2)
@@ -67,8 +70,8 @@ def get_module_info(module_path='', base_path=os.path.join(os.path.dirname(__fil
 	}
 
 
-def get_custom_class(module_id, base_path=os.path.join(os.path.dirname(__file__), 'modules')):
-	path = os.path.join(base_path, module_id + '.js')
+def get_custom_class(module_id):
+	path = os.path.join(config.MODULES_PATH, module_id + '.js')
 	if os.path.exists(path) and os.path.isfile(path):
 		with open(path, 'r') as f:
 			module_class = f.read()
@@ -77,16 +80,17 @@ def get_custom_class(module_id, base_path=os.path.join(os.path.dirname(__file__)
 
 	return None
 
-def get_list(module_path='', base_path=os.path.join(os.path.dirname(__file__), 'modules')):
 
-	path = os.path.join(base_path, module_path)
+def get_list(module_path='') -> dict:
+
+	path = os.path.join(config.MODULES_PATH, module_path)
 	modules = {}
 
 	for file in os.listdir(path):
 
 		file_path = module_path + '/' + file if module_path else file
 
-		if os.path.isdir(os.path.join(base_path, file_path)):
+		if os.path.isdir(os.path.join(config.MODULES_PATH, file_path)):
 			modules |= get_list(file_path)
 		elif file_path[-3:].lower() == '.md':
 			module = get_module_info(file_path)
@@ -95,3 +99,32 @@ def get_list(module_path='', base_path=os.path.join(os.path.dirname(__file__), '
 			del module['id']
 
 	return modules
+
+
+modules = {}
+
+
+def load_python_modules():
+	global modules
+
+	if modules:
+		return modules
+
+	modules = get_list()
+
+	for module_id, module in modules.items():
+		try:
+			spec = importlib.util.spec_from_file_location(
+				"module/" + module_id, config.MODULES_PATH + "/" + module_id + ".py"
+			)
+			module_py = importlib.util.module_from_spec(spec)
+			sys.modules["module/inputs/type_int"] = module_py
+			spec.loader.exec_module(module_py)
+
+			if hasattr(module_py, 'run'):
+				module['run'] = module_py.run
+		except FileNotFoundError:
+			continue
+
+	return modules
+

@@ -2,7 +2,7 @@
 name: String Input
 
 outputs:
-  str_out:
+  value:
     type: string
 
 custom_class: true

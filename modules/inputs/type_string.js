@@ -49,6 +49,6 @@ class StringInputNode extends Node
 			this.outputsContainer
 		);
 
-		this.addOutput("str_out", "string", this.textBox, "");
+		this.addOutput("value", "string", this.textBox, "");
 	}
 }

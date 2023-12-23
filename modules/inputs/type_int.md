@@ -2,7 +2,7 @@
 name: Int Input
 
 outputs:
-  int_out:
+  value:
     type: int
     name: " "
 

@@ -37,6 +37,6 @@ class IntInputNode extends Node
 			this.outputsContainer
 		);
 
-		this.addOutput("int_out", "int", this.attributesBox, "");
+		this.addOutput("value", "int", this.attributesBox, "");
 	}
 }
