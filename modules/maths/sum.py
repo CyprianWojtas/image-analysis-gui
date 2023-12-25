@@ -1,2 +1,9 @@
 def run(inputs, attributes):
-	return {'sum': inputs.get('number1', 0) + inputs.get('number2', 0)}
+
+	sum = 0
+	i = 1
+	while inputs.get(f'number{i}'):
+		sum += inputs.get(f'number{i}')
+		i += 1
+
+	return {'sum': sum}

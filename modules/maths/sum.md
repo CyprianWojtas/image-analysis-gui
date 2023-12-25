@@ -1,18 +1,12 @@
 ---
 name: Sum
 
-inputs:
-  number1:
-    type: int
-    name: Number 1
-  number2:
-    type: int
-    name: Number 2
-
 outputs:
   sum:
     type: int
     name: Sum
+
+custom_class: true
 
 ---
 

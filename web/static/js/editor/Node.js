@@ -1,3 +1,4 @@
+import SocketConnection from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import { NodeInput, NodeOutput, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
@@ -39,6 +40,8 @@ export default class Node extends EventTarget {
     constructor(id, type, attributes = {}) {
         super();
         this.attributes = {};
+        this.customInputs = [];
+        this.customOuptuts = [];
         this.nodeContents = createElement("div", { class: "nodeContents" });
         this.inputsContainer = createElement("div", { class: "inputsContainer" });
         this.outputsContainer = createElement("div", { class: "outputsContainer" });
@@ -97,6 +100,20 @@ export default class Node extends EventTarget {
                 this.nodeContents
             ]
         });
+        SocketConnection.addEventListener("analysis_node_processing", (e) => {
+            if (e.nodeId != this.id)
+                return;
+            console.log(`Processing: ${this.id}...`);
+            this.element.classList.add("processing");
+        });
+        SocketConnection.addEventListener("analysis_node_processed", (e) => {
+            if (e.nodeId != this.id)
+                return;
+            console.log(`Processed: ${this.id}!`);
+            this.element.classList.remove("processing");
+            this.element.classList.add("processed");
+            this.onProcessed(e.data);
+        });
         this.renderContents();
         this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
     }
@@ -121,6 +138,10 @@ export default class Node extends EventTarget {
         this.inputs[id] = input;
         this.inputsContainer.append(input.element);
     }
+    removeInput(id) {
+        this.inputs[id].element.remove();
+        delete this.inputs[id];
+    }
     addOutput(id, type, name, description) {
         const output = new NodeOutput(id, type, name, description);
         output.addEventListener("variable_drag_start", (e) => {
@@ -131,6 +152,10 @@ export default class Node extends EventTarget {
         });
         this.outputs[id] = output;
         this.outputsContainer.append(output.element);
+    }
+    removeOutput(id) {
+        this.outputs[id].element.remove();
+        delete this.outputs[id];
     }
     //===== Node Dragging =====//
     moveTo(posX, posY) {
@@ -190,12 +215,17 @@ export default class Node extends EventTarget {
         this.dispatchEvent(new NodeChangeEvent(this, false));
     }
     toJSONObj() {
-        return {
+        const jsonObj = {
             type: this.type,
             attributes: this.attributes,
             posX: this.posX,
             posY: this.posY
         };
+        if (this.customInputs.length)
+            jsonObj.customInputs = this.customInputs;
+        if (this.customOuptuts.length)
+            jsonObj.customOuptuts = this.customOuptuts;
+        return jsonObj;
     }
     sendUpdate() {
         this.dispatchEvent(new NodeChangeEvent(this));
@@ -203,6 +233,9 @@ export default class Node extends EventTarget {
     remove() {
         this.element.remove();
         this.dispatchEvent(new NodeRemoveEvent(this));
+    }
+    // Parsing analysis output
+    onProcessed(data) {
     }
 }
 //# sourceMappingURL=Node.js.map

@@ -27,6 +27,40 @@ body
 	line-height: 1.25;
 }
 
+.nodeEditor .header
+{
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	background: #111;
+	padding: 1rem;
+	z-index: 999;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 2rem;
+	height: 3rem;
+}
+.nodeEditor .header input
+{
+	background: transparent;
+	border: none;
+	color: #fff;
+	font-family: inherit;
+}
+.nodeEditor .header .runAnalysis
+{
+	outline: 1px solid #fff;
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+	transition: 0.2s background-color, 0.2s color;
+}
+.nodeEditor .header .runAnalysis:hover
+{
+	background: #fff;
+	color: #000;
+}
+
 .nodeEditor .nodesBox
 {
 	display: grid;
@@ -39,7 +73,7 @@ body
 	background-position: var(--background-position, 0px 0px);
 }
 
-.nodeEditor canvas,
+.nodeEditor .nodesBox > canvas,
 .nodeEditor .nodeContainer
 {
 	grid-column: 1 / 2;
@@ -69,12 +103,22 @@ body
 	display: block;
 	white-space: nowrap;
 }
+.nodeEditor .node.processed
+{
+	outline: 2px solid #8afa;
+}
+.nodeEditor .node.processing
+{
+	outline: 2px solid #ff0a;
+}
 
 .nodeEditor .node .nodeContents
 {
-	display: flex;
+	display: grid;
 	gap: 0 1rem;
 	justify-content: space-between;
+	grid-template-columns: repeat(2, auto);
+	align-items: center;
 }
 
 .nodeEditor .node .nodeTitle
@@ -243,10 +287,10 @@ body
 .nodeShelf
 {
 	position: fixed;
-	top: 0;
+	top: 5rem;
 	right: 0;
 	bottom: 0;
-	background: #111;
+	background: #080808;
 	padding: 10px;
 }
 
@@ -323,11 +367,11 @@ body
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 100;
 	padding: 4rem;
 	display: grid;
 	grid-template-columns: 16rem auto;
 	overflow: hidden;
+	z-index: 9999;
 }
 .wikiBox.hidden
 {
@@ -470,6 +514,7 @@ body
 	padding: 4rem;
 	display: grid;
 	overflow: hidden;
+	z-index: 9999;
 }
 .filePicker.hidden
 {

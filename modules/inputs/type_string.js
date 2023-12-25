@@ -41,6 +41,8 @@ class StringInputNode extends Node
 			}
 		);
 
+		this.nodeContents.style.gridTemplateColumns = "auto";
+
 		this.textBox.innerHTML = this.attributes.value || "";
 
 		resizeObserver.observe(this.textBox);

@@ -1,3 +1,4 @@
+import SocketConnection, { AnalysisNodeProcessedEvent } from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import { NodeInput, NodeOutput, NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
@@ -73,6 +74,8 @@ class Node extends EventTarget
 	posY: number;
 
 	attributes: any = {};
+	customInputs: string[] = [];
+	customOuptuts: string[] = [];
 
 	private nodeContents: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodeContents" });
 	
@@ -149,6 +152,28 @@ class Node extends EventTarget
 			}
 		);
 
+		SocketConnection.addEventListener("analysis_node_processing", (e: AnalysisNodeProcessedEvent) =>
+		{
+			if (e.nodeId != this.id)
+				return;
+
+			console.log(`Processing: ${ this.id }...`);
+			this.element.classList.add("processing");
+		});
+
+		SocketConnection.addEventListener("analysis_node_processed", (e: AnalysisNodeProcessedEvent) =>
+		{
+			if (e.nodeId != this.id)
+				return;
+
+			console.log(`Processed: ${ this.id }!`);
+
+			this.element.classList.remove("processing");
+			this.element.classList.add("processed");
+
+			this.onProcessed(e.data);
+		});
+
 		this.renderContents();
 
 		this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
@@ -197,6 +222,12 @@ class Node extends EventTarget
 		this.inputsContainer.append(input.element);
 	}
 
+	protected removeInput(id: string)
+	{
+		this.inputs[id].element.remove();
+		delete this.inputs[id];
+	}
+
 	protected addOutput(id: string, type: string, name: string, description: string)
 	{
 		const output = new NodeOutput(id, type, name, description);
@@ -213,6 +244,12 @@ class Node extends EventTarget
 
 		this.outputs[id] = output;
 		this.outputsContainer.append(output.element);
+	}
+
+	protected removeOutput(id: string)
+	{
+		this.outputs[id].element.remove();
+		delete this.outputs[id];
 	}
 
 	//===== Node Dragging =====//
@@ -306,12 +343,20 @@ class Node extends EventTarget
 
 	toJSONObj()
 	{
-		return {
+		const jsonObj: { [key: string]: any } =
+		{
 			type: this.type,
 			attributes: this.attributes,
 			posX: this.posX,
 			posY: this.posY
 		};
+
+		if (this.customInputs.length)
+			jsonObj.customInputs = this.customInputs;
+		if (this.customOuptuts.length)
+			jsonObj.customOuptuts = this.customOuptuts;
+
+		return jsonObj;
 	}
 
 	protected sendUpdate()
@@ -323,5 +368,12 @@ class Node extends EventTarget
 	{
 		this.element.remove();
 		this.dispatchEvent(new NodeRemoveEvent(this));
+	}
+
+	// Parsing analysis output
+
+	protected onProcessed(data: any)
+	{
+
 	}
 }

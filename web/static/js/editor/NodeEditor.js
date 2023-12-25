@@ -1,3 +1,4 @@
+import SocketConnection from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import Node from "./Node.js";
@@ -6,6 +7,23 @@ export default class NodeEditor {
     constructor() {
         this.c = document.createElement("canvas");
         this.ctx = this.c.getContext("2d");
+        this.headerEl = createNodeTree({
+            name: "div",
+            attributes: { class: "header" },
+            childNodes: [
+                {
+                    name: "input"
+                },
+                {
+                    name: "button",
+                    attributes: { class: "runAnalysis" },
+                    childNodes: ["Run Analysis"],
+                    listeners: {
+                        click: () => this.runAnalysis()
+                    }
+                }
+            ]
+        });
         this.nodeContainer = createElement("div", { class: "nodeContainer" });
         this.posX = 0;
         this.posY = 0;
@@ -24,6 +42,7 @@ export default class NodeEditor {
                 class: "nodeEditor"
             },
             childNodes: [
+                this.headerEl,
                 {
                     name: "div",
                     attributes: {
@@ -395,6 +414,15 @@ export default class NodeEditor {
         this.loadJSON(status, false);
         this.history.push(status);
         this.saveFile();
+    }
+    // Analysis
+    runAnalysis() {
+        for (const nodeId in this.nodes) {
+            const node = this.nodes[nodeId];
+            node.element.classList.remove("processing");
+            node.element.classList.remove("processed");
+        }
+        SocketConnection.runAnalysis(this.filePath);
     }
 }
 //# sourceMappingURL=NodeEditor.js.map

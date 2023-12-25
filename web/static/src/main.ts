@@ -1,3 +1,4 @@
+import SocketConnection from "./SocketConnection.js";
 import AssetLoader from "./editor/AssetLoader.js";
 import NodeEditor from "./editor/NodeEditor.js";
 import Wiki from "./editor/Wiki.js";
@@ -7,6 +8,7 @@ import FilePicker, { FileOpenEvent } from "./files/FilePicker.js";
 {
 	Wiki.init();
 	await AssetLoader.loadNodeTypes();
+	SocketConnection.init();
 
 	const editor = new NodeEditor();
 	const filePicker = new FilePicker();
@@ -22,7 +24,7 @@ import FilePicker, { FileOpenEvent } from "./files/FilePicker.js";
 
 	if (window.location.hash)
 	{
-		editor.openFile(window.location.hash.substring(1));
+		editor.openFile(decodeURIComponent(window.location.hash.substring(1)));
 	}
 	else
 	{

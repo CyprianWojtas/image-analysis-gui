@@ -2,7 +2,7 @@ import json
 
 import files
 import modules
-
+from flask_socketio import emit
 
 class Analysis:
 	def __init__(self, analysis_id):
@@ -35,8 +35,17 @@ class Analysis:
 				runnable = True
 				inputs_dict = {}
 
+				required_inputs = []
+
 				for node_input in mods[node['type']]['inputs']:
-					input_id = node_id + "?" + node_input['id']
+					required_inputs.append(node_input['id'])
+
+				if 'customInputs' in node:
+					for node_input in node['customInputs']:
+						required_inputs.append(node_input)
+
+				for node_input in required_inputs:
+					input_id = node_id + "?" + node_input
 					output_id = self.connections[input_id]
 
 					# Node doesn't have all required inputs
@@ -44,7 +53,7 @@ class Analysis:
 						runnable = False
 						break
 
-					inputs_dict[node_input['id']] = self.variables[output_id]
+					inputs_dict[node_input] = self.variables[output_id]
 
 				if not runnable:
 					continue
@@ -54,7 +63,20 @@ class Analysis:
 					return None
 
 				print(f'Running: {node_id}')
+				emit('analysis_node_processing', {'nodeId': node_id})
 				node_outputs = mods[node['type']]['run'](inputs_dict, node['attributes'])
+
+				if type(node_outputs) is tuple:
+					emit(
+						'analysis_node_processed',
+						{
+							'nodeId': node_id,
+							'data': node_outputs[1]
+						}
+					)
+					node_outputs = node_outputs[0]
+				else:
+					emit('analysis_node_processed', {'nodeId': node_id})
 
 				for node_output_id, node_output in node_outputs.items():
 					output_id = node_id + "?" + node_output_id
@@ -70,7 +92,3 @@ class Analysis:
 				del nodes_to_solve[node_id]
 
 		print('Analysis finished!')
-
-
-# a = Analysis("test project 2.json")
-# a.run()

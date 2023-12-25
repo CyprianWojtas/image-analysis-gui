@@ -1,9 +1,10 @@
+import SocketConnection from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import Node, { NodeChangeEvent } from "./Node.js";
 import NodeShelf from "./NodeShelf.js";
 import { NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
-import Wiki from "./Wiki.js";
+
 
 export default
 class NodeEditor
@@ -13,6 +14,27 @@ class NodeEditor
 	private c: HTMLCanvasElement = document.createElement("canvas");
 	private ctx: CanvasRenderingContext2D = this.c.getContext("2d");
 
+	private headerEl: HTMLDivElement = <HTMLDivElement>createNodeTree(
+		{
+			name: "div",
+			attributes: { class: "header" },
+			childNodes:
+			[
+				{
+					name: "input"
+				},
+				{
+					name: "button",
+					attributes: { class: "runAnalysis" },
+					childNodes: [ "Run Analysis" ],
+					listeners:
+					{
+						click: () => this.runAnalysis()
+					}
+				}
+			]
+		}
+	);
 	private nodeContainer: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodeContainer" });
 	
 	posX: number = 0;
@@ -38,6 +60,7 @@ class NodeEditor
 				},
 				childNodes:
 				[
+					this.headerEl,
 					{
 						name: "div",
 						attributes:
@@ -586,5 +609,17 @@ class NodeEditor
 
 		this.history.push(status);
 		this.saveFile();
+	}
+
+	// Analysis
+	runAnalysis()
+	{
+		for (const nodeId in this.nodes)
+		{
+			const node = this.nodes[nodeId];
+			node.element.classList.remove("processing");
+			node.element.classList.remove("processed");
+		}
+		SocketConnection.runAnalysis(this.filePath);
 	}
 }

@@ -6,37 +6,32 @@ class IntInputNode extends Node
 {
 	renderContents()
 	{
-		this.attributesBox = createNodeTree(
+		this.valueInput = createNodeTree(
 			{
-				name: "div",
-				attributes: { class: "attributesBox" },
-				childNodes:
-				[
+				name: "input",
+				attributes: { type: "number", style: "width: 6rem", value: this.attributes.value || 0 },
+				listeners:
+				{
+					input: e =>
 					{
-						name: "input",
-						attributes: { type: "number", style: "width: 6rem", value: this.attributes.value || 0 },
-						listeners:
-						{
-							input: e =>
-							{
-								this.attributes.value = e.target.valueAsNumber;
-							},
-							blur: e =>
-							{
-								this.attributes.value = e.target.valueAsNumber;
-								this.sendUpdate();
-							},
-							mousedown: e => e.stopPropagation()
-						}
-					}
-				]
+						this.attributes.value = e.target.valueAsNumber;
+					},
+					blur: e =>
+					{
+						this.attributes.value = e.target.valueAsNumber;
+						this.sendUpdate();
+					},
+					mousedown: e => e.stopPropagation()
+				}
 			}
 		);
+
+		this.nodeContents.style.gridTemplateColumns = "auto";
 
 		this.nodeContents.append(
 			this.outputsContainer
 		);
 
-		this.addOutput("value", "int", this.attributesBox, "");
+		this.addOutput("value", "int", this.valueInput, "");
 	}
 }
