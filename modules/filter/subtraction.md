@@ -1,5 +1,5 @@
 ---
-name: Image Subtraction
+name: Subtract Images
 
 inputs:
   image_in:

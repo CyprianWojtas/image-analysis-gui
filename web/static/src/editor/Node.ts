@@ -1,6 +1,8 @@
+import Settings from "../Settings.js";
 import SocketConnection, { AnalysisNodeProcessedEvent } from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
+import NodeEditor from "./NodeEditor.js";
 import { NodeInput, NodeOutput, NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
 import Wiki from "./Wiki.js";
 
@@ -72,6 +74,7 @@ class Node extends EventTarget
 
 	posX: number;
 	posY: number;
+	editor: NodeEditor;
 
 	attributes: any = {};
 	customInputs: string[] = [];
@@ -97,7 +100,8 @@ class Node extends EventTarget
 				name: "div",
 				attributes:
 				{
-					class: `node nodeId_${ this.id }`
+					class: `node nodeId_${ this.id }`,
+					style: `--node-colour: ${ AssetLoader.nodesGroups[nodeData.group]?.colour || "#333" }`
 				},
 				childNodes:
 				[
@@ -113,12 +117,12 @@ class Node extends EventTarget
 							nodeData?.name || "New Node",
 							{
 								name: "div",
-								attributes: { class: "buttons" },
+								attributes: { class: "buttons buttons-circled" },
 								childNodes:
 								[
 									{
 										name: "button",
-										childNodes: [ "?" ],
+										childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
 										listeners:
 										{
 											mousedown: e => e.stopPropagation(),
@@ -131,7 +135,7 @@ class Node extends EventTarget
 									},
 									{
 										name: "button",
-										childNodes: [ "x" ],
+										childNodes: [ { name: "i", attributes: { class: "icon-cancel" } } ],
 										attributes: { class: "btn-close" },
 										listeners:
 										{
@@ -148,7 +152,12 @@ class Node extends EventTarget
 						]
 					},
 					this.nodeContents
-				]
+				],
+				listeners:
+				{
+					mousedown: e => e.stopPropagation(),
+					// wheel: e => e.stopPropagation()
+				}
 			}
 		);
 
@@ -277,7 +286,14 @@ class Node extends EventTarget
 
 		const moveEvent = (e: MouseEvent) =>
 		{
-			this.moveTo(startPosX + e.clientX - dragPosX, startPosY + e.clientY - dragPosY);
+			let posX = startPosX + (e.clientX - dragPosX) / this.editor.scale;
+			let posY = startPosY + (e.clientY - dragPosY) / this.editor.scale;
+			if (Settings.get("editor.snapToGrid"))
+			{
+				posX = Math.round(posX / 18) * 18;
+				posY = Math.round(posY / 18) * 18;
+			}
+			this.moveTo(posX, posY);
 		}
 
 		const mouseupEvent = (e: MouseEvent) =>
@@ -315,8 +331,8 @@ class Node extends EventTarget
 			const thisPos = this.element.getBoundingClientRect();
 			const variablePos = variable.getHandleBoundingClientRect();
 
-			variable.posX = variablePos.x - thisPos.x + 4;
-			variable.posY = variablePos.y - thisPos.y + 4;
+			variable.posX = (variablePos.x - thisPos.x) / this.editor.scale + 4;
+			variable.posY = (variablePos.y - thisPos.y) / this.editor.scale + 4;
 		}
 		
 		return {

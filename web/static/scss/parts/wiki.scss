@@ -1,0 +1,140 @@
+.wikiBox
+{
+	position: fixed;
+	background: #1118;
+	backdrop-filter: blur(1rem);
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 4rem;
+	display: grid;
+	grid-template-columns: 16rem auto;
+	overflow: hidden;
+	z-index: 9999;
+
+	&.hidden
+	{
+		display: none;
+	}
+
+	.nodes
+	{
+		background: #333;
+		padding: 1rem 0.25rem 1rem 1rem;
+		overflow: hidden;
+		display: grid;
+		grid-template-rows: auto 1fr;
+	}
+	.nodesSearchBox
+	{
+		margin-right: 0.75rem;
+		font-family: inherit;
+		font-size: inherit;
+		border: 1px solid #888;
+		background: #fff;
+		outline: none;
+	}
+
+	.nodes .nodesListBox
+	{
+		overflow: auto;
+	}
+	.nodes .nodesListBox .node
+	{
+		padding: 0.5rem;
+		background: none;
+		border: none;
+		font-family: inherit;
+		font-size: inherit;
+		color: inherit;
+		display: block;
+		cursor: pointer;
+		transition: 0.2s background-color;
+		width: calc(100% - 1rem);
+		text-align: left;
+		position: relative;
+	}
+	.nodes .nodesListBox .node::after
+	{
+		content: "";
+		display: block;
+		position: absolute;
+		top: 0;
+		left: 100%;
+		bottom: 0;
+		width: 0;
+		background: transparent;
+		clip-path: polygon(0 0, 100% 50%, 0 100%);
+		transition: 0.2s width, background-color 0.2s;
+	}
+	.nodes .nodesListBox .node.selected
+	{
+		background: #555;
+	}
+	.nodes .nodesListBox .node.selected::after
+	{
+		width: 1rem;
+		background: #555;
+	}
+
+	.nodes .nodesListBox .node:hover
+	{
+		background: #555;
+	}
+
+	.article
+	{
+		background: #222;
+		padding: 1rem;
+		display: grid;
+		grid-template-columns: 1fr auto;
+		grid-template-rows: auto 1fr;
+		overflow: hidden;
+	}
+
+	.article .closeButton
+	{
+		width: 2rem;
+		height: 2rem;
+		background: #444;
+		color: #fff;
+		border: none;
+		transition: 0.2s background-color;
+		margin-left: 1rem;
+		cursor: pointer;
+		text-align: center;
+	}
+	.article .closeButton:hover,
+	.article .closeButton:focus
+	{
+		background: #d00;
+	}
+
+	.article .title
+	{
+		font-size: 2rem;
+		font-weight: 700;
+		border-bottom: 1px solid #fff4;
+	}
+
+	.article .articleContent
+	{
+		overflow: auto;
+		max-height: 100%;
+		grid-column: 1 / -1;
+		padding: 0 1rem 0 0;
+		line-height: 1.5;
+	}
+
+	.article .articleContent h2
+	{
+		border-bottom: 1px solid #fff2;
+	}
+	.article .articleContent pre
+	{
+		background: #111;
+		padding: 0.75rem 1rem;
+		overflow: auto;
+	}
+}

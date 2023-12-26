@@ -1,41 +1,18 @@
 import importlib.util
 import os
-import re
 import sys
 
-import yaml
-
 import config
-
-
-def find_md_parts(text):
-
-	parts = {}
-
-	while True:
-		march = re.search(r'\n!(\w+)\n([\w\W]*?)(\n!\w+\n)', text)
-
-		if march:
-			text = text[march.start(3):]
-			parts[march.group(1)] = march.group(2).strip()
-		else:
-			march = re.search(r'\n!(\w+)\n([\w\W]*)', text)
-			parts[march.group(1)] = march.group(2).strip()
-
-			return parts
+import md_parser
 
 
 def get_module_info(module_path=''):
 
 	module_id = module_path[0:-3]
-	with open(os.path.join(config.MODULES_PATH, module_path), 'r') as f:
-		module_data_str = f.read()
 
-	_, module_yml, module_description = module_data_str.split('---', 2)
-
-	module_data = yaml.safe_load(module_yml)
-
-	module_desc_parts = find_md_parts(module_description)
+	parsed = md_parser.parse_file(os.path.join(config.MODULES_PATH, module_path))
+	module_data = parsed['data']
+	module_desc_parts = parsed['md_parts']
 
 	inputs = []
 
@@ -62,7 +39,7 @@ def get_module_info(module_path=''):
 		'description':
 			module_desc_parts['description']
 			if 'description' in module_desc_parts
-			else (module_description if not module_desc_parts else ''),
+			else (parsed['md_text'] if not module_desc_parts else ''),
 
 		'wiki': module_desc_parts['wiki'] if 'wiki' in module_desc_parts else None,
 		'inputs': inputs,
@@ -81,36 +58,67 @@ def get_custom_class(module_id):
 	return None
 
 
-def get_list(module_path='') -> dict:
+def get_group(group_path):
+
+	path = os.path.join(config.MODULES_PATH, group_path)
+
+	if not os.path.exists(os.path.join(path, '_group.md')):
+		return None
+
+	data = md_parser.parse_file(os.path.join(path, '_group.md'))
+
+	return {
+		'id': group_path,
+		'name': data['data'].get('name', group_path),
+		'colour': data['data'].get('colour'),
+		'description': data['md_text']
+	}
+
+
+def get_list(module_path='') -> tuple:
 
 	path = os.path.join(config.MODULES_PATH, module_path)
 	modules = {}
+	groups = {}
+
+	group_info = get_group(module_path)
+	if group_info:
+		groups[module_path] = group_info
 
 	for file in os.listdir(path):
+
+		if file == '_group.md':
+			continue
 
 		file_path = module_path + '/' + file if module_path else file
 
 		if os.path.isdir(os.path.join(config.MODULES_PATH, file_path)):
-			modules |= get_list(file_path)
+			submodules, subgroups = get_list(file_path)
+			modules |= submodules
+			groups |= subgroups
 		elif file_path[-3:].lower() == '.md':
 			module = get_module_info(file_path)
+
+			module['group'] = module_path
+
 			modules[module['id']] = module
 
 			del module['id']
 
-	return modules
+	return modules, groups
 
 
 modules = {}
+groups = {}
 
 
 def load_python_modules():
-	global modules
+	global modules, groups
 
-	if modules:
+	if modules and groups:
 		return modules
 
-	modules = get_list()
+	modules, groups = get_list()
 
 	for module_id, module in modules.items():
 		try:

@@ -1,9 +1,12 @@
+import Settings from "./Settings.js";
+import SettingsPage from "./SettingsPage.js";
 import SocketConnection from "./SocketConnection.js";
 import AssetLoader from "./editor/AssetLoader.js";
 import NodeEditor from "./editor/NodeEditor.js";
 import Wiki from "./editor/Wiki.js";
 import FilePicker from "./files/FilePicker.js";
 (async () => {
+    SettingsPage.init();
     Wiki.init();
     await AssetLoader.loadNodeTypes();
     SocketConnection.init();
@@ -14,6 +17,8 @@ import FilePicker from "./files/FilePicker.js";
     document.body.append(editor.element);
     // @ts-ignore
     window.editor = editor;
+    // @ts-ignore
+    window.Settings = Settings;
     if (window.location.hash) {
         editor.openFile(decodeURIComponent(window.location.hash.substring(1)));
     }

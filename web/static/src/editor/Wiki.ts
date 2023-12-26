@@ -37,7 +37,7 @@ class Wiki
 				name: "div",
 				attributes:
 				{
-					class: "wikiBox hidden"
+					class: "wikiBox fullscreenPage hidden"
 				},
 				childNodes:
 				[
@@ -66,7 +66,7 @@ class Wiki
 								name: "button",
 								attributes: { class: "closeButton" },
 								listeners: { click: () => this.close() },
-								childNodes: [ "x" ]
+								childNodes: [ { name: "i", attributes: { class: "icon-cancel" } } ]
 							},
 							this.articleContent
 						]

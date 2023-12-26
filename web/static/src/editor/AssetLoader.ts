@@ -7,11 +7,14 @@ class AssetLoader
 	 * Nodes template data
 	 */
 	static nodesData: { [param: string] : any };
+	static nodesGroups: { [param: string] : any };
 	static variableTypes: { [param: string] : any };
 
 	static async loadNodeTypes()
 	{
-		this.nodesData     = await (await fetch("/api/nodes")).json();
+		const nodes = await (await fetch("/api/nodes")).json();
+		this.nodesData = nodes.nodes;
+		this.nodesGroups = nodes.groups;
 		this.variableTypes = await (await fetch("/api/variable-types.json")).json();
 
 		for(const nodeId in this.nodesData)

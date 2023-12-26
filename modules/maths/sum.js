@@ -6,32 +6,50 @@ class IntInputNode extends Node
 {
 	renderContents()
 	{
-		this.sumCountInput = createNodeTree(
+		if (!this.attributes.numberCount)
+			this.attributes.numberCount = 2;
+
+		this.plusMinusButtons = createNodeTree(
 			{
-				name: "input",
-				attributes: { type: "number", style: "width: 6rem; grid-column: 1 / -1;", value: this.attributes.numberCount || 2 },
-				listeners:
-				{
-					input: e =>
+				name: "div",
+				attributes: { style: "grid-column: 1 / -1; display: flex; gap: 0.25rem; margin-top: 0.5rem;" },
+				childNodes:
+				[
 					{
-						this.attributes.numberCount = e.target.valueAsNumber;
-						this.updateInputs();
+						name: "button",
+						attributes: { class: "btn-circled" },
+						childNodes: [ { name: "i", attributes: { class: "icon-plus" } } ],
+						listeners:
+						{
+							click: () =>
+							{
+								this.attributes.numberCount++;
+								this.updateInputs();
+							}
+						}
 					},
-					blur: e =>
 					{
-						this.attributes.numberCount = e.target.valueAsNumber;
-						this.updateInputs();
-						this.sendUpdate();
-					},
-					mousedown: e => e.stopPropagation()
-				}
+						name: "button",
+						attributes: { class: "btn-circled" },
+						childNodes: [ { name: "i", attributes: { class: "icon-minus" } } ],
+						listeners:
+						{
+							click: () =>
+							{
+								if (this.attributes.numberCount > 2)
+									this.attributes.numberCount--;
+								this.updateInputs();
+							}
+						}
+					}
+				]
 			}
 		);
 
 		this.nodeContents.append(
-			this.sumCountInput,
 			this.inputsContainer,
-			this.outputsContainer
+			this.outputsContainer,
+			this.plusMinusButtons
 		);
 
 		this.addOutput("sum", "int", "Sum", "");

@@ -12,9 +12,10 @@ custom_class: true
 
 !description
 
+Adds multiple numbers together
 
 !wiki
 
-Adds two numbers together
+Adds multiple numbers together
 
-\\[ Sum(x_1, x_2) = x_1 + x_2 \\]
+\\[ Sum(x_1, ..., x_n) = x_1 + ... + x_n \\]

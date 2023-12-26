@@ -8,9 +8,8 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 @api.route('/nodes')
 def api_nodes():
-	mods = modules.get_list()
-	print(mods)
-	return mods
+	nodes, groups = modules.get_list()
+	return {'nodes': nodes, 'groups': groups}
 
 
 @api.route('/nodes/<path:node_id>')

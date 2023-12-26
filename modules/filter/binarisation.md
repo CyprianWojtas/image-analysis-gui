@@ -5,10 +5,13 @@ inputs:
   image_in:
     type: image
     name: Image
+  treshold:
+    type: int
+    name: Treshold
 
 outputs:
   image_out:
-    type: image_bin
+    type: image
     name: Binarised Image
 
 ---

@@ -1,3 +1,4 @@
+import Settings from "../Settings.js";
 import SocketConnection from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
@@ -38,6 +39,7 @@ export class NodeChangeEvent extends NodeEvent {
 }
 export default class Node extends EventTarget {
     constructor(id, type, attributes = {}) {
+        var _a;
         super();
         this.attributes = {};
         this.customInputs = [];
@@ -55,7 +57,8 @@ export default class Node extends EventTarget {
         this.element = createNodeTree({
             name: "div",
             attributes: {
-                class: `node nodeId_${this.id}`
+                class: `node nodeId_${this.id}`,
+                style: `--node-colour: ${((_a = AssetLoader.nodesGroups[nodeData.group]) === null || _a === void 0 ? void 0 : _a.colour) || "#333"}`
             },
             childNodes: [
                 {
@@ -68,11 +71,11 @@ export default class Node extends EventTarget {
                         (nodeData === null || nodeData === void 0 ? void 0 : nodeData.name) || "New Node",
                         {
                             name: "div",
-                            attributes: { class: "buttons" },
+                            attributes: { class: "buttons buttons-circled" },
                             childNodes: [
                                 {
                                     name: "button",
-                                    childNodes: ["?"],
+                                    childNodes: [{ name: "i", attributes: { class: "icon-help" } }],
                                     listeners: {
                                         mousedown: e => e.stopPropagation(),
                                         click: e => {
@@ -83,7 +86,7 @@ export default class Node extends EventTarget {
                                 },
                                 {
                                     name: "button",
-                                    childNodes: ["x"],
+                                    childNodes: [{ name: "i", attributes: { class: "icon-cancel" } }],
                                     attributes: { class: "btn-close" },
                                     listeners: {
                                         mousedown: e => e.stopPropagation(),
@@ -98,7 +101,11 @@ export default class Node extends EventTarget {
                     ]
                 },
                 this.nodeContents
-            ]
+            ],
+            listeners: {
+                mousedown: e => e.stopPropagation(),
+                // wheel: e => e.stopPropagation()
+            }
         });
         SocketConnection.addEventListener("analysis_node_processing", (e) => {
             if (e.nodeId != this.id)
@@ -172,7 +179,13 @@ export default class Node extends EventTarget {
         let dragPosX = e.clientX;
         let dragPosY = e.clientY;
         const moveEvent = (e) => {
-            this.moveTo(startPosX + e.clientX - dragPosX, startPosY + e.clientY - dragPosY);
+            let posX = startPosX + (e.clientX - dragPosX) / this.editor.scale;
+            let posY = startPosY + (e.clientY - dragPosY) / this.editor.scale;
+            if (Settings.get("editor.snapToGrid")) {
+                posX = Math.round(posX / 18) * 18;
+                posY = Math.round(posY / 18) * 18;
+            }
+            this.moveTo(posX, posY);
         };
         const mouseupEvent = (e) => {
             moveEvent(e);
@@ -195,8 +208,8 @@ export default class Node extends EventTarget {
         if (variable.posX === null || variable.posY === null) {
             const thisPos = this.element.getBoundingClientRect();
             const variablePos = variable.getHandleBoundingClientRect();
-            variable.posX = variablePos.x - thisPos.x + 4;
-            variable.posY = variablePos.y - thisPos.y + 4;
+            variable.posX = (variablePos.x - thisPos.x) / this.editor.scale + 4;
+            variable.posY = (variablePos.y - thisPos.y) / this.editor.scale + 4;
         }
         return {
             x: this.posX + variable.posX,

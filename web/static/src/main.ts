@@ -1,3 +1,5 @@
+import Settings from "./Settings.js";
+import SettingsPage from "./SettingsPage.js";
 import SocketConnection from "./SocketConnection.js";
 import AssetLoader from "./editor/AssetLoader.js";
 import NodeEditor from "./editor/NodeEditor.js";
@@ -6,6 +8,7 @@ import FilePicker, { FileOpenEvent } from "./files/FilePicker.js";
 
 (async () =>
 {
+	SettingsPage.init();
 	Wiki.init();
 	await AssetLoader.loadNodeTypes();
 	SocketConnection.init();
@@ -21,6 +24,8 @@ import FilePicker, { FileOpenEvent } from "./files/FilePicker.js";
 	
 	// @ts-ignore
 	window.editor = editor;
+	// @ts-ignore
+	window.Settings = Settings;
 
 	if (window.location.hash)
 	{

@@ -1,0 +1,26 @@
+.settings
+{
+	display: grid;
+	grid-template-rows: auto 1fr;
+
+	.header
+	{
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 1rem;
+		background: #333;
+		padding: 1rem;
+		align-items: center;
+
+		h1
+		{
+			margin: 0;
+		}
+	}
+
+	.settingsBox
+	{
+		background: #222;
+		padding: 1rem;
+	}
+}

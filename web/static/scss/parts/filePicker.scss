@@ -1,0 +1,124 @@
+.filePicker
+{
+	position: fixed;
+	background: #1118;
+	backdrop-filter: blur(1rem);
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 100;
+	padding: 4rem;
+	display: grid;
+	overflow: hidden;
+	z-index: 9999;
+}
+.filePicker.hidden
+{
+	display: none;
+}
+
+.filePicker .files
+{
+	background: #222;
+	padding: 1rem;
+}
+
+.filePicker .header
+{
+	border-bottom: 1px solid #fff4;
+	margin-bottom: 1rem;
+	padding: 0.5rem 0;
+}
+
+.filePicker .header .path a
+{
+	color: inherit;
+	text-decoration: none;
+	margin-right: 0.25rem;
+}
+
+.filePicker .header .path a:not(:last-child)::after
+{
+	content: "/";
+	margin-left: 0.25rem;
+}
+
+.filePicker .dirsListBox
+{
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fill, 16rem);
+	margin-bottom: 1rem;
+}
+
+.filePicker .filesListBox
+{
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fill, minmax(33rem, 1fr));
+}
+.filePicker .dirsListBox .dir
+{
+	padding: 0.5rem 1rem;
+}
+.filePicker .file
+{
+	background: #333;
+	display: grid;
+	width: 100%;
+	padding: 1rem;
+	cursor: pointer;
+	transition: background-color 0.2s, color 0.2s;
+	grid-template-columns: auto auto;
+}
+.filePicker .file:focus,
+.filePicker .file:hover
+{
+	background: #fff;
+	color: #000;
+}
+
+.filePicker .file .tile
+{
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+.filePicker .file > div:last-child
+{
+	text-align: right;
+}
+
+.filePicker .createFileBox
+{
+	background: #333;
+	padding: 1rem;
+	display: flex;
+	align-items: center;
+}
+
+.filePicker .createFileBox input
+{
+	border: none;
+	font-family: inherit;
+	font-size: inherit;
+	background: #444;
+	color: #fff;
+	outline: none;
+	border-bottom: 1px solid #fff6;
+	padding: 0.25rem 0.5rem;
+}
+.filePicker .createFileBox button
+{
+	margin-left: 1rem;
+	background: #444;
+	padding: 0.25rem 0.75rem;
+	cursor: pointer;
+	transition: background-color 0.2s, color 0.2s;
+}
+.filePicker .createFileBox button:hover,
+.filePicker .createFileBox button:focus
+{
+	background: #fff;
+	color: #000;
+}

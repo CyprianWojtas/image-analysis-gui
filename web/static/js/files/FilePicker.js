@@ -29,7 +29,7 @@ export default class FilePicker extends EventTarget {
         });
         this.element = createNodeTree({
             name: "div",
-            attributes: { class: "filePicker hidden" },
+            attributes: { class: "filePicker fullscreenPage hidden" },
             childNodes: [
                 {
                     name: "div",

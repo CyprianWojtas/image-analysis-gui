@@ -26,7 +26,6 @@ class Analysis:
 		nodes_to_solve = {**self.nodes}
 
 		mods = modules.load_python_modules()
-		# print(mods)
 
 		while nodes_to_solve:
 			solved_nodes = []

@@ -57,7 +57,7 @@ class FilePicker extends EventTarget
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes: { class: "filePicker hidden" },
+				attributes: { class: "filePicker fullscreenPage hidden" },
 				childNodes:
 				[
 					{

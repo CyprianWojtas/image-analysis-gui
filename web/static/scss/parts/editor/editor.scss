@@ -1,0 +1,143 @@
+@use "../../variables" as var;
+
+
+.nodeEditor
+{
+	.header
+	{
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		background: #111;
+		padding: 1rem;
+		z-index: 999;
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		gap: 2rem;
+		height: 3rem;
+
+		input
+		{
+			background: transparent;
+			border: none;
+			font-size: 1.25rem;
+  			font-weight: 700;
+		}
+
+		.runAnalysis
+		{
+			outline: 1px solid #fff;
+			padding: 0.5rem 1rem;
+			cursor: pointer;
+			transition: 0.2s background-color, 0.2s color;
+			&:hover
+			{
+				background: #fff;
+				color: #000;
+			}
+		}
+	}
+
+	.nodesBox
+	{
+		display: grid;
+		overflow: hidden;
+		background-color: #222;
+		background-size: calc(1.5rem * var(--scale, 1)) calc(1.5rem * var(--scale, 1));
+		background-position: var(--background-position, 0px 0px);
+
+		.nodeContainer
+		{
+			position: relative;
+			width: 0;
+			height: 0;
+		}
+
+		> canvas
+		{
+			filter: drop-shadow(0 0 1rem #000);
+		}
+
+		> canvas,
+		.nodeContainer
+		{
+			grid-column: 1 / 2;
+			grid-row: 1 / 2;
+		}
+	}
+
+	&[data-background-pattern="lines"] .nodesBox
+	{
+		background-image:
+			repeating-linear-gradient(#fff1, #fff1 1px, #fff0 1px, #fff0 calc(1.5rem * var(--scale, 1))),
+			repeating-linear-gradient(90deg, #fff1, #fff1 1px, #fff0 1px, #fff0 calc(1.5rem * var(--scale, 1)));
+	}
+
+	&[data-background-pattern="dots"] .nodesBox
+	{
+		background-image:
+			radial-gradient(circle at 0 0, #fff4, #fff4 1px, #fff0 1px, #fff0 calc(1.5rem * var(--scale, 1)));
+	}
+
+	
+	&.nodeDragged,
+	&.nodeDragged *,
+	&.variableDragged,
+	&.variableDragged *
+	{
+		cursor: grabbing !important;
+	}
+
+	.scaleBox
+	{
+		position: fixed;
+		bottom: 1rem;
+		left: 1rem;
+		
+		input
+		{
+			background: none;
+			border: none;
+			width: 2rem;
+			padding: 0;
+			text-align: right;
+			-moz-appearance: textfield;
+
+			&::-webkit-outer-spin-button,
+			&::-webkit-inner-spin-button
+			{
+				-webkit-appearance: none;
+				margin: 0;
+			}
+		}
+		
+		button
+		{
+			width: 1.5rem;
+			text-align: center;
+			border: 1px solid #fff2;
+			transition: 0.2s background-color;
+			font-size: 0.8rem;
+  			padding: 0.25rem 0;
+
+			&.scalePlus
+			{
+				margin-left: 0.5rem;
+				border-right: none;
+				border-top-left-radius: 4px;
+				border-bottom-left-radius: 4px;
+			}
+			&.scaleMinus
+			{
+				border-top-right-radius: 4px;
+				border-bottom-right-radius: 4px;
+			}
+
+			&:hover
+			{
+				background: #0008;
+			}
+		}
+	}
+}
