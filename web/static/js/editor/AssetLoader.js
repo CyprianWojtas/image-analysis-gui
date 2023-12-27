@@ -1,4 +1,3 @@
-import Wiki from "./Wiki.js";
 export default class AssetLoader {
     static async loadNodeTypes() {
         const nodes = await (await fetch("/api/nodes")).json();
@@ -11,7 +10,6 @@ export default class AssetLoader {
                 continue;
             node.class = (await import(`/api/nodes/${nodeId}`)).default;
         }
-        Wiki.addNodes(this.nodesData);
     }
 }
 //# sourceMappingURL=AssetLoader.js.map

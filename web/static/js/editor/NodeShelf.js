@@ -4,6 +4,8 @@ import Wiki from "./Wiki.js";
 export default class NodeShelf {
     constructor() {
         this.nodesBox = createElement("div", { class: "nodes" });
+        this.searchBox = createElement("div", { class: "nodes", style: "display: none" });
+        this.searchInput = createElement("input", { class: "searchInput", placeholder: "Search..." }, { input: () => this.search(this.searchInput.value) });
         this.element = createNodeTree({
             name: "div",
             attributes: {
@@ -16,11 +18,17 @@ export default class NodeShelf {
                         "Nodes"
                     ]
                 },
-                this.nodesBox
+                this.searchInput,
+                this.nodesBox,
+                this.searchBox
             ]
         });
+        this.loadGroups();
+    }
+    loadGroups() {
         const groupedNodes = {};
         const ungroupedNodes = [];
+        this.nodesBox.innerHTML = "";
         for (const nodeId in AssetLoader.nodesData) {
             const groupId = AssetLoader.nodesData[nodeId].group;
             if (AssetLoader.nodesGroups[groupId]) {
@@ -37,6 +45,31 @@ export default class NodeShelf {
         }
         if (ungroupedNodes.length)
             this.nodesBox.append(this.createGroupBox("_unogranised", { name: "Unogranised" }, ungroupedNodes));
+    }
+    search(searchText) {
+        if (!searchText) {
+            this.nodesBox.style.display = "block";
+            this.searchBox.style.display = "none";
+            return;
+        }
+        else {
+            this.nodesBox.style.display = "none";
+            this.searchBox.style.display = "block";
+        }
+        this.searchBox.innerHTML = "";
+        searchText = searchText.toLowerCase();
+        const foundInTheName = [];
+        const foundInTheDescription = [];
+        for (const nodeId in AssetLoader.nodesData) {
+            const nodeType = AssetLoader.nodesData[nodeId];
+            if (nodeType.name.toLowerCase().includes(searchText))
+                foundInTheName.push(this.createNodeBox(nodeId, nodeType));
+            else if (nodeType.description.toLowerCase().includes(searchText))
+                foundInTheDescription.push(this.createNodeBox(nodeId, nodeType));
+        }
+        this.searchBox.append(...foundInTheName, ...foundInTheDescription);
+        if (!this.searchBox.childNodes.length)
+            this.searchBox.append(createNodeTree({ name: "div", attributes: { class: "noResults" }, childNodes: ["No results..."] }));
     }
     createGroupBox(groupId, group, nodes) {
         const nodesBox = createElement("div", { class: "nodeBox" });
@@ -55,19 +88,22 @@ export default class NodeShelf {
                     },
                     childNodes: [
                         (group === null || group === void 0 ? void 0 : group.name) || groupId,
-                        {
-                            name: "button",
-                            attributes: {
-                                class: "wikiLink btn-circled"
-                            },
-                            childNodes: [{ name: "i", attributes: { class: "icon-help" } }],
-                            listeners: {
-                                click: e => {
-                                    e.stopPropagation();
-                                    Wiki.openArticle(groupId);
-                                }
-                            }
-                        }
+                        // {
+                        // 	name: "button",
+                        // 	attributes:
+                        // 	{
+                        // 		class: "wikiLink btn-circled"
+                        // 	},
+                        // 	childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
+                        // 	listeners:
+                        // 	{
+                        // 		click: e =>
+                        // 		{
+                        // 			e.stopPropagation();
+                        // 			Wiki.openArticle(groupId);
+                        // 		}
+                        // 	}
+                        // }
                     ],
                     listeners: {
                         click: () => {

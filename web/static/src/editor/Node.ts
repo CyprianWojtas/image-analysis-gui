@@ -1,5 +1,5 @@
 import Settings from "../Settings.js";
-import SocketConnection, { AnalysisNodeProcessedEvent } from "../SocketConnection.js";
+import SocketConnection, { AnalysisNodeErrorEvent, AnalysisNodeProcessedEvent } from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import NodeEditor from "./NodeEditor.js";
@@ -84,6 +84,7 @@ class Node extends EventTarget
 	
 	private inputsContainer:  HTMLDivElement = <HTMLDivElement>createElement("div", { class: "inputsContainer" });
 	private outputsContainer: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "outputsContainer" });
+	private errorBox: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "errorBox" });
 
 	constructor(id: string, type: string, attributes: any = {})
 	{
@@ -122,6 +123,22 @@ class Node extends EventTarget
 								[
 									{
 										name: "button",
+										attributes: { title: "Duplicate" },
+										childNodes: [ { name: "i", attributes: { class: "icon-duplicate" } } ],
+										listeners:
+										{
+											mousedown: e => e.stopPropagation(),
+											click: e =>
+											{
+												e.stopPropagation();
+												this.editor.addNode(this.type, undefined, this.posX + 18, this.posY + 18);
+												this.editor.historyPush();
+											}
+										}
+									},
+									{
+										name: "button",
+										attributes: { title: "Help" },
 										childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
 										listeners:
 										{
@@ -136,7 +153,7 @@ class Node extends EventTarget
 									{
 										name: "button",
 										childNodes: [ { name: "i", attributes: { class: "icon-cancel" } } ],
-										attributes: { class: "btn-close" },
+										attributes: { class: "btn-close", title: "Remove" },
 										listeners:
 										{
 											mousedown: e => e.stopPropagation(),
@@ -151,12 +168,17 @@ class Node extends EventTarget
 							}
 						]
 					},
-					this.nodeContents
+					this.nodeContents,
+					this.errorBox
 				],
 				listeners:
 				{
-					mousedown: e => e.stopPropagation(),
-					// wheel: e => e.stopPropagation()
+					mousedown: e => 
+					{
+						if (e.button != 0)
+							return;
+						e.stopPropagation();
+					}
 				}
 			}
 		);
@@ -181,6 +203,22 @@ class Node extends EventTarget
 			this.element.classList.add("processed");
 
 			this.onProcessed(e.data);
+		});
+
+		SocketConnection.addEventListener("analysis_node_error", (e: AnalysisNodeErrorEvent) =>
+		{
+			if (e.nodeId != this.id)
+				return;
+
+			console.error(`Error ${ this.id }!\n${ e.error }`);
+
+			this.element.classList.remove("processing");
+			this.element.classList.add("error");
+
+			this.errorBox.innerHTML = "";
+			this.errorBox.append(e.error);
+
+			this.onError(e.error);
 		});
 
 		this.renderContents();
@@ -276,6 +314,9 @@ class Node extends EventTarget
 
 	private dragStart(e: MouseEvent)
 	{
+		if (e.button != 0)
+			return;
+
 		e.stopPropagation();
 
 		let startPosX = this.posX;
@@ -389,6 +430,11 @@ class Node extends EventTarget
 	// Parsing analysis output
 
 	protected onProcessed(data: any)
+	{
+
+	}
+
+	protected onError(error: string)
 	{
 
 	}

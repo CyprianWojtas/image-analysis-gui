@@ -9,6 +9,17 @@
 	width: 18rem;
 	overflow: auto;
 
+	.searchInput
+	{
+		background: transparent;
+		border: none;
+		border-bottom: 1px solid #fff4;
+		outline: none;
+		width: calc(100% - 2rem);
+		box-sizing: border-box;
+		margin: 0 1rem 2rem;
+	}
+
 	.groupType
 	{
 		box-sizing: border-box;
@@ -111,5 +122,10 @@
 		{
 			padding: 10px;
 		}
+	}
+
+	.noResults
+	{
+		text-align: center;
 	}
 }

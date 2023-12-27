@@ -8,6 +8,12 @@ class NodeShelf
 	element: HTMLDivElement;
 
 	private nodesBox: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodes" });
+	private searchBox: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodes", style: "display: none" });
+	private searchInput: HTMLInputElement = <HTMLInputElement>createElement(
+		"input",
+		{ class: "searchInput", placeholder: "Search..." },
+		{ input: () => this.search(this.searchInput.value) }
+	);
 
 	constructor()
 	{
@@ -27,13 +33,22 @@ class NodeShelf
 							"Nodes"
 						]
 					},
-					this.nodesBox
+					this.searchInput,
+					this.nodesBox,
+					this.searchBox
 				]
 			}
 		);
 
+		this.loadGroups();
+	}
+
+	private loadGroups()
+	{
 		const groupedNodes = {};
 		const ungroupedNodes = [];
+
+		this.nodesBox.innerHTML = "";
 
 		for (const nodeId in AssetLoader.nodesData)
 		{
@@ -57,6 +72,41 @@ class NodeShelf
 
 		if (ungroupedNodes.length)
 			this.nodesBox.append(this.createGroupBox("_unogranised", { name: "Unogranised" }, ungroupedNodes));
+	}
+
+	search(searchText: string)
+	{
+		if (!searchText)
+		{
+			this.nodesBox.style.display  = "block";
+			this.searchBox.style.display = "none";
+			return;
+		}
+		else
+		{
+			this.nodesBox.style.display  = "none";
+			this.searchBox.style.display = "block";
+		}
+
+		this.searchBox.innerHTML = "";
+		searchText = searchText.toLowerCase();
+
+		const foundInTheName = [];
+		const foundInTheDescription = [];
+
+		for (const nodeId in AssetLoader.nodesData)
+		{
+			const nodeType = AssetLoader.nodesData[nodeId];
+
+			if (nodeType.name.toLowerCase().includes(searchText))
+				foundInTheName.push(this.createNodeBox(nodeId, nodeType));
+			else if (nodeType.description.toLowerCase().includes(searchText))
+				foundInTheDescription.push(this.createNodeBox(nodeId, nodeType));
+		}
+
+		this.searchBox.append(...foundInTheName, ...foundInTheDescription);
+		if (!this.searchBox.childNodes.length)
+			this.searchBox.append(createNodeTree({ name: "div",  attributes: { class: "noResults" }, childNodes: [ "No results..." ] }));
 	}
 
 	private createGroupBox(groupId: string, group: any, nodes: string[])
@@ -83,22 +133,22 @@ class NodeShelf
 						childNodes:
 						[
 							group?.name || groupId,
-							{
-								name: "button",
-								attributes:
-								{
-									class: "wikiLink btn-circled"
-								},
-								childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
-								listeners:
-								{
-									click: e =>
-									{
-										e.stopPropagation();
-										Wiki.openArticle(groupId);
-									}
-								}
-							}
+							// {
+							// 	name: "button",
+							// 	attributes:
+							// 	{
+							// 		class: "wikiLink btn-circled"
+							// 	},
+							// 	childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
+							// 	listeners:
+							// 	{
+							// 		click: e =>
+							// 		{
+							// 			e.stopPropagation();
+							// 			Wiki.openArticle(groupId);
+							// 		}
+							// 	}
+							// }
 						],
 						listeners:
 						{

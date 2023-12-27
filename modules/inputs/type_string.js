@@ -27,15 +27,11 @@ class StringInputNode extends Node
 				{
 					this.attributes.value = this.textBox.value;
 					this.sendUpdate();
-					console.log("Updated!");
-					console.log(this.attributes);
 				},
 				mouseup: () =>
 				{
 					this.attributes.value = this.textBox.value;
 					this.sendUpdate();
-					console.log("Updated!");
-					console.log(this.attributes);
 				},
 				mousedown: e => e.stopPropagation()
 			}

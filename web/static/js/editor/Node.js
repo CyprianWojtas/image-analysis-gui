@@ -47,6 +47,7 @@ export default class Node extends EventTarget {
         this.nodeContents = createElement("div", { class: "nodeContents" });
         this.inputsContainer = createElement("div", { class: "inputsContainer" });
         this.outputsContainer = createElement("div", { class: "outputsContainer" });
+        this.errorBox = createElement("div", { class: "errorBox" });
         //===== Variables =====//
         this.inputs = {};
         this.outputs = {};
@@ -75,6 +76,20 @@ export default class Node extends EventTarget {
                             childNodes: [
                                 {
                                     name: "button",
+                                    attributes: { title: "Duplicate" },
+                                    childNodes: [{ name: "i", attributes: { class: "icon-duplicate" } }],
+                                    listeners: {
+                                        mousedown: e => e.stopPropagation(),
+                                        click: e => {
+                                            e.stopPropagation();
+                                            this.editor.addNode(this.type, undefined, this.posX + 18, this.posY + 18);
+                                            this.editor.historyPush();
+                                        }
+                                    }
+                                },
+                                {
+                                    name: "button",
+                                    attributes: { title: "Help" },
                                     childNodes: [{ name: "i", attributes: { class: "icon-help" } }],
                                     listeners: {
                                         mousedown: e => e.stopPropagation(),
@@ -87,7 +102,7 @@ export default class Node extends EventTarget {
                                 {
                                     name: "button",
                                     childNodes: [{ name: "i", attributes: { class: "icon-cancel" } }],
-                                    attributes: { class: "btn-close" },
+                                    attributes: { class: "btn-close", title: "Remove" },
                                     listeners: {
                                         mousedown: e => e.stopPropagation(),
                                         click: e => {
@@ -100,11 +115,15 @@ export default class Node extends EventTarget {
                         }
                     ]
                 },
-                this.nodeContents
+                this.nodeContents,
+                this.errorBox
             ],
             listeners: {
-                mousedown: e => e.stopPropagation(),
-                // wheel: e => e.stopPropagation()
+                mousedown: e => {
+                    if (e.button != 0)
+                        return;
+                    e.stopPropagation();
+                }
             }
         });
         SocketConnection.addEventListener("analysis_node_processing", (e) => {
@@ -120,6 +139,16 @@ export default class Node extends EventTarget {
             this.element.classList.remove("processing");
             this.element.classList.add("processed");
             this.onProcessed(e.data);
+        });
+        SocketConnection.addEventListener("analysis_node_error", (e) => {
+            if (e.nodeId != this.id)
+                return;
+            console.error(`Error ${this.id}!\n${e.error}`);
+            this.element.classList.remove("processing");
+            this.element.classList.add("error");
+            this.errorBox.innerHTML = "";
+            this.errorBox.append(e.error);
+            this.onError(e.error);
         });
         this.renderContents();
         this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
@@ -173,6 +202,8 @@ export default class Node extends EventTarget {
         this.dispatchEvent(new NodeMoveEvent(this));
     }
     dragStart(e) {
+        if (e.button != 0)
+            return;
         e.stopPropagation();
         let startPosX = this.posX;
         let startPosY = this.posY;
@@ -249,6 +280,8 @@ export default class Node extends EventTarget {
     }
     // Parsing analysis output
     onProcessed(data) {
+    }
+    onError(error) {
     }
 }
 //# sourceMappingURL=Node.js.map

@@ -26,6 +26,8 @@ The Binarisation Filter is a fundamental image processing technique used to conv
 
 ## How it Works
 
+![Usage Example](wiki/binarisation.png)
+
 Binarisation is achieved by establishing a threshold value, which determines whether a pixel's intensity should be classified as black or white. Pixels with intensities below the threshold are set to black, while those equal to or above the threshold are set to white.
 
 ## Parameters

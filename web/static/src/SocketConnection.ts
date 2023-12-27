@@ -26,6 +26,20 @@ class AnalysisNodeProcessedEvent extends Event
 	}
 }
 
+export
+class AnalysisNodeErrorEvent extends Event
+{
+	nodeId: string;
+	error: string;
+
+	constructor(nodeId: string, error: string)
+	{
+		super("analysis_node_error");
+		this.nodeId = nodeId;
+		this.error = error;
+	}
+}
+
 export default
 class SocketConnection extends EventTarget
 {
@@ -44,14 +58,28 @@ class SocketConnection extends EventTarget
 
 		this.socket.on("analysis_node_processing", data =>
 		{
-			// console.log("analysis_node_processing", data);
 			this.dispatchEvent(new AnalysisNodeProcessingEvent(data.nodeId));
 		});
 
 		this.socket.on("analysis_node_processed", data =>
 		{
-			// console.log("analysis_node_processed", data);
 			this.dispatchEvent(new AnalysisNodeProcessedEvent(data.nodeId, data.data));
+		});
+
+		this.socket.on("analysis_node_error", data =>
+		{
+			this.dispatchEvent(new AnalysisNodeErrorEvent(data.nodeId, data.error));
+		});
+
+		this.socket.on("analysis_status", data =>
+		{
+			console.log("analysis_status", data);
+		});
+
+		this.socket.on("analysis_updated", data =>
+		{
+			console.log("analysis_updated", data.analysisId);
+			this.socket.emit("analysis_run", { analysisId: data.analysisId });
 		});
 	}
 
@@ -71,8 +99,25 @@ class SocketConnection extends EventTarget
 		this.eventManager.dispatchEvent(event);
 	}
 
-	static runAnalysis(analysisId)
+	static runAnalysis(analysisId: string)
 	{
-		this.socket.emit('run_analysis', { analysisId: analysisId });
+		this.socket.emit("analysis_run", { analysisId: analysisId });
+	}
+
+	static getAnalysisStatus(analysisId: string)
+	{
+		this.socket.emit("analysis_status", { analysisId: analysisId });
+	}
+
+	static updateAnalysis(analysisId: string, data: string, nodesToReset: string[])
+	{
+		this.socket.emit(
+			"analysis_update",
+			{
+				analysisId: analysisId,
+				data: data,
+				nodes: nodesToReset
+			}
+		);
 	}
 }

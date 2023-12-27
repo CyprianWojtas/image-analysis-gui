@@ -8,14 +8,34 @@
 	display: block;
 	white-space: nowrap;
 
-	&.processed
-	{
-		outline: 2px solid #8afa;
-	}
 	&.processing
 	{
 		outline: 2px solid #ff0a;
 		animation: nodeProcessing 1.5s infinite alternate;
+	}
+	&.processed
+	{
+		outline: 2px solid #8afa;
+	}
+	
+	.errorBox
+	{
+		display: none;
+	}
+
+	&.error
+	{
+		outline: 2px solid #f00;
+
+		.errorBox
+		{
+			display: block;
+			text-align: center;
+			background: #a00;
+			font-weight: 700;
+			padding: 0.5rem;
+			white-space: normal;
+		}
 	}
 
 	.nodeTitle

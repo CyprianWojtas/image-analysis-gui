@@ -82,6 +82,9 @@ export abstract class NodeVariable extends EventTarget
 
 	protected onDragStartEvent(e)
 	{
+		if (e.button != 0)
+			return;
+
 		e.stopPropagation();
 		this.dispatchEvent(new VariableDragStartEvent(this));
 	}

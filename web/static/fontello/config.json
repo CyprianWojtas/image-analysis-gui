@@ -35,6 +35,12 @@
       "css": "help",
       "code": 61736,
       "src": "fontawesome"
+    },
+    {
+      "uid": "493hui9b6xiqaf04slclmqnwpap3oxjj",
+      "css": "duplicate",
+      "code": 59396,
+      "src": "typicons"
     }
   ]
 }

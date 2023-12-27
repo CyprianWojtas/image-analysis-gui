@@ -1,7 +1,8 @@
-from flask import Flask, send_file
-from flask_socketio import SocketIO
+from flask import Flask, send_file, send_from_directory
+from flask_socketio import SocketIO, emit
 
 import analysis
+import config
 import web_api
 
 app = Flask(
@@ -29,9 +30,29 @@ def files_route():
 	return send_file('web/static/files/index.html')
 
 
-@socketio.on('run_analysis')
-def socket_run_analysis(json):
-	print('received json: ' + str(json))
-	a = analysis.Analysis(json['analysisId'])
-	a.run()
+@app.route("/modules/<path:path>")
+def modules_route(path):
+	return send_from_directory(config.MODULES_PATH, path)
 
+
+@socketio.on('analysis_run')
+def socket_analysis_run(json):
+	analysis.run(json.get('analysisId'))
+
+
+@socketio.on('analysis_status')
+def socket_analysis_status(json):
+	emit('analysis_status', analysis.status(json.get('analysisId')))
+
+
+@socketio.on('analysis_reset_nodes')
+def socket_analysis_reset_nodes(json):
+	analysis.reset_nodes(json.get('analysisId'), json.get('nodes'))
+
+
+@socketio.on('analysis_update')
+def socket_analysis_reset_nodes(json):
+	analysis.update(json.get('analysisId'), json.get('data'))
+	analysis.reset_nodes(json.get('analysisId'), json.get('nodes'))
+	analysis.run(json.get('analysisId'))
+	# emit('analysis_updated', {'analysisId': json.get('analysisId')})

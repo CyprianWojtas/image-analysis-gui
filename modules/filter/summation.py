@@ -10,6 +10,6 @@ def run(inputs, attributes):
 	image2 = cv2.resize(image2, (image1.shape[1], image1.shape[0]))
 
 	# Perform Image Summation
-	result_image = image1 + image2
+	result_image = cv2.add(image1, image2)
 
 	return {'image_out': result_image}

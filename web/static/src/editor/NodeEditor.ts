@@ -2,6 +2,7 @@ import Settings from "../Settings.js";
 import SettingsPage from "../SettingsPage.js";
 import SocketConnection from "../SocketConnection.js";
 import { createElement, createNodeTree } from "../Utils.js";
+import FilePicker from "../files/FilePicker.js";
 import AssetLoader from "./AssetLoader.js";
 import Node, { NodeChangeEvent } from "./Node.js";
 import NodeShelf from "./NodeShelf.js";
@@ -12,6 +13,8 @@ export default
 class NodeEditor
 {
 	element: HTMLDivElement;
+
+	filePicker: FilePicker;
 
 	private c: HTMLCanvasElement = document.createElement("canvas");
 	private ctx: CanvasRenderingContext2D = this.c.getContext("2d");
@@ -34,6 +37,15 @@ class NodeEditor
 							this.metadata.title = e.target.value;
 							this.historyPush();
 						}
+					}
+				},
+				{
+					name: "button",
+					attributes: { class: "filesBtn" },
+					childNodes: [ "Files" ],
+					listeners:
+					{
+						click: () => this.filePicker.open()
 					}
 				},
 				{
@@ -104,7 +116,7 @@ class NodeEditor
 	private nodeShelf: NodeShelf = new NodeShelf();
 
 	nodes: {[key: string]: Node} = {};
-	nodeConnections: [string, string][] = [];
+	nodeConnections: {[input: string]: string} = {};
 	metadata: {[key: string]: any} = {};
 
 	filePath: string;
@@ -309,6 +321,8 @@ class NodeEditor
 			this.draggedVariableType = e.variable.type;
 			let isInput = e.variable.input;
 
+			let originalInput = e.nodeVarId;
+
 			if (isInput)
 			{
 				const conectedVariable = this.getConnectedVariable(e.nodeVarId);
@@ -324,7 +338,10 @@ class NodeEditor
 					this.draggedVariableId = e.nodeVarId;
 			}
 			else
+			{
+				originalInput = null;
 				this.draggedVariableId = e.nodeVarId;
+			}
 
 			this.element.classList.add("variableDragged");
 			this.element.classList.add(`variableDraggedType_${ this.draggedVariableType }`);
@@ -355,7 +372,6 @@ class NodeEditor
 
 			const mouseupEvent = (e: MouseEvent) =>
 			{
-				this.draggedVariableId = null;
 				this.element.classList.remove("variableDragged");
 				this.element.classList.remove(`variableDraggedType_${ this.draggedVariableType }`);
 				this.element.classList.remove(`variableDragged_${ isInput ? "input" : "output" }`);
@@ -367,7 +383,35 @@ class NodeEditor
 
 				this.redrawConnestions();
 				
-				this.historyPush();
+				if (this.historyPush())
+				{
+					const connectedNowVariableId = this.getConnectedVariable(this.draggedVariableId);
+
+					const outdatedNodes = [];
+
+					if (this.getVariable(this.draggedVariableId).input)
+					{
+						console.log("New connection:", connectedNowVariableId, " -> ", this.draggedVariableId);
+						outdatedNodes.push(...this.markNodeOutdated(this.draggedVariableId.split("?")[0]));
+					}
+					else
+					{
+						if (originalInput)
+						{
+							console.log("Removed connection:", this.draggedVariableId, " -> ", originalInput);
+							outdatedNodes.push(...this.markNodeOutdated(originalInput.split("?")[0]));
+						}
+						if (connectedNowVariableId)
+						{
+							console.log("New connection:", this.draggedVariableId, " -> ", connectedNowVariableId);
+							outdatedNodes.push(...this.markNodeOutdated(connectedNowVariableId.split("?")[0]));
+						}
+					}
+
+					this.updateRunningAnalysis(outdatedNodes);
+				}
+				
+				this.draggedVariableId = null;
 			}
 
 			window.addEventListener("mousemove", moveEvent);
@@ -384,7 +428,6 @@ class NodeEditor
 					return;
 				}
 
-				console.log("New connection!", this.draggedVariableId, e.nodeVarId);
 				if (e.variable.input)
 					this.addConnection(this.draggedVariableId, e.nodeVarId);
 				else
@@ -430,41 +473,38 @@ class NodeEditor
 		this.nodes[nodeIdInput].inputs[variableIdInput].connectedTo = nodeVarIdOutput;
 		this.nodes[nodeIdOutput].outputs[variableIdOutput].connectedTo = nodeVarIdInput;
 
-		this.nodeConnections.push([nodeVarIdOutput, nodeVarIdInput]);
+		this.nodeConnections[nodeVarIdInput] = nodeVarIdOutput;
 	}
 
 	removeConnection(nodeVarIdOutput: string, nodeVarIdInput: string)
 	{
-		for (const connectionId in this.nodeConnections)
+		if (this.nodeConnections[nodeVarIdInput] == nodeVarIdOutput)
 		{
-			const connection = this.nodeConnections[connectionId];
-			if (connection[1] == nodeVarIdInput && connection[0] == nodeVarIdOutput)
-			{
-				this.nodeConnections = [ ...this.nodeConnections.slice(0, parseInt(connectionId)), ...this.nodeConnections.slice(parseInt(connectionId) + 1)];
-				this.getVariable(nodeVarIdOutput).connectedTo = null;
-				this.getVariable(nodeVarIdInput).connectedTo = null;
-				return true;
-			}
+			this.getVariable(nodeVarIdInput).connectedTo = null;
+			this.getVariable(this.nodeConnections[nodeVarIdInput]).connectedTo = null;
+			delete this.nodeConnections[nodeVarIdInput];
+
+			return true;
 		}
 	}
 
 	removeNodeConnections(nodeId: string)
 	{
 		const toRemove = [];
-		for (const connectionId in this.nodeConnections)
+		for (const nodeVarIdInput in this.nodeConnections)
 		{
-			const connection = this.nodeConnections[connectionId];
-			const node1 = connection[0].split("?")[0];
-			const node2 = connection[1].split("?")[0];
+			const nodeVarIdOutput = this.nodeConnections[nodeVarIdInput];
+			const node1 = nodeVarIdInput[0].split("?")[0];
+			const node2 = nodeVarIdOutput[1].split("?")[0];
 			if (node1 == nodeId || node2 == nodeId)
 			{
-				toRemove.push(connectionId);
+				toRemove.push(nodeVarIdInput);
 			}
 		}
 
-		for (const id of toRemove.reverse())
+		for (const nodeVarIdInput of toRemove)
 		{
-			this.nodeConnections.splice(id, 1);
+			delete this.nodeConnections[nodeVarIdInput];
 		}
 	}
 
@@ -474,16 +514,60 @@ class NodeEditor
 		return this.nodes[nodeId]?.getVariable(variableId) || null;
 	}
 
-	getConnectedVariable(nodeVarId: string)
+	getConnectedVariable(nodeVarId: string): string
 	{
-		for (const connection of this.nodeConnections)
-		{
-			if (connection[0] == nodeVarId)
-				return connection[1];
+		if (this.nodeConnections[nodeVarId])
+			return this.nodeConnections[nodeVarId];
 
-			if (connection[1] == nodeVarId)
-				return connection[0];
+		for (const nodeVarIdInput in this.nodeConnections)
+		{
+			if (this.nodeConnections[nodeVarIdInput] == nodeVarId)
+				return nodeVarIdInput;
 		}
+
+		return null;
+	}
+
+	getConnectedNodes(nodeId: string): Node[]
+	{
+		const checkedNode = this.nodes[nodeId];
+		if (!checkedNode)
+			return null;
+
+		const foundNodes = [];
+
+		for (const nodeVarIdInput in this.nodeConnections)
+		{
+			const nodeIdOutput = this.nodeConnections[nodeVarIdInput].split("?")[0];
+			if (nodeIdOutput != nodeId)
+				continue;
+
+			foundNodes.push(this.nodes[nodeVarIdInput.split("?")[0]]);
+		}
+
+		return foundNodes;
+	}
+
+	markNodeOutdated(nodeId: string)
+	{
+		this.nodes[nodeId].element.classList.remove("processed");
+		this.nodes[nodeId].element.classList.remove("error");
+		const outdatedNodes = [];
+		outdatedNodes.push(nodeId);
+
+		for (const node of this.getConnectedNodes(nodeId))
+		{
+			// TODO: Avoid loops, maybe move this to the backend
+			// if (node.element.classList.contains("processed") || node.element.classList.contains("error"))
+			outdatedNodes.push(...this.markNodeOutdated(node.id));
+		}
+
+		return outdatedNodes;
+	}
+
+	updateRunningAnalysis(outdatedNodes)
+	{
+		SocketConnection.updateAnalysis(this.filePath, this.toJSON(), outdatedNodes);
 	}
 
 	//===== Drawing =====//
@@ -605,14 +689,15 @@ class NodeEditor
 		this.ctx.resetTransform();
 		this.ctx.clearRect(0, 0, this.c.width, this.c.height);
 
-		for (const connection of this.nodeConnections)
+		for (const nodeVarIdInput in this.nodeConnections)
 		{
-			const [nodeIdOutput, variableIdOutput] = connection[0].split("?");
-			const [nodeIdInput,  variableIdInput ] = connection[1].split("?");
+			const nodeVarIdOutput = this.nodeConnections[nodeVarIdInput];
+			const [nodeIdOutput, variableIdOutput] = nodeVarIdOutput.split("?");
+			const [nodeIdInput,  variableIdInput ] = nodeVarIdInput.split("?");
 
 			const posInput  = this.nodes[nodeIdInput ].getHandlePosition(variableIdInput);
 			const posOutput = this.nodes[nodeIdOutput].getHandlePosition(variableIdOutput);
-			const variableType = this.getVariable(connection[0])?.type;
+			const variableType = this.getVariable(nodeVarIdInput)?.type;
 
 			this.drawConnection(posInput.x, posInput.y, posOutput.x, posOutput.y, AssetLoader.variableTypes[variableType]?.color || "#fff");
 		}
@@ -693,9 +778,14 @@ class NodeEditor
 		for (const node in this.nodes)
 			nodes[node] = this.nodes[node].toJSONObj();
 
+		const connectionsArr = [];
+
+		for (const nodeVarIdInput in this.nodeConnections)
+			connectionsArr.push([this.nodeConnections[nodeVarIdInput], nodeVarIdInput]);
+
 		return JSON.stringify({
 			nodes: nodes,
-			connections: this.nodeConnections,
+			connections: connectionsArr,
 			...this.metadata
 		});
 	}
@@ -704,7 +794,7 @@ class NodeEditor
 	{
 		
 		this.nodes = {};
-		this.nodeConnections = [];
+		this.nodeConnections = {};
 		this.nodeContainer.innerHTML = "";
 		this.ctx.clearRect(0, 0, this.c.width, this.c.height);
 
@@ -763,11 +853,11 @@ class NodeEditor
 
 	undoHistory: string[] = [];
 	
-	historyPush()
+	historyPush(): boolean
 	{
 		const status = this.toJSON();
 		if (status == this.history[this.history.length - 1])
-			return;
+			return false;
 		
 		this.history.push(status);
 		if (this.history.length > 100)
@@ -775,6 +865,8 @@ class NodeEditor
 
 		this.undoHistory = [];
 		this.saveFile();
+
+		return true;
 	}
 
 	historyUndo()
@@ -811,6 +903,7 @@ class NodeEditor
 			const node = this.nodes[nodeId];
 			node.element.classList.remove("processing");
 			node.element.classList.remove("processed");
+			node.element.classList.remove("error");
 		}
 		SocketConnection.runAnalysis(this.filePath);
 	}

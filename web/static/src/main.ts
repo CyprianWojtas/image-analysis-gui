@@ -8,13 +8,14 @@ import FilePicker, { FileOpenEvent } from "./files/FilePicker.js";
 
 (async () =>
 {
-	SettingsPage.init();
-	Wiki.init();
 	await AssetLoader.loadNodeTypes();
 	SocketConnection.init();
+	SettingsPage.init();
+	Wiki.init();
 
 	const editor = new NodeEditor();
 	const filePicker = new FilePicker();
+	editor.filePicker = filePicker;
 
 	const editorStyles = editor.createEditorStyles();
 
@@ -26,6 +27,8 @@ import FilePicker, { FileOpenEvent } from "./files/FilePicker.js";
 	window.editor = editor;
 	// @ts-ignore
 	window.Settings = Settings;
+	// @ts-ignore
+	window.SocketConnection = SocketConnection;
 
 	if (window.location.hash)
 	{

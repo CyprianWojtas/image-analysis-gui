@@ -6,12 +6,13 @@ import NodeEditor from "./editor/NodeEditor.js";
 import Wiki from "./editor/Wiki.js";
 import FilePicker from "./files/FilePicker.js";
 (async () => {
-    SettingsPage.init();
-    Wiki.init();
     await AssetLoader.loadNodeTypes();
     SocketConnection.init();
+    SettingsPage.init();
+    Wiki.init();
     const editor = new NodeEditor();
     const filePicker = new FilePicker();
+    editor.filePicker = filePicker;
     const editorStyles = editor.createEditorStyles();
     document.head.append(editorStyles);
     document.body.append(editor.element);
@@ -19,6 +20,8 @@ import FilePicker from "./files/FilePicker.js";
     window.editor = editor;
     // @ts-ignore
     window.Settings = Settings;
+    // @ts-ignore
+    window.SocketConnection = SocketConnection;
     if (window.location.hash) {
         editor.openFile(decodeURIComponent(window.location.hash.substring(1)));
     }

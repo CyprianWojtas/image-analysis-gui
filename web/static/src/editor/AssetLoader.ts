@@ -25,7 +25,5 @@ class AssetLoader
 
 			node.class = (await import(`/api/nodes/${ nodeId }`)).default;
 		}
-
-		Wiki.addNodes(this.nodesData);
 	}
 }

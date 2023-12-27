@@ -3,4 +3,5 @@
 .icon-plus:before { content: '\e801'; } /* '' */
 .icon-minus:before { content: '\e802'; } /* '' */
 .icon-ok:before { content: '\e803'; } /* '' */
+.icon-duplicate:before { content: '\e804'; } /* '' */
 .icon-help:before { content: '\f128'; } /* '' */

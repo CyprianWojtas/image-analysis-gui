@@ -9,7 +9,7 @@
 	bottom: 0;
 	padding: 4rem;
 	display: grid;
-	grid-template-columns: 16rem auto;
+	grid-template-columns: 18rem auto;
 	overflow: hidden;
 	z-index: 9999;
 
@@ -21,20 +21,80 @@
 	.nodes
 	{
 		background: #333;
-		padding: 1rem 0.25rem 1rem 1rem;
+		padding: 1rem;
+		gap: 1rem;
 		overflow: hidden;
 		display: grid;
 		grid-template-rows: auto 1fr;
+
+		.nodesSearchInput
+		{
+			margin-right: 0.75rem;
+			font-family: inherit;
+			font-size: inherit;
+			border: none;
+			border-bottom: 1px solid #fff4;
+			background: transparent;
+			outline: none;
+		}
+
+		.listBox
+		{
+			overflow: auto;
+
+			.groupType
+			{
+				padding: 1rem 0;
+				border-bottom: 1px solid #fff4;
+
+				.groupDescription
+				{
+					margin-bottom: 1rem;
+				}
+				
+				.content
+				{
+					padding: 0 10px;
+					box-sizing: border-box;
+					overflow: hidden;
+					margin-top: 1rem;
+				}
+			}
+
+			.nodeType
+			{
+				background: var(--node-colour, #333);
+				background-image: linear-gradient(#fff1, #0001);
+				padding: 5px 2.5rem 5px 10px;
+				border-radius: 6px;
+				user-select: none;
+				position: relative;
+				cursor: pointer;
+				margin-bottom: 0.5rem;
+				transition: 0.2s filter;
+
+				&:hover,
+				&.selected
+				{
+					filter: brightness(2) contrast(1.2);
+				}
+			}
+
+			.noResults
+			{
+				text-align: center;
+				margin-top: 1rem;
+			}
+		}
 	}
-	.nodesSearchBox
-	{
-		margin-right: 0.75rem;
-		font-family: inherit;
-		font-size: inherit;
-		border: 1px solid #888;
-		background: #fff;
-		outline: none;
-	}
+
+
+
+
+
+
+
+
 
 	.nodes .nodesListBox
 	{
@@ -125,16 +185,21 @@
 		grid-column: 1 / -1;
 		padding: 0 1rem 0 0;
 		line-height: 1.5;
-	}
 
-	.article .articleContent h2
-	{
-		border-bottom: 1px solid #fff2;
-	}
-	.article .articleContent pre
-	{
-		background: #111;
-		padding: 0.75rem 1rem;
-		overflow: auto;
+		h2
+		{
+			border-bottom: 1px solid #fff2;
+		}
+		pre
+		{
+			background: #111;
+			padding: 0.75rem 1rem;
+			overflow: auto;
+		}
+
+		img
+		{
+			max-width: 100%;
+		}
 	}
 }
