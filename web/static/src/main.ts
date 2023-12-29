@@ -4,7 +4,7 @@ import SocketConnection from "./SocketConnection.js";
 import AssetLoader from "./editor/AssetLoader.js";
 import NodeEditor from "./editor/NodeEditor.js";
 import Wiki from "./editor/Wiki.js";
-import FilePicker, { FileOpenEvent } from "./files/FilePicker.js";
+import FilePicker, { FileOpenEvent } from "./FilePicker.js";
 
 (async () =>
 {

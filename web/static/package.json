@@ -1,12 +1,12 @@
 {
-	"devDependencies":
-	{
-		"typescript": "^5.2.2",
-		"sass": "^1.69.5"
+	"devDependencies": {
+		"sass": "^1.69.5",
+		"typedoc-plugin-merge-modules": "^5.1.0",
+		"typescript": "^5.2.2"
 	},
-	"scripts":
-	{
+	"scripts": {
 		"watch-css": "npx sass -w scss/main.scss style.css --embed-sources --style compressed",
-		"watch-ts": "npx tsc -w"
+		"watch-ts": "npx tsc -w",
+		"documentation": "npx typedoc src/** --exclude src/lib/** --plugin typedoc-plugin-merge-modules"
 	}
 }

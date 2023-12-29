@@ -23,12 +23,17 @@ class ImagePreviewNode extends Node
 			this.outputsContainer
 		);
 
-		this.addInput("value", "int", " ", "");
-		this.addOutput("value_out", "int", " ", "");
+		this.addInput("value", "number", " ", "");
+		this.addOutput("value_out", "number", " ", "");
 	}
 
 	onProcessed(data)
 	{
 		this.inputEl.value = data.value;
+	}
+
+	onOutdated()
+	{
+		this.inputEl.value = "";
 	}
 }

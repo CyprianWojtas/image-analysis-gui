@@ -8,9 +8,7 @@ export default class NodeShelf {
         this.searchInput = createElement("input", { class: "searchInput", placeholder: "Search..." }, { input: () => this.search(this.searchInput.value) });
         this.element = createNodeTree({
             name: "div",
-            attributes: {
-                class: "nodeShelf"
-            },
+            class: "nodeShelf",
             childNodes: [
                 {
                     name: "h1",
@@ -69,7 +67,7 @@ export default class NodeShelf {
         }
         this.searchBox.append(...foundInTheName, ...foundInTheDescription);
         if (!this.searchBox.childNodes.length)
-            this.searchBox.append(createNodeTree({ name: "div", attributes: { class: "noResults" }, childNodes: ["No results..."] }));
+            this.searchBox.append(createNodeTree({ name: "div", class: "noResults", childNodes: ["No results..."] }));
     }
     createGroupBox(groupId, group, nodes) {
         const nodesBox = createElement("div", { class: "nodeBox" });
@@ -77,24 +75,17 @@ export default class NodeShelf {
         groupDescription.innerHTML = (group === null || group === void 0 ? void 0 : group.description) || "";
         const groupBox = createNodeTree({
             name: "div",
-            attributes: {
-                class: `groupType groupTypeId_${groupId}`
-            },
+            class: `groupType groupTypeId_${groupId}`,
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "groupTitle"
-                    },
+                    class: "groupTitle",
                     childNodes: [
                         (group === null || group === void 0 ? void 0 : group.name) || groupId,
                         // {
                         // 	name: "button",
-                        // 	attributes:
-                        // 	{
-                        // 		class: "wikiLink btn-circled"
-                        // 	},
-                        // 	childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
+                        // 	class: "wikiLink btn-circled",
+                        // 	childNodes: [ { name: "i", class: "icon-help" } ],
                         // 	listeners:
                         // 	{
                         // 		click: e =>
@@ -113,7 +104,7 @@ export default class NodeShelf {
                 },
                 {
                     name: "div",
-                    attributes: { class: "content" },
+                    class: "content",
                     childNodes: [
                         groupDescription,
                         nodesBox
@@ -133,11 +124,9 @@ export default class NodeShelf {
         nodeDescription.innerHTML = (node === null || node === void 0 ? void 0 : node.description) || "";
         const nodeBox = createNodeTree({
             name: "div",
-            attributes: {
-                class: `nodeType nodeTypeId_${nodeId}`,
-                draggable: "true",
-                style: `--node-colour: ${((_a = AssetLoader.nodesGroups[node.group]) === null || _a === void 0 ? void 0 : _a.colour) || "#333"}`
-            },
+            class: `nodeType nodeTypeId_${nodeId}`,
+            draggable: "true",
+            style: `--node-colour: ${((_a = AssetLoader.nodesGroups[node.group]) === null || _a === void 0 ? void 0 : _a.colour) || "#333"}`,
             listeners: {
                 dragstart: e => {
                     e.dataTransfer.setData("nodeId", nodeId);
@@ -146,17 +135,13 @@ export default class NodeShelf {
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "nodeTitle"
-                    },
+                    class: "nodeTitle",
                     childNodes: [
                         (node === null || node === void 0 ? void 0 : node.name) || nodeId,
                         {
                             name: "button",
-                            attributes: {
-                                class: "wikiLink btn-circled"
-                            },
-                            childNodes: [{ name: "i", attributes: { class: "icon-help" } }],
+                            class: "wikiLink btn-circled",
+                            childNodes: [{ name: "i", class: "icon-help" }],
                             listeners: {
                                 click: e => {
                                     e.stopPropagation();

@@ -9,7 +9,9 @@ class IntInputNode extends Node
 		this.valueInput = createNodeTree(
 			{
 				name: "input",
-				attributes: { type: "number", style: "width: 6rem", value: this.attributes.value || 0 },
+				type: "number",
+				style: "width: 8rem",
+				value: this.attributes.value || 0,
 				listeners:
 				{
 					input: e =>
@@ -21,7 +23,12 @@ class IntInputNode extends Node
 						this.attributes.value = e.target.valueAsNumber;
 						this.sendUpdate();
 					},
-					mousedown: e => e.stopPropagation()
+					mousedown: e => e.stopPropagation(),
+					wheel: e =>
+					{
+						if (this.valueInput == document.activeElement)
+							e.stopPropagation();
+					}
 				}
 			}
 		);
@@ -32,6 +39,6 @@ class IntInputNode extends Node
 			this.outputsContainer
 		);
 
-		this.addOutput("value", "int", this.valueInput, "");
+		this.addOutput("value", "number", this.valueInput, "");
 	}
 }

@@ -1,4 +1,5 @@
-import { createElement, createNodeTree, unixToStr } from "../Utils.js";
+import { createElement, createNodeTree, unixToStr } from "./Utils.js";
+import { FilesSerialisable } from "./apiTypes/Files.js";
 
 export
 class FileOpenEvent extends Event
@@ -37,7 +38,7 @@ class FilePicker extends EventTarget
 		this.createFileBox = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes: { class: "createFileBox" },
+				class: "createFileBox",
 				childNodes:
 				[
 					this.nameInput,
@@ -57,12 +58,12 @@ class FilePicker extends EventTarget
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes: { class: "filePicker fullscreenPage hidden" },
+				class: "filePicker fullscreenPage hidden",
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes: { class: "files" },
+						class: "files",
 						childNodes:
 						[
 							{
@@ -71,7 +72,7 @@ class FilePicker extends EventTarget
 							},
 							{
 								name: "div",
-								attributes: { class: "header" },
+								class: "header",
 								childNodes:
 								[
 									this.pathEl
@@ -106,7 +107,7 @@ class FilePicker extends EventTarget
 		this.dirsListBox.innerHTML = "";
 		this.filesListBox.innerHTML = "";
 
-		const resp = await (await fetch(`/api/files?path=${ path }`)).json();
+		const resp: FilesSerialisable = await (await fetch(`/api/files?path=${ path }`)).json();
 
 		let pathUrl = "";
 
@@ -114,7 +115,8 @@ class FilePicker extends EventTarget
 		this.pathEl.append(createNodeTree(
 			{
 				name: "a",
-				attributes: { class: "dir", href: `#` },
+				href: `#`,
+				class: "dir",
 				listeners: {
 					click: e =>
 					{
@@ -137,7 +139,8 @@ class FilePicker extends EventTarget
 			this.pathEl.append(createNodeTree(
 				{
 					name: "a",
-					attributes: { class: "dir", href: `#${ dirUrl }` },
+					href: `#${ dirUrl }`,
+					class: "dir",
 					listeners: {
 						click: e =>
 						{
@@ -155,7 +158,7 @@ class FilePicker extends EventTarget
 			this.dirsListBox.append(createNodeTree(
 				{
 					name: "button",
-					attributes: { class: "file dir" },
+					class: "file dir",
 					childNodes: [ dir.name ],
 					listeners:
 					{
@@ -170,23 +173,23 @@ class FilePicker extends EventTarget
 			this.filesListBox.append(createNodeTree(
 				{
 					name: "button",
-					attributes: { class: "file" },
+					class: "file" + (file.active ? " active" : ""),
 					childNodes:
 					[
 						{
 							name: "div",
 							childNodes:
 							[
-								{ name: "div", attributes: { class: "tile" }, childNodes: [ file.title ] },
-								{ name: "div", attributes: { class: "name" }, childNodes: [ file.name ] }
+								{ name: "div", class: "title", childNodes: [ file.title ] },
+								{ name: "div", class: "name", childNodes: [ file.name ] }
 							]
 						},
 						{
 							name: "div",
 							childNodes:
 							[
-								{ name: "div", attributes: { class: "utime" }, childNodes: [ "Last update: " + unixToStr(file.updateTime) ] },
-								{ name: "div", attributes: { class: "ctime" }, childNodes: [ "Created: ", unixToStr(file.creationTime) ] }
+								{ name: "div", class: "utime", childNodes: [ "Last update: " + unixToStr(file.updateTime) ] },
+								{ name: "div", class: "ctime", childNodes: [ "Created: ", unixToStr(file.creationTime) ] }
 							]
 						}
 					],

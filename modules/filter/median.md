@@ -6,7 +6,7 @@ inputs:
     type: image
     name: Image
   radius:
-    type: int
+    type: number
     name: Filter Radius
 
 outputs:

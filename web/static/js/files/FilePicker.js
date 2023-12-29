@@ -14,7 +14,7 @@ export default class FilePicker extends EventTarget {
         this.nameInput = createElement("input", { placeholder: "New file name" });
         this.createFileBox = createNodeTree({
             name: "div",
-            attributes: { class: "createFileBox" },
+            class: "createFileBox",
             childNodes: [
                 this.nameInput,
                 ".json",
@@ -29,11 +29,11 @@ export default class FilePicker extends EventTarget {
         });
         this.element = createNodeTree({
             name: "div",
-            attributes: { class: "filePicker fullscreenPage hidden" },
+            class: "filePicker fullscreenPage hidden",
             childNodes: [
                 {
                     name: "div",
-                    attributes: { class: "files" },
+                    class: "files",
                     childNodes: [
                         {
                             name: "h1",
@@ -41,7 +41,7 @@ export default class FilePicker extends EventTarget {
                         },
                         {
                             name: "div",
-                            attributes: { class: "header" },
+                            class: "header",
                             childNodes: [
                                 this.pathEl
                             ]
@@ -71,7 +71,8 @@ export default class FilePicker extends EventTarget {
         this.pathEl.innerHTML = "";
         this.pathEl.append(createNodeTree({
             name: "a",
-            attributes: { class: "dir", href: `#` },
+            href: `#`,
+            class: "dir",
             listeners: {
                 click: e => {
                     e.preventDefault();
@@ -87,7 +88,8 @@ export default class FilePicker extends EventTarget {
             const dirUrl = pathUrl;
             this.pathEl.append(createNodeTree({
                 name: "a",
-                attributes: { class: "dir", href: `#${dirUrl}` },
+                href: `#${dirUrl}`,
+                class: "dir",
                 listeners: {
                     click: e => {
                         e.preventDefault();
@@ -100,7 +102,7 @@ export default class FilePicker extends EventTarget {
         for (const dir of resp.dirs) {
             this.dirsListBox.append(createNodeTree({
                 name: "button",
-                attributes: { class: "file dir" },
+                class: "file dir",
                 childNodes: [dir.name],
                 listeners: {
                     click: () => this.loadPath(dir.path)
@@ -110,20 +112,20 @@ export default class FilePicker extends EventTarget {
         for (const file of resp.files) {
             this.filesListBox.append(createNodeTree({
                 name: "button",
-                attributes: { class: "file" },
+                class: "file",
                 childNodes: [
                     {
                         name: "div",
                         childNodes: [
-                            { name: "div", attributes: { class: "tile" }, childNodes: [file.title] },
-                            { name: "div", attributes: { class: "name" }, childNodes: [file.name] }
+                            { name: "div", class: "tile", childNodes: [file.title] },
+                            { name: "div", class: "name", childNodes: [file.name] }
                         ]
                     },
                     {
                         name: "div",
                         childNodes: [
-                            { name: "div", attributes: { class: "utime" }, childNodes: ["Last update: " + unixToStr(file.updateTime)] },
-                            { name: "div", attributes: { class: "ctime" }, childNodes: ["Created: ", unixToStr(file.creationTime)] }
+                            { name: "div", class: "utime", childNodes: ["Last update: " + unixToStr(file.updateTime)] },
+                            { name: "div", class: "ctime", childNodes: ["Created: ", unixToStr(file.creationTime)] }
                         ]
                     }
                 ],

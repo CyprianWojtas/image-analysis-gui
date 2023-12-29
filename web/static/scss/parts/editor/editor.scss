@@ -13,7 +13,7 @@
 		padding: 1rem;
 		z-index: 999;
 		display: grid;
-		grid-template-columns: 1fr repeat(3, auto);
+		grid-template-columns: 1fr repeat(4, auto);
 		gap: 2rem;
 		height: 3rem;
 
@@ -28,14 +28,49 @@
 		.runAnalysis
 		{
 			outline: 1px solid #fff;
-			padding: 0.5rem 1rem;
+			padding: 0.5rem;
+			width: 9rem;
+			text-align: center;
 			cursor: pointer;
 			transition: 0.2s background-color, 0.2s color;
+
 			&:hover
 			{
 				background: #fff;
 				color: #000;
 			}
+		}
+		.playPauseButton
+		{
+			margin: 0 -0.5rem 0 -0.5rem;
+			opacity: 0;
+			width: 0;
+			pointer-events: none;
+
+			transition: 0.2s opacity, 0.2s width, 0.2s margin;
+		}
+	}
+
+	&.runningAnalysis
+	{
+		.runAnalysis
+		{
+			background: #fff;
+			color: #000;
+
+			&:hover
+			{
+				background: #fff0;
+				color: #fff;
+			}
+		}
+		
+		.playPauseButton
+		{
+			opacity: 1;
+			width: 2rem;
+			pointer-events: initial;
+			margin: 0 .5rem 0 -0.5rem;
 		}
 	}
 

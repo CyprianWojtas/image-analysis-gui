@@ -3,25 +3,28 @@ name: Create Image
 
 inputs:
   width:
-    type: int
+    type: number
     name: Width
     description: Image width
   height:
-    type: int
+    type: number
     name: Height
     description: Image height
   channel_r:
-    type: int
+    type: number
     name: Colour Red
     description: Red value of the fill colour
+    optional: true
   channel_g:
-    type: int
+    type: number
     name: Colour Green
     description: Green value of the fill colour
+    optional: true
   channel_b:
-    type: int
+    type: number
     name: Colour Blue
     description: Blue value of the fill colour
+    optional: true
 
 outputs:
   file:

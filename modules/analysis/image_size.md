@@ -8,10 +8,10 @@ inputs:
 
 outputs:
   width:
-    type: int
+    type: number
     name: Width
   height:
-    type: int
+    type: number
     name: Height
 
 ---

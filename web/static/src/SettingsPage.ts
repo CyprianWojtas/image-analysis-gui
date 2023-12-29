@@ -11,15 +11,12 @@ class SettingsPage
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: "settings fullscreenPage hidden"
-				},
+				class: "settings fullscreenPage hidden",
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes: { class: "header" },
+						class: "header",
 						childNodes:
 						[
 							{
@@ -28,18 +25,15 @@ class SettingsPage
 							},
 							{
 								name: "button",
-								attributes: { class: "closeButton" },
+								class: "closeButton",
 								listeners: { click: () => this.close() },
-								childNodes: [ { name: "i", attributes: { class: "icon-cancel" } } ]
+								childNodes: [ { name: "i", class: "icon-cancel" } ]
 							}
 						]
 					},
 					{
 						name: "div",
-						attributes:
-						{
-							class: "settingsBox"
-						},
+						class: "settingsBox",
 						childNodes:
 						[
 							{
@@ -49,7 +43,8 @@ class SettingsPage
 									"Snap to grid ",
 									{
 										name: "input",
-										attributes: { type: "checkbox", checked: Settings.get("editor.snapToGrid") },
+										type: "checkbox",
+										checked: Settings.get("editor.snapToGrid"),
 										listeners:
 										{
 											input: e => Settings.set("editor.snapToGrid", e.target.checked)
@@ -64,7 +59,7 @@ class SettingsPage
 									"Editor background: ",
 									{
 										name: "select",
-										attributes: { selected: Settings.get("editor.background") },
+										selected: Settings.get("editor.background"),
 										listeners:
 										{
 											change: e => Settings.set("editor.background", e.target.value)
@@ -73,17 +68,17 @@ class SettingsPage
 										[
 											{
 												name: "option",
-												attributes: { value: "lines" },
+												value: "lines",
 												childNodes: [ "Lines" ]
 											},
 											{
 												name: "option",
-												attributes: { value: "dots" },
+												value: "dots",
 												childNodes: [ "Dots" ]
 											},
 											{
 												name: "option",
-												attributes: { value: "clear" },
+												value: "clear",
 												childNodes: [ "Clear" ]
 											}
 										]
@@ -97,7 +92,7 @@ class SettingsPage
 									"Connections appreance: ",
 									{
 										name: "select",
-										attributes: { selected: Settings.get("editor.connectionStyle") },
+										selected: Settings.get("editor.connectionStyle"),
 										listeners:
 										{
 											change: e => Settings.set("editor.connectionStyle", e.target.value)
@@ -106,17 +101,17 @@ class SettingsPage
 										[
 											{
 												name: "option",
-												attributes: { value: "bezier" },
+												value: "bezier",
 												childNodes: [ "Bezier Curves" ]
 											},
 											{
 												name: "option",
-												attributes: { value: "straight" },
+												value: "straight",
 												childNodes: [ "Straight Lines" ]
 											},
 											{
 												name: "option",
-												attributes: { value: "right" },
+												value: "right",
 												childNodes: [ "Right Angles" ]
 											}
 										]

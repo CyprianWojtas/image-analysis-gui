@@ -4,7 +4,7 @@
  * @param attributes - `name: value` dictionary
  * @param eventListeners - `name: value` dictionary
  */
-export function createElement(nodeName: string, attributes: { [name: string]: string; } = {}, eventListeners: { [name: string]: ((...any) => any) | ((...any) => any)[]; } = {})
+export function createElement(nodeName: string, attributes: { [name: string]: any; } = {}, eventListeners: { [name: string]: ((...any) => any) | ((...any) => any)[]; } = {})
 {
 	let element: HTMLElement = document.createElement(nodeName);
 
@@ -26,20 +26,30 @@ export function createElement(nodeName: string, attributes: { [name: string]: st
 }
 
 
-interface ElementParams
+export interface ElementParams
 {
 	name: string;
 	attributes?: { [name: string]: string };
 	listeners?: { [name: string]: ((...any) => any) | ((...any) => any)[] };
 	childNodes?: (ElementParams | HTMLElement | Text | ChildNode | string)[];
+	[any: string]: any;
 }
 
 /** Create HTML node tree */
 export function createNodeTree(nodeTree: ElementParams): HTMLElement
 {
-	let rootNode = createElement(nodeTree.name, nodeTree.attributes, nodeTree.listeners);
+	const name       = nodeTree.name;
+	const listeners  = nodeTree.listeners;
+	const childNodes = nodeTree.childNodes;
 
-	for (let childNode of nodeTree.childNodes || [])
+	delete nodeTree.name;
+	delete nodeTree.listeners;
+	delete nodeTree.childNodes;
+	delete nodeTree.attributes;
+
+	const rootNode = createElement(name, nodeTree, listeners);
+
+	for (const childNode of childNodes || [])
 	{
 		if (typeof childNode == "string" || childNode instanceof HTMLElement || childNode instanceof Text)
 		{
@@ -65,4 +75,14 @@ export function unixToStr(timestamp: number)
 	const date = new Date(timestamp * 1000);
 
 	return `${ date.getHours() }:${ date.getMinutes().toString().padStart(2, "0") } ${ date.getFullYear() }-${ (date.getMonth() + 1).toString().padStart(2, "0") }-${ date.getDate().toString().padStart(2, "0") }`;
+}
+
+/**
+ * Stops event propagation if the left mouse button is being used
+ */
+export function stopLMBPropagation(e: MouseEvent)
+{
+	if (e.button != 0)
+		return;
+	e.stopPropagation();
 }

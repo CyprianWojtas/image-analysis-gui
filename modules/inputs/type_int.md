@@ -1,9 +1,9 @@
 ---
-name: Int Input
+name: Numerical Input
 
 outputs:
   value:
-    type: int
+    type: number
     name: " "
 
 custom_class: true

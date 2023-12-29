@@ -1,6 +1,7 @@
 import Settings from "../Settings.js";
-import SocketConnection, { AnalysisNodeErrorEvent, AnalysisNodeProcessedEvent } from "../SocketConnection.js";
-import { createElement, createNodeTree } from "../Utils.js";
+import SocketConnection, { AnalysisNodeDataEvent, AnalysisNodeErrorEvent, AnalysisNodeProcessedEvent } from "../SocketConnection.js";
+import { createElement, createNodeTree, stopLMBPropagation } from "../Utils.js";
+import { NodeSerialisable } from "../apiTypes/Analysis.js";
 import AssetLoader from "./AssetLoader.js";
 import NodeEditor from "./NodeEditor.js";
 import { NodeInput, NodeOutput, NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
@@ -57,33 +58,48 @@ export class NodeRemoveEvent extends NodeEvent
 export class NodeChangeEvent extends NodeEvent
 {
 	pushToHistory: boolean;
+	reloadAnalysis: boolean;
 
-	constructor(node: Node, pushToHistory: boolean = true)
+	constructor(node: Node, pushToHistory: boolean = true, reloadAnalysis: boolean = false)
 	{
 		super("node_change", node);
 		this.pushToHistory = pushToHistory;
+		this.reloadAnalysis = reloadAnalysis;
 	}
 }
 
 export default
 class Node extends EventTarget
 {
+	/** Unique node ID */
 	id: string;
+	/** Node type */
 	type: string;
+	/** HTML node element */
 	element: HTMLDivElement;
 
+	/** Node position X */
 	posX: number;
+	/** Node position Y */
 	posY: number;
+	/** The editor node is inserted into */
 	editor: NodeEditor;
 
+	/** Dictionary containing all custom node attributes (saved in analysis file) */
 	attributes: any = {};
+	/** List containing names of all custom node inputs; if specified used as default inputs for the node */
 	customInputs: string[] = [];
+	/** List containing names of all custom node outputs; if specified used as default outputs for the node */
 	customOuptuts: string[] = [];
 
+	/** HTML element containing the node contents */
 	private nodeContents: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodeContents" });
 	
+	/** HTML element containing the inputs and theif handles */
 	private inputsContainer:  HTMLDivElement = <HTMLDivElement>createElement("div", { class: "inputsContainer" });
+	/** HTML element containing the outputs and theif handles */
 	private outputsContainer: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "outputsContainer" });
+	/** HTML element displaying errors when running the node fails */
 	private errorBox: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "errorBox" });
 
 	constructor(id: string, type: string, attributes: any = {})
@@ -99,16 +115,13 @@ class Node extends EventTarget
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: `node nodeId_${ this.id }`,
-					style: `--node-colour: ${ AssetLoader.nodesGroups[nodeData.group]?.colour || "#333" }`
-				},
+				class: `node nodeId_${ this.id }`,
+				style: `--node-colour: ${ AssetLoader.nodesGroups[nodeData.group]?.colour || "#333" }`,
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes: { class: "nodeTitle" },
+						class: "nodeTitle",
 						listeners:
 						{
 							mousedown: e => this.dragStart(e)
@@ -118,16 +131,30 @@ class Node extends EventTarget
 							nodeData?.name || "New Node",
 							{
 								name: "div",
-								attributes: { class: "buttons buttons-circled" },
+								class: "buttons buttons-circled",
 								childNodes:
 								[
 									{
 										name: "button",
-										attributes: { title: "Duplicate" },
-										childNodes: [ { name: "i", attributes: { class: "icon-duplicate" } } ],
+										title: "Reload",
+										childNodes: [ { name: "i", class: "icon-arrows-cw" } ],
 										listeners:
 										{
-											mousedown: e => e.stopPropagation(),
+											mousedown: e => stopLMBPropagation(e),
+											click: e =>
+											{
+												e.stopPropagation();
+												this.sendUpdate(true);
+											}
+										}
+									},
+									{
+										name: "button",
+										title: "Duplicate",
+										childNodes: [ { name: "i", class: "icon-duplicate" } ],
+										listeners:
+										{
+											mousedown: e => stopLMBPropagation(e),
 											click: e =>
 											{
 												e.stopPropagation();
@@ -138,11 +165,11 @@ class Node extends EventTarget
 									},
 									{
 										name: "button",
-										attributes: { title: "Help" },
-										childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
+										title: "Help",
+										childNodes: [ { name: "i", class: "icon-help" } ],
 										listeners:
 										{
-											mousedown: e => e.stopPropagation(),
+											mousedown: e => stopLMBPropagation(e),
 											click: e =>
 											{
 												e.stopPropagation();
@@ -152,11 +179,12 @@ class Node extends EventTarget
 									},
 									{
 										name: "button",
-										childNodes: [ { name: "i", attributes: { class: "icon-cancel" } } ],
-										attributes: { class: "btn-close", title: "Remove" },
+										class: "btn-close",
+										title: "Remove",
+										childNodes: [ { name: "i", class: "icon-cancel" } ],
 										listeners:
 										{
-											mousedown: e => e.stopPropagation(),
+											mousedown: e => stopLMBPropagation(e),
 											click: e =>
 											{
 												e.stopPropagation();
@@ -173,12 +201,7 @@ class Node extends EventTarget
 				],
 				listeners:
 				{
-					mousedown: e => 
-					{
-						if (e.button != 0)
-							return;
-						e.stopPropagation();
-					}
+					mousedown: e => stopLMBPropagation(e)
 				}
 			}
 		);
@@ -188,7 +211,6 @@ class Node extends EventTarget
 			if (e.nodeId != this.id)
 				return;
 
-			console.log(`Processing: ${ this.id }...`);
 			this.element.classList.add("processing");
 		});
 
@@ -197,11 +219,7 @@ class Node extends EventTarget
 			if (e.nodeId != this.id)
 				return;
 
-			console.log(`Processed: ${ this.id }!`);
-
-			this.element.classList.remove("processing");
-			this.element.classList.add("processed");
-
+			this.markAsProcessed();
 			this.onProcessed(e.data);
 		});
 
@@ -211,22 +229,27 @@ class Node extends EventTarget
 				return;
 
 			console.error(`Error ${ this.id }!\n${ e.error }`);
+			this.markAsError(e.error);
+		});
 
-			this.element.classList.remove("processing");
-			this.element.classList.add("error");
+		SocketConnection.addEventListener("analysis_node_data", (e: AnalysisNodeDataEvent) =>
+		{
+			if (e.nodeId != this.id)
+				return;
 
-			this.errorBox.innerHTML = "";
-			this.errorBox.append(e.error);
-
-			this.onError(e.error);
+			this.markAsProcessed();
+			this.onProcessed(e.data);
 		});
 
 		this.renderContents();
 
-		this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
+		this.moveTo(0, 0);
 	}
 
-	protected renderContents()
+	/**
+	 * Creates node contents when the node is being created
+	 */
+	protected renderContents(): void
 	{
 		this.nodeContents.append(
 			this.inputsContainer,
@@ -246,12 +269,51 @@ class Node extends EventTarget
 		}
 	}
 
+	//===== Node Status =====//
+
+	/**
+	 * Marks the node as being done processing
+	 */
+	markAsProcessed(): void
+	{
+		this.element.classList.remove("processing");
+		this.element.classList.add("processed");
+	}
+
+	/**
+	 * Shows the node processing error
+	 */
+	markAsError(error: string): void
+	{
+		this.element.classList.remove("processing");
+		this.element.classList.add("error");
+
+		this.errorBox.innerHTML = "";
+		this.errorBox.append(error);
+
+		this.onError(error);
+	}
+
+	/**
+	 * Marks node as outdated (unprocessed)
+	 */
+	markOutdated()
+	{
+		this.element.classList.remove("processing");
+		this.element.classList.remove("processed");
+		this.element.classList.remove("error");
+		this.onOutdated();
+	}
+
 	//===== Variables =====//
 
 	inputs:  {[key: string]: NodeInput}  = {};
 	outputs: {[key: string]: NodeOutput} = {};
 
-	protected addInput(id: string, type: string, name: string, description: string)
+	/**
+	 * Creates a node input and appends it to the inputsContainer
+	 */
+	protected addInput(id: string, type: string, name: string, description: string): void
 	{
 		const input = new NodeInput(id, type, name, description);
 
@@ -274,8 +336,11 @@ class Node extends EventTarget
 		this.inputs[id].element.remove();
 		delete this.inputs[id];
 	}
-
-	protected addOutput(id: string, type: string, name: string, description: string)
+	
+	/**
+	 * Creates a node output and appends it to the outputsContainer
+	 */
+	protected addOutput(id: string, type: string, name: string, description: string): void
 	{
 		const output = new NodeOutput(id, type, name, description);
 
@@ -347,7 +412,7 @@ class Node extends EventTarget
 			this.element.classList.remove("dragged");
 
 			this.dispatchEvent(new NodeDragEndEvent(this));
-			this.sendUpdate();
+			this.sendUpdate(false);
 		}
 
 		window.addEventListener("mousemove", moveEvent);
@@ -398,9 +463,9 @@ class Node extends EventTarget
 		this.dispatchEvent(new NodeChangeEvent(this, false));
 	}
 
-	toJSONObj()
+	toJSONObj(): NodeSerialisable
 	{
-		const jsonObj: { [key: string]: any } =
+		const jsonObj: NodeSerialisable =
 		{
 			type: this.type,
 			attributes: this.attributes,
@@ -411,14 +476,14 @@ class Node extends EventTarget
 		if (this.customInputs.length)
 			jsonObj.customInputs = this.customInputs;
 		if (this.customOuptuts.length)
-			jsonObj.customOuptuts = this.customOuptuts;
+			jsonObj.customOutputs = this.customOuptuts;
 
 		return jsonObj;
 	}
 
-	protected sendUpdate()
+	protected sendUpdate(reloadAnalysis: boolean = true)
 	{
-		this.dispatchEvent(new NodeChangeEvent(this));
+		this.dispatchEvent(new NodeChangeEvent(this, true, reloadAnalysis));
 	}
 
 	remove()
@@ -437,5 +502,10 @@ class Node extends EventTarget
 	protected onError(error: string)
 	{
 
+	}
+
+	protected onOutdated()
+	{
+		
 	}
 }

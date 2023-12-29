@@ -1,6 +1,6 @@
 import Settings from "../Settings.js";
 import SocketConnection from "../SocketConnection.js";
-import { createElement, createNodeTree } from "../Utils.js";
+import { createElement, createNodeTree, stopLMBPropagation } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import { NodeInput, NodeOutput, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
 import Wiki from "./Wiki.js";
@@ -32,21 +32,29 @@ export class NodeRemoveEvent extends NodeEvent {
     }
 }
 export class NodeChangeEvent extends NodeEvent {
-    constructor(node, pushToHistory = true) {
+    constructor(node, pushToHistory = true, reloadAnalysis = false) {
         super("node_change", node);
         this.pushToHistory = pushToHistory;
+        this.reloadAnalysis = reloadAnalysis;
     }
 }
 export default class Node extends EventTarget {
     constructor(id, type, attributes = {}) {
         var _a;
         super();
+        /** Dictionary containing all custom node attributes (saved in analysis file) */
         this.attributes = {};
+        /** List containing names of all custom node inputs; if specified used as default inputs for the node */
         this.customInputs = [];
+        /** List containing names of all custom node outputs; if specified used as default outputs for the node */
         this.customOuptuts = [];
+        /** HTML element containing the node contents */
         this.nodeContents = createElement("div", { class: "nodeContents" });
+        /** HTML element containing the inputs and theif handles */
         this.inputsContainer = createElement("div", { class: "inputsContainer" });
+        /** HTML element containing the outputs and theif handles */
         this.outputsContainer = createElement("div", { class: "outputsContainer" });
+        /** HTML element displaying errors when running the node fails */
         this.errorBox = createElement("div", { class: "errorBox" });
         //===== Variables =====//
         this.inputs = {};
@@ -57,14 +65,12 @@ export default class Node extends EventTarget {
         this.attributes = attributes;
         this.element = createNodeTree({
             name: "div",
-            attributes: {
-                class: `node nodeId_${this.id}`,
-                style: `--node-colour: ${((_a = AssetLoader.nodesGroups[nodeData.group]) === null || _a === void 0 ? void 0 : _a.colour) || "#333"}`
-            },
+            class: `node nodeId_${this.id}`,
+            style: `--node-colour: ${((_a = AssetLoader.nodesGroups[nodeData.group]) === null || _a === void 0 ? void 0 : _a.colour) || "#333"}`,
             childNodes: [
                 {
                     name: "div",
-                    attributes: { class: "nodeTitle" },
+                    class: "nodeTitle",
                     listeners: {
                         mousedown: e => this.dragStart(e)
                     },
@@ -72,14 +78,26 @@ export default class Node extends EventTarget {
                         (nodeData === null || nodeData === void 0 ? void 0 : nodeData.name) || "New Node",
                         {
                             name: "div",
-                            attributes: { class: "buttons buttons-circled" },
+                            class: "buttons buttons-circled",
                             childNodes: [
                                 {
                                     name: "button",
-                                    attributes: { title: "Duplicate" },
-                                    childNodes: [{ name: "i", attributes: { class: "icon-duplicate" } }],
+                                    title: "Reload",
+                                    childNodes: [{ name: "i", class: "icon-arrows-cw" }],
                                     listeners: {
-                                        mousedown: e => e.stopPropagation(),
+                                        mousedown: e => stopLMBPropagation(e),
+                                        click: e => {
+                                            e.stopPropagation();
+                                            this.sendUpdate(true);
+                                        }
+                                    }
+                                },
+                                {
+                                    name: "button",
+                                    title: "Duplicate",
+                                    childNodes: [{ name: "i", class: "icon-duplicate" }],
+                                    listeners: {
+                                        mousedown: e => stopLMBPropagation(e),
                                         click: e => {
                                             e.stopPropagation();
                                             this.editor.addNode(this.type, undefined, this.posX + 18, this.posY + 18);
@@ -89,10 +107,10 @@ export default class Node extends EventTarget {
                                 },
                                 {
                                     name: "button",
-                                    attributes: { title: "Help" },
-                                    childNodes: [{ name: "i", attributes: { class: "icon-help" } }],
+                                    title: "Help",
+                                    childNodes: [{ name: "i", class: "icon-help" }],
                                     listeners: {
-                                        mousedown: e => e.stopPropagation(),
+                                        mousedown: e => stopLMBPropagation(e),
                                         click: e => {
                                             e.stopPropagation();
                                             Wiki.openArticle(this.type);
@@ -101,10 +119,11 @@ export default class Node extends EventTarget {
                                 },
                                 {
                                     name: "button",
-                                    childNodes: [{ name: "i", attributes: { class: "icon-cancel" } }],
-                                    attributes: { class: "btn-close", title: "Remove" },
+                                    class: "btn-close",
+                                    title: "Remove",
+                                    childNodes: [{ name: "i", class: "icon-cancel" }],
                                     listeners: {
-                                        mousedown: e => e.stopPropagation(),
+                                        mousedown: e => stopLMBPropagation(e),
                                         click: e => {
                                             e.stopPropagation();
                                             this.remove();
@@ -119,40 +138,38 @@ export default class Node extends EventTarget {
                 this.errorBox
             ],
             listeners: {
-                mousedown: e => {
-                    if (e.button != 0)
-                        return;
-                    e.stopPropagation();
-                }
+                mousedown: e => stopLMBPropagation(e)
             }
         });
         SocketConnection.addEventListener("analysis_node_processing", (e) => {
             if (e.nodeId != this.id)
                 return;
-            console.log(`Processing: ${this.id}...`);
             this.element.classList.add("processing");
         });
         SocketConnection.addEventListener("analysis_node_processed", (e) => {
             if (e.nodeId != this.id)
                 return;
-            console.log(`Processed: ${this.id}!`);
-            this.element.classList.remove("processing");
-            this.element.classList.add("processed");
+            this.markAsProcessed();
             this.onProcessed(e.data);
         });
         SocketConnection.addEventListener("analysis_node_error", (e) => {
             if (e.nodeId != this.id)
                 return;
             console.error(`Error ${this.id}!\n${e.error}`);
-            this.element.classList.remove("processing");
-            this.element.classList.add("error");
-            this.errorBox.innerHTML = "";
-            this.errorBox.append(e.error);
-            this.onError(e.error);
+            this.markAsError(e.error);
+        });
+        SocketConnection.addEventListener("analysis_node_data", (e) => {
+            if (e.nodeId != this.id)
+                return;
+            this.markAsProcessed();
+            this.onProcessed(e.data);
         });
         this.renderContents();
-        this.moveTo(nodeData.posX || 0, nodeData.posY || 0);
+        this.moveTo(0, 0);
     }
+    /**
+     * Creates node contents when the node is being created
+     */
     renderContents() {
         this.nodeContents.append(this.inputsContainer, this.outputsContainer);
         const nodeData = AssetLoader.nodesData[this.type];
@@ -163,6 +180,36 @@ export default class Node extends EventTarget {
             this.addOutput(output.id, output.type, output.name, output.description);
         }
     }
+    //===== Node Status =====//
+    /**
+     * Marks the node as being done processing
+     */
+    markAsProcessed() {
+        this.element.classList.remove("processing");
+        this.element.classList.add("processed");
+    }
+    /**
+     * Shows the node processing error
+     */
+    markAsError(error) {
+        this.element.classList.remove("processing");
+        this.element.classList.add("error");
+        this.errorBox.innerHTML = "";
+        this.errorBox.append(error);
+        this.onError(error);
+    }
+    /**
+     * Marks node as outdated (unprocessed)
+     */
+    markOutdated() {
+        this.element.classList.remove("processing");
+        this.element.classList.remove("processed");
+        this.element.classList.remove("error");
+        this.onOutdated();
+    }
+    /**
+     * Creates a node input and appends it to the inputsContainer
+     */
     addInput(id, type, name, description) {
         const input = new NodeInput(id, type, name, description);
         input.addEventListener("variable_drag_start", (e) => {
@@ -178,6 +225,9 @@ export default class Node extends EventTarget {
         this.inputs[id].element.remove();
         delete this.inputs[id];
     }
+    /**
+     * Creates a node output and appends it to the outputsContainer
+     */
     addOutput(id, type, name, description) {
         const output = new NodeOutput(id, type, name, description);
         output.addEventListener("variable_drag_start", (e) => {
@@ -224,7 +274,7 @@ export default class Node extends EventTarget {
             window.removeEventListener("mouseup", mouseupEvent);
             this.element.classList.remove("dragged");
             this.dispatchEvent(new NodeDragEndEvent(this));
-            this.sendUpdate();
+            this.sendUpdate(false);
         };
         window.addEventListener("mousemove", moveEvent);
         window.addEventListener("mouseup", mouseupEvent);
@@ -268,11 +318,11 @@ export default class Node extends EventTarget {
         if (this.customInputs.length)
             jsonObj.customInputs = this.customInputs;
         if (this.customOuptuts.length)
-            jsonObj.customOuptuts = this.customOuptuts;
+            jsonObj.customOutputs = this.customOuptuts;
         return jsonObj;
     }
-    sendUpdate() {
-        this.dispatchEvent(new NodeChangeEvent(this));
+    sendUpdate(reloadAnalysis = true) {
+        this.dispatchEvent(new NodeChangeEvent(this, true, reloadAnalysis));
     }
     remove() {
         this.element.remove();
@@ -282,6 +332,8 @@ export default class Node extends EventTarget {
     onProcessed(data) {
     }
     onError(error) {
+    }
+    onOutdated() {
     }
 }
 //# sourceMappingURL=Node.js.map

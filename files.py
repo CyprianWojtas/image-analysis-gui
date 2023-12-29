@@ -2,6 +2,7 @@ import json
 import os.path
 import time
 
+import analysis
 import config
 
 
@@ -17,29 +18,32 @@ def get_path(path: str):
 
 	for file in os.listdir(abs_path):
 		file_path = os.path.join(abs_path, file)
+		file_id = path + '/' + file if path else file
+
 		if os.path.isdir(file_path):
 			dirs.append(
 				{
 					'name': file,
-					'path': path + '/' + file if path else file,
+					'path': file_id,
 					'type': 'dir'
 				}
 			)
 		elif os.path.isfile(file_path):
 			with open(file_path, "r") as f:
 				try:
-					analysis = json.load(f)
+					analysis_data = json.load(f)
 				except json.JSONDecodeError:
 					continue
 
 				files.append(
 					{
 						'name': file,
-						'title': analysis.get('title', file),
-						'updateTime': analysis.get('updateTime'),
-						'creationTime': analysis.get('creationTime'),
-						'path': path + '/' + file if path else file,
-						'type': 'file'
+						'title': analysis_data.get('title', file),
+						'updateTime': analysis_data.get('updateTime'),
+						'creationTime': analysis_data.get('creationTime'),
+						'path': file_id,
+						'type': 'file',
+						'active': analysis.is_active(file_id)
 					}
 				)
 

@@ -20,10 +20,7 @@ class NodeShelf
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: "nodeShelf"
-				},
+				class: "nodeShelf",
 				childNodes:
 				[
 					{
@@ -106,7 +103,7 @@ class NodeShelf
 
 		this.searchBox.append(...foundInTheName, ...foundInTheDescription);
 		if (!this.searchBox.childNodes.length)
-			this.searchBox.append(createNodeTree({ name: "div",  attributes: { class: "noResults" }, childNodes: [ "No results..." ] }));
+			this.searchBox.append(createNodeTree({ name: "div",  class: "noResults", childNodes: [ "No results..." ] }));
 	}
 
 	private createGroupBox(groupId: string, group: any, nodes: string[])
@@ -118,28 +115,19 @@ class NodeShelf
 		const groupBox = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: `groupType groupTypeId_${ groupId }`
-				},
+				class: `groupType groupTypeId_${ groupId }`,
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "groupTitle"
-						},
+						class: "groupTitle",
 						childNodes:
 						[
 							group?.name || groupId,
 							// {
 							// 	name: "button",
-							// 	attributes:
-							// 	{
-							// 		class: "wikiLink btn-circled"
-							// 	},
-							// 	childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
+							// 	class: "wikiLink btn-circled",
+							// 	childNodes: [ { name: "i", class: "icon-help" } ],
 							// 	listeners:
 							// 	{
 							// 		click: e =>
@@ -160,7 +148,7 @@ class NodeShelf
 					},
 					{
 						name: "div",
-						attributes: { class: "content" },
+						class: "content",
 						childNodes:
 						[
 							groupDescription,
@@ -188,12 +176,9 @@ class NodeShelf
 		const nodeBox = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: `nodeType nodeTypeId_${ nodeId }`,
-					draggable: "true",
-					style: `--node-colour: ${ AssetLoader.nodesGroups[node.group]?.colour || "#333" }`
-				},
+				class: `nodeType nodeTypeId_${ nodeId }`,
+				draggable: "true",
+				style: `--node-colour: ${ AssetLoader.nodesGroups[node.group]?.colour || "#333" }`,
 				listeners:
 				{
 					dragstart: e =>
@@ -205,20 +190,14 @@ class NodeShelf
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "nodeTitle"
-						},
+						class: "nodeTitle",
 						childNodes:
 						[
 							node?.name || nodeId,
 							{
 								name: "button",
-								attributes:
-								{
-									class: "wikiLink btn-circled"
-								},
-								childNodes: [ { name: "i", attributes: { class: "icon-help" } } ],
+								class: "wikiLink btn-circled",
+								childNodes: [ { name: "i", class: "icon-help" } ],
 								listeners:
 								{
 									click: e =>

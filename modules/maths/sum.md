@@ -3,7 +3,7 @@ name: Sum
 
 outputs:
   sum:
-    type: int
+    type: number
     name: Sum
 
 custom_class: true

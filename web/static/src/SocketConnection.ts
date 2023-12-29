@@ -1,7 +1,6 @@
 import { io } from "./lib/socket.io.esm.min.js";
 
-export
-class AnalysisNodeProcessingEvent extends Event
+export class AnalysisNodeProcessingEvent extends Event
 {
 	nodeId: string;
 
@@ -12,8 +11,7 @@ class AnalysisNodeProcessingEvent extends Event
 	}
 }
 
-export
-class AnalysisNodeProcessedEvent extends Event
+export class AnalysisNodeProcessedEvent extends Event
 {
 	nodeId: string;
 	data: any;
@@ -26,8 +24,37 @@ class AnalysisNodeProcessedEvent extends Event
 	}
 }
 
-export
-class AnalysisNodeErrorEvent extends Event
+export class AnalysisUpdatedEvent extends Event
+{
+	analysisId: string;
+
+	constructor(analysisId: string)
+	{
+		super("analysis_updated");
+		this.analysisId = analysisId;
+	}
+}
+
+export class AnalysisStatusEvent extends Event
+{
+	analysisId: string;
+	active: boolean;
+	paused: boolean;
+	solvedNodes: string[];
+	errors: { [nodeId: string]: string };
+
+	constructor(data: any)
+	{
+		super("analysis_status");
+		this.analysisId  = data.analysisId;
+		this.active      = data.active;
+		this.paused      = data.paused;
+		this.solvedNodes = data.solvedNodes || [];
+		this.errors      = data.errors;
+	}
+}
+
+export class AnalysisNodeErrorEvent extends Event
 {
 	nodeId: string;
 	error: string;
@@ -37,6 +64,19 @@ class AnalysisNodeErrorEvent extends Event
 		super("analysis_node_error");
 		this.nodeId = nodeId;
 		this.error = error;
+	}
+}
+
+export class AnalysisNodeDataEvent extends Event
+{
+	nodeId: string;
+	data: any;
+
+	constructor(nodeId: string, data: any)
+	{
+		super("analysis_node_data");
+		this.nodeId = nodeId;
+		this.data = data;
 	}
 }
 
@@ -51,10 +91,10 @@ class SocketConnection extends EventTarget
 		this.eventManager = new EventTarget();
 		this.socket = io();
 
-		this.socket.on("connect", () =>
-		{
-			this.dispatchEvent(new Event("connected"));
-		});
+		// this.socket.on("connect", () =>
+		// {
+		// 	this.dispatchEvent(new Event("connected"));
+		// });
 
 		this.socket.on("analysis_node_processing", data =>
 		{
@@ -73,13 +113,17 @@ class SocketConnection extends EventTarget
 
 		this.socket.on("analysis_status", data =>
 		{
-			console.log("analysis_status", data);
+			this.dispatchEvent(new AnalysisStatusEvent(data));
 		});
 
 		this.socket.on("analysis_updated", data =>
 		{
-			console.log("analysis_updated", data.analysisId);
-			this.socket.emit("analysis_run", { analysisId: data.analysisId });
+			this.dispatchEvent(new AnalysisUpdatedEvent(data.analysisId));
+		});
+
+		this.socket.on("analysis_node_data", data =>
+		{
+			this.dispatchEvent(new AnalysisNodeDataEvent(data.nodeId, data.data));
 		});
 	}
 
@@ -104,9 +148,24 @@ class SocketConnection extends EventTarget
 		this.socket.emit("analysis_run", { analysisId: analysisId });
 	}
 
+	static stopAnalysis(analysisId: string)
+	{
+		this.socket.emit("analysis_stop", { analysisId: analysisId });
+	}
+
+	static setAnalysisPause(analysisId: string, paused: boolean)
+	{
+		this.socket.emit("analysis_set_paused", { analysisId: analysisId, paused: paused });
+	}
+
 	static getAnalysisStatus(analysisId: string)
 	{
 		this.socket.emit("analysis_status", { analysisId: analysisId });
+	}
+
+	static getAnalysisData(analysisId: string)
+	{
+		this.socket.emit("analysis_get_node_data", { analysisId: analysisId });
 	}
 
 	static updateAnalysis(analysisId: string, data: string, nodesToReset: string[])

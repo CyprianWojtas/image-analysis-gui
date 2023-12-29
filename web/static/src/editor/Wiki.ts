@@ -40,24 +40,18 @@ class Wiki
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: "wikiBox fullscreenPage hidden"
-				},
+				class: "wikiBox fullscreenPage hidden",
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "nodes"
-						},
+						class: "nodes",
 						childNodes:
 						[
 							this.searchInput,
 							{
 								name: "div",
-								attributes: { class: "listBox" },
+								class: "listBox",
 								childNodes:
 								[
 									this.nodesBox,
@@ -68,18 +62,15 @@ class Wiki
 					},
 					{
 						name: "div",
-						attributes:
-						{
-							class: "article"
-						},
+						class: "article",
 						childNodes:
 						[
 							this.articleTitle,
 							{
 								name: "button",
-								attributes: { class: "closeButton" },
+								class: "closeButton",
 								listeners: { click: () => this.close() },
-								childNodes: [ { name: "i", attributes: { class: "icon-cancel" } } ]
+								childNodes: [ { name: "i", class: "icon-cancel" } ]
 							},
 							this.articleContent
 						]
@@ -157,7 +148,7 @@ class Wiki
 		this.searchBox.append(...foundInTheName, ...foundInTheDescription);
 
 		if (!this.searchBox.childNodes.length)
-			this.searchBox.append(createNodeTree({ name: "div",  attributes: { class: "noResults" }, childNodes: [ "No results..." ] }));
+			this.searchBox.append(createNodeTree({ name: "div", class: "noResults", childNodes: [ "No results..." ] }));
 	}
 
 	private static createGroupBox(groupId: string, group: any, nodes: string[])
@@ -169,19 +160,13 @@ class Wiki
 		const groupBox = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: `groupType groupTypeId_${ groupId }`,
-					style: `--node-colour: ${ group.colour || "#333" }`
-				},
+				class: `groupType groupTypeId_${ groupId }`,
+				style: `--node-colour: ${ group.colour || "#333" }`,
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "groupTitle"
-						},
+						class: "groupTitle",
 						childNodes:
 						[
 							group?.name || groupId
@@ -197,7 +182,7 @@ class Wiki
 					},
 					{
 						name: "div",
-						attributes: { class: "content" },
+						class: "content",
 						childNodes:
 						[
 							groupDescription,
@@ -222,11 +207,8 @@ class Wiki
 		const nodeBox = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: `nodeType nodeTypeId_${ nodeId }${ this.openedArticleId == nodeId ? " selected" : "" }`,
-					style: `--node-colour: ${ AssetLoader.nodesGroups[node.group]?.colour || "#333" }`
-				},
+				class: `nodeType nodeTypeId_${ nodeId }${ this.openedArticleId == nodeId ? " selected" : "" }`,
+				style: `--node-colour: ${ AssetLoader.nodesGroups[node.group]?.colour || "#333" }`,
 				listeners:
 				{
 					click: e =>
@@ -239,10 +221,7 @@ class Wiki
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "nodeTitle"
-						},
+						class: "nodeTitle",
 						childNodes:
 						[
 							node?.name || nodeId

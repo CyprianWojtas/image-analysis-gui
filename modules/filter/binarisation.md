@@ -6,7 +6,7 @@ inputs:
     type: image
     name: Image
   treshold:
-    type: int
+    type: number
     name: Treshold
 
 outputs:

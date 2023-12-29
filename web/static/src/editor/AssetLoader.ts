@@ -1,12 +1,12 @@
-import Wiki from "./Wiki.js";
+import { NodeTemplate } from "../apiTypes/Analysis.js";
 
 export default
-class AssetLoader
+abstract class AssetLoader
 {
 	/**
 	 * Nodes template data
 	 */
-	static nodesData: { [param: string] : any };
+	static nodesData: { [param: string] : NodeTemplate };
 	static nodesGroups: { [param: string] : any };
 	static variableTypes: { [param: string] : any };
 

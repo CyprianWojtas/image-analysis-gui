@@ -62,16 +62,12 @@ export class NodeInput extends NodeVariable {
         this.input = true;
         this.element = createNodeTree({
             name: "div",
-            attributes: {
-                class: `nodeInput nodeVariableType_${type}`,
-                title: description || ""
-            },
+            class: `nodeInput nodeVariableType_${type}`,
+            title: description || "",
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "name"
-                    },
+                    class: "name",
                     childNodes: [
                         this.name || this.id || ""
                     ]
@@ -91,16 +87,12 @@ export class NodeOutput extends NodeVariable {
         this.input = false;
         this.element = createNodeTree({
             name: "div",
-            attributes: {
-                class: `nodeOutput nodeVariableType_${type}`,
-                title: description || ""
-            },
+            class: `nodeOutput nodeVariableType_${type}`,
+            title: description || "",
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "name"
-                    },
+                    class: "name",
                     childNodes: [
                         this.name || this.id || ""
                     ]

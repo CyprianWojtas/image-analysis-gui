@@ -7,11 +7,13 @@ inputs:
     name: Image
     description: Image
   brightness:
-    type: int
+    type: number
     name: Brightness
+    optional: true
   contrast:
-    type: int
+    type: number
     name: Contrast
+    optional: true
 
 outputs:
   image_out:

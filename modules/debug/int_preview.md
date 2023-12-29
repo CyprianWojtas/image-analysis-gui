@@ -1,14 +1,14 @@
 ---
-name: Int Preview
+name: Number Preview
 
 inputs:
   value:
-    type: int
+    type: number
     name: Number
 
 outputs:
   value_out:
-    type: int
+    type: number
     name: Number
 
 custom_class: true

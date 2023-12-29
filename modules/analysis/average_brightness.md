@@ -8,7 +8,7 @@ inputs:
 
 outputs:
   value:
-    type: int
+    type: number
     name: Brightness
 
 ---

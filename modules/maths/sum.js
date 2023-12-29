@@ -12,13 +12,13 @@ class IntInputNode extends Node
 		this.plusMinusButtons = createNodeTree(
 			{
 				name: "div",
-				attributes: { style: "grid-column: 1 / -1; display: flex; gap: 0.25rem; margin-top: 0.5rem;" },
+				style: "grid-column: 1 / -1; display: flex; gap: 0.25rem; margin-top: 0.5rem;",
 				childNodes:
 				[
 					{
 						name: "button",
-						attributes: { class: "btn-circled" },
-						childNodes: [ { name: "i", attributes: { class: "icon-plus" } } ],
+						class: "btn-circled",
+						childNodes: [ { name: "i", class: "icon-plus" } ],
 						listeners:
 						{
 							click: () =>
@@ -30,8 +30,8 @@ class IntInputNode extends Node
 					},
 					{
 						name: "button",
-						attributes: { class: "btn-circled" },
-						childNodes: [ { name: "i", attributes: { class: "icon-minus" } } ],
+						class: "btn-circled",
+						childNodes: [ { name: "i", class: "icon-minus" } ],
 						listeners:
 						{
 							click: () =>
@@ -52,7 +52,7 @@ class IntInputNode extends Node
 			this.plusMinusButtons
 		);
 
-		this.addOutput("sum", "int", "Sum", "");
+		this.addOutput("sum", "number", "Sum", "");
 
 		this.updateInputs();
 	}
@@ -65,7 +65,7 @@ class IntInputNode extends Node
 		while (desiredInputs > currentInputs)
 		{
 			currentInputs++;
-			this.addInput(`number${ currentInputs }`, "int", `Number ${ currentInputs }`, "");
+			this.addInput(`number${ currentInputs }`, "number", `Number ${ currentInputs }`, "");
 			this.customInputs.push(`number${ currentInputs }`);
 		}
 

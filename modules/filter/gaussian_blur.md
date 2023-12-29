@@ -6,7 +6,7 @@ inputs:
     type: image
     name: Image
   blur_radius:
-    type: int
+    type: number
     name: Blur Radius
 
 outputs:

@@ -11,7 +11,7 @@ export default class NodeEditor {
         this.ctx = this.c.getContext("2d");
         this.headerEl = createNodeTree({
             name: "div",
-            attributes: { class: "header" },
+            class: "header",
             childNodes: [
                 {
                     name: "input",
@@ -26,7 +26,7 @@ export default class NodeEditor {
                 },
                 {
                     name: "button",
-                    attributes: { class: "filesBtn" },
+                    class: "filesBtn",
                     childNodes: ["Files"],
                     listeners: {
                         click: () => this.filePicker.open()
@@ -34,7 +34,7 @@ export default class NodeEditor {
                 },
                 {
                     name: "button",
-                    attributes: { class: "settingsBtn" },
+                    class: "settingsBtn",
                     childNodes: ["Settings"],
                     listeners: {
                         click: () => SettingsPage.open()
@@ -42,10 +42,24 @@ export default class NodeEditor {
                 },
                 {
                     name: "button",
-                    attributes: { class: "runAnalysis" },
+                    class: "runAnalysis",
                     childNodes: ["Run Analysis"],
                     listeners: {
-                        click: () => this.runAnalysis()
+                        click: () => {
+                            if (this.analysisActive)
+                                this.turnOff(true);
+                            else {
+                                this.turnOn();
+                            }
+                        }
+                    }
+                },
+                {
+                    name: "button",
+                    class: "playPauseButton",
+                    childNodes: [{ name: "i", class: "icon-pause" }],
+                    listeners: {
+                        click: () => this.setPaused(!this.analysisPaused)
                     }
                 }
             ]
@@ -55,22 +69,22 @@ export default class NodeEditor {
         });
         this.scaleBoxEl = createNodeTree({
             name: "div",
-            attributes: { class: "scaleBox" },
+            class: "scaleBox",
             childNodes: [
                 this.scaleInputEl,
                 "%",
                 {
                     name: "button",
-                    attributes: { class: "scalePlus" },
-                    childNodes: [{ name: "i", attributes: { class: "icon-plus" } }],
+                    class: "scalePlus",
+                    childNodes: [{ name: "i", class: "icon-plus" }],
                     listeners: {
                         click: () => this.setScale(this.scale * 1.1)
                     }
                 },
                 {
                     name: "button",
-                    attributes: { class: "scaleMinus" },
-                    childNodes: [{ name: "i", attributes: { class: "icon-minus" } }],
+                    class: "scaleMinus",
+                    childNodes: [{ name: "i", class: "icon-minus" }],
                     listeners: {
                         click: () => this.setScale(this.scale / 1.1)
                     }
@@ -85,23 +99,23 @@ export default class NodeEditor {
         this.nodes = {};
         this.nodeConnections = {};
         this.metadata = {};
+        this.analysisActive = false;
+        this.analysisPaused = false;
         this.history = [];
+        // ===== Variable dragging varaibles ===== //
         this.draggedVariableId = null;
         this.draggedVariableType = null;
+        this.droppedVariableId = null;
         // ===== Data Import/Export ===== //
         this.undoHistory = [];
         this.element = createNodeTree({
             name: "div",
-            attributes: {
-                class: "nodeEditor"
-            },
+            class: "nodeEditor",
             childNodes: [
                 this.headerEl,
                 {
                     name: "div",
-                    attributes: {
-                        class: "nodesBox"
-                    },
+                    class: "nodesBox",
                     childNodes: [
                         this.c,
                         this.nodeContainer
@@ -139,6 +153,27 @@ export default class NodeEditor {
         });
         Settings.addSettingsChangedListener("editor.connectionStyle", () => {
             this.redrawConnestions();
+        });
+        SocketConnection.addEventListener("analysis_status", (e) => {
+            var _a, _b;
+            if (e.analysisId != this.analysisId)
+                return;
+            for (const nodeId of e.solvedNodes)
+                (_a = this.nodes[nodeId]) === null || _a === void 0 ? void 0 : _a.markAsProcessed();
+            for (const nodeId in e.errors)
+                (_b = this.nodes[nodeId]) === null || _b === void 0 ? void 0 : _b.markAsError(e.errors[nodeId]);
+            if (e.active) {
+                this.analysisActive = true;
+                SocketConnection.getAnalysisData(this.analysisId);
+                this.turnOn(false);
+            }
+            this.setPaused(e.paused);
+        });
+        SocketConnection.addEventListener("analysis_updated", (e) => {
+            if (e.analysisId != this.analysisId)
+                return;
+            if (!this.analysisPaused)
+                SocketConnection.runAnalysis(this.analysisId);
         });
         document.body.addEventListener("keydown", e => {
             if (e.ctrlKey && !e.shiftKey && e.code == "KeyZ")
@@ -200,19 +235,24 @@ export default class NodeEditor {
         node.addEventListener("node_change", (e) => {
             if (e.pushToHistory)
                 this.historyPush();
+            if (e.reloadAnalysis)
+                this.updateRunningAnalysis(this.markNodeOutdated(e.nodeId));
             this.redrawConnestions();
         });
         node.addEventListener("node_remove", () => {
+            const nodeToUpdate = this.markNodeOutdated(nodeId);
             this.removeNodeConnections(nodeId);
             delete this.nodes[nodeId];
             this.historyPush();
             this.redrawConnestions();
+            this.updateRunningAnalysis(nodeToUpdate);
         });
         if (Settings.get("editor.snapToGrid")) {
             nodePosX = Math.round(nodePosX / 18) * 18;
             nodePosY = Math.round(nodePosY / 18) * 18;
         }
         node.moveTo(nodePosX, nodePosY);
+        // ===== Node dragging ===== //
         node.addEventListener("node_move", () => {
             this.redrawConnestions();
         });
@@ -223,6 +263,7 @@ export default class NodeEditor {
         node.addEventListener("node_drag_end", () => {
             this.element.classList.remove("nodeDragged");
         });
+        // ===== Variable dragging ===== //
         node.addEventListener("variable_drag_start", (e) => {
             this.draggedVariableType = e.variable.type;
             let isInput = e.variable.input;
@@ -254,7 +295,7 @@ export default class NodeEditor {
                 else
                     this.drawConnection((e.clientX - this.posX) / this.scale, (e.clientY - this.posY) / this.scale, pos.x, pos.y, AssetLoader.variableTypes[this.draggedVariableType].color);
             };
-            const mouseupEvent = (e) => {
+            const mouseupEvent = () => {
                 this.element.classList.remove("variableDragged");
                 this.element.classList.remove(`variableDraggedType_${this.draggedVariableType}`);
                 this.element.classList.remove(`variableDragged_${isInput ? "input" : "output"}`);
@@ -263,22 +304,24 @@ export default class NodeEditor {
                 window.removeEventListener("mouseup", mouseupEvent);
                 this.redrawConnestions();
                 if (this.historyPush()) {
-                    const connectedNowVariableId = this.getConnectedVariable(this.draggedVariableId);
                     const outdatedNodes = [];
                     if (this.getVariable(this.draggedVariableId).input) {
-                        console.log("New connection:", connectedNowVariableId, " -> ", this.draggedVariableId);
+                        console.log("New connection:", this.droppedVariableId, " -> ", this.draggedVariableId);
                         outdatedNodes.push(...this.markNodeOutdated(this.draggedVariableId.split("?")[0]));
                     }
                     else {
-                        if (originalInput) {
-                            console.log("Removed connection:", this.draggedVariableId, " -> ", originalInput);
-                            outdatedNodes.push(...this.markNodeOutdated(originalInput.split("?")[0]));
-                        }
-                        if (connectedNowVariableId) {
-                            console.log("New connection:", this.draggedVariableId, " -> ", connectedNowVariableId);
-                            outdatedNodes.push(...this.markNodeOutdated(connectedNowVariableId.split("?")[0]));
+                        if (originalInput != this.droppedVariableId) {
+                            if (originalInput) {
+                                console.log("Removed connection:", this.draggedVariableId, " -> ", originalInput);
+                                outdatedNodes.push(...this.markNodeOutdated(originalInput.split("?")[0]));
+                            }
+                            if (this.droppedVariableId) {
+                                console.log("New connection:", this.draggedVariableId, " -> ", this.droppedVariableId);
+                                outdatedNodes.push(...this.markNodeOutdated(this.droppedVariableId.split("?")[0]));
+                            }
                         }
                     }
+                    this.droppedVariableId = null;
                     this.updateRunningAnalysis(outdatedNodes);
                 }
                 this.draggedVariableId = null;
@@ -292,6 +335,7 @@ export default class NodeEditor {
                     this.redrawConnestions();
                     return;
                 }
+                this.droppedVariableId = e.nodeVarId;
                 if (e.variable.input)
                     this.addConnection(this.draggedVariableId, e.nodeVarId);
                 else
@@ -337,8 +381,8 @@ export default class NodeEditor {
         const toRemove = [];
         for (const nodeVarIdInput in this.nodeConnections) {
             const nodeVarIdOutput = this.nodeConnections[nodeVarIdInput];
-            const node1 = nodeVarIdInput[0].split("?")[0];
-            const node2 = nodeVarIdOutput[1].split("?")[0];
+            const node1 = nodeVarIdInput.split("?")[0];
+            const node2 = nodeVarIdOutput.split("?")[0];
             if (node1 == nodeId || node2 == nodeId) {
                 toRemove.push(nodeVarIdInput);
             }
@@ -361,6 +405,9 @@ export default class NodeEditor {
         }
         return null;
     }
+    /**
+     * Gets nodes connected to the given node outputs
+     */
     getConnectedNodes(nodeId) {
         const checkedNode = this.nodes[nodeId];
         if (!checkedNode)
@@ -375,19 +422,18 @@ export default class NodeEditor {
         return foundNodes;
     }
     markNodeOutdated(nodeId) {
-        this.nodes[nodeId].element.classList.remove("processed");
-        this.nodes[nodeId].element.classList.remove("error");
-        const outdatedNodes = [];
-        outdatedNodes.push(nodeId);
+        this.nodes[nodeId].markOutdated();
+        const outdatedNodes = new Set();
+        outdatedNodes.add(nodeId);
         for (const node of this.getConnectedNodes(nodeId)) {
-            // TODO: Avoid loops, maybe move this to the backend
-            // if (node.element.classList.contains("processed") || node.element.classList.contains("error"))
-            outdatedNodes.push(...this.markNodeOutdated(node.id));
+            if (!outdatedNodes.has(node.id))
+                for (const childNode of this.markNodeOutdated(node.id))
+                    outdatedNodes.add(childNode);
         }
-        return outdatedNodes;
+        return [...outdatedNodes];
     }
     updateRunningAnalysis(outdatedNodes) {
-        SocketConnection.updateAnalysis(this.filePath, this.toJSON(), outdatedNodes);
+        SocketConnection.updateAnalysis(this.analysisId, this.toJSON(), outdatedNodes);
     }
     //===== Drawing =====//
     resizeEditor() {
@@ -535,14 +581,17 @@ export default class NodeEditor {
         window.addEventListener("mouseup", mouseupEvent);
     }
     // ===== Data Import/Export ===== //
-    toJSON() {
+    toJSONObj() {
         const nodes = {};
-        for (const node in this.nodes)
-            nodes[node] = this.nodes[node].toJSONObj();
+        for (const nodeId in this.nodes)
+            nodes[nodeId] = this.nodes[nodeId].toJSONObj();
         const connectionsArr = [];
         for (const nodeVarIdInput in this.nodeConnections)
             connectionsArr.push([this.nodeConnections[nodeVarIdInput], nodeVarIdInput]);
-        return JSON.stringify(Object.assign({ nodes: nodes, connections: connectionsArr }, this.metadata));
+        return Object.assign({ nodes: nodes, connections: connectionsArr, title: this.metadata.title, creationTime: this.metadata.creationTime, updateTime: this.metadata.updateTime }, this.metadata);
+    }
+    toJSON() {
+        return JSON.stringify(this.toJSONObj());
     }
     loadJSON(json, updateHistory = true) {
         this.nodes = {};
@@ -566,17 +615,19 @@ export default class NodeEditor {
             this.historyPush();
     }
     async openFile(filePath) {
-        this.filePath = filePath;
+        this.analysisId = filePath;
         const resp = await fetch(`/api/files/${filePath}`);
         if (resp.status != 200)
             return false;
+        this.turnOff();
         this.history = [];
         this.undoHistory = [];
         this.loadJSON(await resp.text(), false);
         this.history.push(this.toJSON());
+        SocketConnection.getAnalysisStatus(this.analysisId);
     }
     async saveFile() {
-        const resp = await fetch(`/api/files/${this.filePath}`, {
+        const resp = await fetch(`/api/files/${this.analysisId}`, {
             method: 'PUT',
             body: this.history[this.history.length - 1]
         });
@@ -602,6 +653,7 @@ export default class NodeEditor {
         this.loadJSON(status, false);
         this.undoHistory.push(undoStatus);
         this.saveFile();
+        this.updateRunningAnalysis(Object.keys(this.nodes));
     }
     historyRedo() {
         if (this.undoHistory.length < 1)
@@ -610,16 +662,38 @@ export default class NodeEditor {
         this.loadJSON(status, false);
         this.history.push(status);
         this.saveFile();
+        this.updateRunningAnalysis(Object.keys(this.nodes));
     }
     // Analysis
-    runAnalysis() {
-        for (const nodeId in this.nodes) {
-            const node = this.nodes[nodeId];
-            node.element.classList.remove("processing");
-            node.element.classList.remove("processed");
-            node.element.classList.remove("error");
+    turnOn(startAutomatically = true) {
+        this.analysisActive = true;
+        this.element.classList.add("runningAnalysis");
+        this.headerEl.querySelector(".runAnalysis").innerHTML = "Running Analysis";
+        if (startAutomatically)
+            SocketConnection.runAnalysis(this.analysisId);
+    }
+    turnOff(stopAnalysis = false) {
+        for (const nodeId in this.nodes)
+            this.nodes[nodeId].markOutdated();
+        this.analysisActive = false;
+        this.element.classList.remove("runningAnalysis");
+        this.headerEl.querySelector(".runAnalysis").innerHTML = "Run Analysis";
+        if (stopAnalysis)
+            SocketConnection.stopAnalysis(this.analysisId);
+    }
+    setPaused(paused) {
+        this.analysisPaused = paused;
+        const playPauseContent = this.headerEl.querySelector(".playPauseButton i");
+        if (!paused) {
+            playPauseContent.classList.add("icon-pause");
+            playPauseContent.classList.remove("icon-play");
+            SocketConnection.runAnalysis(this.analysisId);
         }
-        SocketConnection.runAnalysis(this.filePath);
+        else {
+            playPauseContent.classList.remove("icon-pause");
+            playPauseContent.classList.add("icon-play");
+        }
+        SocketConnection.setAnalysisPause(this.analysisId, paused);
     }
 }
 //# sourceMappingURL=NodeEditor.js.map

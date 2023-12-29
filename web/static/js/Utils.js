@@ -20,8 +20,15 @@ export function createElement(nodeName, attributes = {}, eventListeners = {}) {
 }
 /** Create HTML node tree */
 export function createNodeTree(nodeTree) {
-    let rootNode = createElement(nodeTree.name, nodeTree.attributes, nodeTree.listeners);
-    for (let childNode of nodeTree.childNodes || []) {
+    const name = nodeTree.name;
+    const listeners = nodeTree.listeners;
+    const childNodes = nodeTree.childNodes;
+    delete nodeTree.name;
+    delete nodeTree.listeners;
+    delete nodeTree.childNodes;
+    delete nodeTree.attributes;
+    const rootNode = createElement(name, nodeTree, listeners);
+    for (const childNode of childNodes || []) {
         if (typeof childNode == "string" || childNode instanceof HTMLElement || childNode instanceof Text) {
             rootNode.append(childNode);
             continue;
@@ -39,5 +46,13 @@ export function unixToStr(timestamp) {
         return "—";
     const date = new Date(timestamp * 1000);
     return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")} ${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+}
+/**
+ * Stops event propagation if the left mouse button is being used
+ */
+export function stopLMBPropagation(e) {
+    if (e.button != 0)
+        return;
+    e.stopPropagation();
 }
 //# sourceMappingURL=Utils.js.map

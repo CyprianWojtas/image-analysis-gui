@@ -19,20 +19,16 @@ class Wiki {
         this.articleContent = createElement("div", { class: "articleContent" });
         this.element = createNodeTree({
             name: "div",
-            attributes: {
-                class: "wikiBox fullscreenPage hidden"
-            },
+            class: "wikiBox fullscreenPage hidden",
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "nodes"
-                    },
+                    class: "nodes",
                     childNodes: [
                         this.searchInput,
                         {
                             name: "div",
-                            attributes: { class: "listBox" },
+                            class: "listBox",
                             childNodes: [
                                 this.nodesBox,
                                 this.searchBox
@@ -42,16 +38,14 @@ class Wiki {
                 },
                 {
                     name: "div",
-                    attributes: {
-                        class: "article"
-                    },
+                    class: "article",
                     childNodes: [
                         this.articleTitle,
                         {
                             name: "button",
-                            attributes: { class: "closeButton" },
+                            class: "closeButton",
                             listeners: { click: () => this.close() },
-                            childNodes: [{ name: "i", attributes: { class: "icon-cancel" } }]
+                            childNodes: [{ name: "i", class: "icon-cancel" }]
                         },
                         this.articleContent
                     ]
@@ -105,7 +99,7 @@ class Wiki {
         }
         this.searchBox.append(...foundInTheName, ...foundInTheDescription);
         if (!this.searchBox.childNodes.length)
-            this.searchBox.append(createNodeTree({ name: "div", attributes: { class: "noResults" }, childNodes: ["No results..."] }));
+            this.searchBox.append(createNodeTree({ name: "div", class: "noResults", childNodes: ["No results..."] }));
     }
     static createGroupBox(groupId, group, nodes) {
         const nodesBox = createElement("div", { class: "nodeBox" });
@@ -113,16 +107,12 @@ class Wiki {
         groupDescription.innerHTML = (group === null || group === void 0 ? void 0 : group.description) || "";
         const groupBox = createNodeTree({
             name: "div",
-            attributes: {
-                class: `groupType groupTypeId_${groupId}`,
-                style: `--node-colour: ${group.colour || "#333"}`
-            },
+            class: `groupType groupTypeId_${groupId}`,
+            style: `--node-colour: ${group.colour || "#333"}`,
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "groupTitle"
-                    },
+                    class: "groupTitle",
                     childNodes: [
                         (group === null || group === void 0 ? void 0 : group.name) || groupId
                     ],
@@ -135,7 +125,7 @@ class Wiki {
                 },
                 {
                     name: "div",
-                    attributes: { class: "content" },
+                    class: "content",
                     childNodes: [
                         groupDescription,
                         nodesBox
@@ -153,10 +143,8 @@ class Wiki {
         var _a;
         const nodeBox = createNodeTree({
             name: "div",
-            attributes: {
-                class: `nodeType nodeTypeId_${nodeId}${this.openedArticleId == nodeId ? " selected" : ""}`,
-                style: `--node-colour: ${((_a = AssetLoader.nodesGroups[node.group]) === null || _a === void 0 ? void 0 : _a.colour) || "#333"}`
-            },
+            class: `nodeType nodeTypeId_${nodeId}${this.openedArticleId == nodeId ? " selected" : ""}`,
+            style: `--node-colour: ${((_a = AssetLoader.nodesGroups[node.group]) === null || _a === void 0 ? void 0 : _a.colour) || "#333"}`,
             listeners: {
                 click: e => {
                     e.stopPropagation();
@@ -166,9 +154,7 @@ class Wiki {
             childNodes: [
                 {
                     name: "div",
-                    attributes: {
-                        class: "nodeTitle"
-                    },
+                    class: "nodeTitle",
                     childNodes: [
                         (node === null || node === void 0 ? void 0 : node.name) || nodeId
                     ]

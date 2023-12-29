@@ -6,6 +6,8 @@ import io
 
 def run(inputs, attributes):
 
+	print(inputs)
+
 	try:
 		response = requests.get(inputs['file_name'])
 	except:

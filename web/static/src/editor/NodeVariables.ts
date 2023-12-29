@@ -121,19 +121,13 @@ class NodeInput extends NodeVariable
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: `nodeInput nodeVariableType_${ type }`,
-					title: description || ""
-				},
+				class: `nodeInput nodeVariableType_${ type }`,
+				title: description || "",
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "name"
-						},
+						class: "name",
 						childNodes:
 						[
 							this.name || this.id || ""
@@ -162,19 +156,13 @@ class NodeOutput extends NodeVariable
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
-				attributes:
-				{
-					class: `nodeOutput nodeVariableType_${ type }`,
-					title: description || ""
-				},
+				class: `nodeOutput nodeVariableType_${ type }`,
+				title: description || "",
 				childNodes:
 				[
 					{
 						name: "div",
-						attributes:
-						{
-							class: "name"
-						},
+						class: "name",
 						childNodes:
 						[
 							this.name || this.id || ""
