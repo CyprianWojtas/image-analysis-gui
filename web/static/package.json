@@ -7,6 +7,6 @@
 	"scripts": {
 		"watch-css": "npx sass -w scss/main.scss style.css --embed-sources --style compressed",
 		"watch-ts": "npx tsc -w",
-		"documentation": "npx typedoc src/** --exclude src/lib/** --plugin typedoc-plugin-merge-modules"
+		"docs": "npx typedoc src/** --exclude src/lib/** --plugin typedoc-plugin-merge-modules --out ../../_docs/gui"
 	}
 }
