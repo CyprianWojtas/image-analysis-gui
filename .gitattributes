@@ -2,3 +2,5 @@
 /web/static/js/           linguist-generated=true
 /web/static/style.css     linguist-generated=true
 /web/static/style.css.map linguist-generated=true
+/web/static/src/lib/      linguist-vendored=true
+/web/static/fontello/     linguist-vendored=true
