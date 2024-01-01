@@ -1,0 +1,196 @@
+.filePicker
+{
+	position: fixed;
+	background: #1118;
+	backdrop-filter: blur(1rem);
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 100;
+	padding: 4rem;
+	display: grid;
+	overflow: hidden;
+	z-index: 9999;
+
+	&.hidden
+	{
+		display: none;
+	}
+
+	.files
+	{
+		background: #222;
+		padding: 1rem;
+	}
+
+	.header
+	{
+		border-bottom: 1px solid #fff4;
+		margin-bottom: 1rem;
+		padding: 0.5rem 0;
+		
+		.path a
+		{
+			color: inherit;
+			text-decoration: none;
+			margin-right: 1rem;
+			position: relative;
+			background: #333;
+			padding: 0.25rem 0.75rem;
+			display: inline-block;
+			transition: background-color 0.2s, color 0.2s;
+
+			&:hover
+			{
+				background: #fff;
+				color: #000;
+			}
+
+			&:not(:last-child)::after
+			{
+				content: "»";
+				position: absolute;
+				right: -0.75rem;
+				color: #fff;
+			}
+		}
+	}
+
+
+	.dirsListBox
+	{
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(auto-fill, 16rem);
+		margin-bottom: 1rem;
+
+		.dir
+		{
+			padding: 0.5rem 1rem;
+			align-content: center;
+		}
+	}
+
+	.filesListBox
+	{
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(auto-fill, minmax(33rem, 1fr));
+	}
+
+	.file
+	{
+		background: #333;
+		display: grid;
+		width: 100%;
+		padding: 1rem;
+		cursor: pointer;
+		transition: background-color 0.2s, color 0.2s;
+		grid-template-columns: auto auto;
+
+		&:focus,
+		&:hover
+		{
+			background: #fff;
+			color: #000;
+		}
+
+		.title
+		{
+			font-size: 1.25rem;
+			font-weight: 700;
+		}
+
+	}
+
+
+	.file.active .title::after
+	{
+		content: "Active";
+		color: #0a0;
+		border: 1px solid #0a0;
+		font-size: 0.9rem;
+		padding: 0 0.25rem;
+		margin-left: 1rem;
+	}
+
+	.file > div:last-child
+	{
+		text-align: right;
+	}
+
+	.createDirBox
+	{
+		background: #333;
+		padding: 0.5rem;
+		display: flex;
+		align-items: center;
+
+		input
+		{
+			border: none;
+			font-family: inherit;
+			font-size: inherit;
+			background: #444;
+			color: #fff;
+			outline: none;
+			border-bottom: 1px solid #fff6;
+			padding: 0.25rem 0.5rem;
+			width: 8.5rem;
+		}
+
+		button
+		{
+			margin-left: 1rem;
+			background: #444;
+			padding: 0.25rem 0.75rem;
+			cursor: pointer;
+			transition: background-color 0.2s, color 0.2s;
+			
+			&:hover,
+			&:focus
+			{
+				background: #fff;
+				color: #000;
+			}
+		}
+	}
+
+
+	.createFileBox
+	{
+		background: #333;
+		padding: 1rem;
+		display: flex;
+		align-items: center;
+
+		input
+		{
+			border: none;
+			font-family: inherit;
+			font-size: inherit;
+			background: #444;
+			color: #fff;
+			outline: none;
+			border-bottom: 1px solid #fff6;
+			padding: 0.25rem 0.5rem;
+		}
+
+		button
+		{
+			margin-left: 1rem;
+			background: #444;
+			padding: 0.25rem 0.75rem;
+			cursor: pointer;
+			transition: background-color 0.2s, color 0.2s;
+			
+			&:hover,
+			&:focus
+			{
+				background: #fff;
+				color: #000;
+			}
+		}
+	}
+}

@@ -1,6 +1,6 @@
 /_docs/**                 linguist-generated=true linguist-documentation=true
-/web/static/js/**         linguist-generated=true
-/web/static/style.css     linguist-generated=true
-/web/static/style.css.map linguist-generated=true
-/web/static/src/lib/**    linguist-generated=true linguist-vendored=true
-/web/static/fontello/**   linguist-generated=true linguist-vendored=true
+/web/js/**         linguist-generated=true
+/web/style.css     linguist-generated=true
+/web/style.css.map linguist-generated=true
+/web/src/lib/**    linguist-generated=true linguist-vendored=true
+/web/fontello/**   linguist-generated=true linguist-vendored=true

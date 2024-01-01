@@ -47,7 +47,12 @@ def get_path(path: str):
 					}
 				)
 
-	return {'files': files, 'dirs': dirs}
+	return {
+		'files': files,
+		'dirs': dirs,
+		'rootPath': config.FILES_PATH,
+		'fullPath': abs_path
+	}
 
 
 def create(path):
@@ -74,6 +79,24 @@ def create(path):
 			},
 			f
 		)
+
+	return True
+
+
+def create_dir(path):
+
+	while path.startswith('/'):
+		path = path[1:]
+
+	abs_path = os.path.join(config.FILES_PATH, path)
+
+	if not os.path.isdir(os.path.dirname(abs_path)):
+		return False
+
+	if os.path.exists(abs_path):
+		return False
+
+	os.mkdir(abs_path)
 
 	return True
 

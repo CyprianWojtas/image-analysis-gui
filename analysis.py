@@ -184,15 +184,14 @@ def update(analysis_id, data):
 		return False
 
 	a = started_analysis[analysis_id]
-	data_dict = json.loads(data)
 
-	for node_id, node in data_dict['nodes'].items():
+	for node_id, node in data['nodes'].items():
 		if node_id not in a.nodes:
 			a.nodes_to_solve[node_id] = node
 		a.nodes[node_id] = node
 
 	a.connections = {}
-	for connection in data_dict['connections']:
+	for connection in data['connections']:
 		a.connections[connection[1]] = connection[0]
 
 

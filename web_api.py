@@ -44,8 +44,15 @@ def api_files_get(file_path):
 
 @api.route('/files/<path:file_path>', methods=['CREATE'])
 def api_files_create(file_path):
-	if files.create(file_path):
-		return "OK", 200
+	create_type = request.args.get('type') or 'file'
+
+	if create_type == 'file':
+		if files.create(file_path):
+			return "OK", 200
+
+	elif create_type == 'dir':
+		if files.create_dir(file_path):
+			return "OK", 200
 
 	return "File exists", 400
 

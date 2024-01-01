@@ -8,8 +8,7 @@ import web_api
 app = Flask(
 	__name__,
 	static_url_path='',
-	static_folder='web/static',
-	template_folder='web/templates',
+	static_folder='web'
 )
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
@@ -22,7 +21,7 @@ def run():
 
 @app.route("/")
 def index_route():
-	return send_file('web/static/index.html')
+	return send_file('web/index.html')
 
 
 @app.route("/modules/<path:path>")
