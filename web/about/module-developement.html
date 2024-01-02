@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>About | Image Analysis Tool</title>
+	<link rel="stylesheet" href="/about/default.css">
+</head>
+<body>
+	<h1>Image Analysis Tool</h1>
+
+	<p>Node-based extensive tool for image manipulation and analysis</p>
+
+	<div class="menu">
+		<a href="/about/">About</a> |
+		<a href="/about/module-developement">Module Developement</a>
+	</div>
+
+	<h2>Module developement</h2>
+
+	<p>This tool allows you to easily create your own nodes and node groups. All the module files are localised in the '/modules/' directory.</p>
+	<p>A functional node consists of these files:</p>
+	<ul>
+		<li><strong>&lt;node&gt;.md</strong> – node declaration and description</li>
+		<li><strong>&lt;node&gt;.py</strong> – Python script implementing node functionality</li>
+		<li><strong>&lt;node&gt;.js</strong> – JavaScript file that allows you to customise the way your node works and how it's displayed in the GUI</li>
+	</ul>
+
+	<p>By default all these files have to be placed in the same directory and use the same name. This can be changed within the '&lt;node&gt;.md' file.</p>
+
+
+	<!-- NODE.md -->
+	
+	<h3>&lt;node&gt;.md</h3>
+
+	<p>File containing node declaration and description. Within the header section (between --- dividers) file consists of node data defined in <a href="https://yaml.org/" target="_blank">YAML</a>. Rest of the file is written in common Markdown with HTML and, for writting mathematical equations, LaTeX support.</p>
+
+	<pre>---
+<span class="var">name</span>: <span class="str">&lt;name of the module&gt;</span> <span class="comment"># Name displayed in the shelf and on the node header</span>
+<span class="var">id</span>: <span class="str">&lt;module id&gt;</span> <span class="comment"># ID of the node, cannot include the '?' and '#' character. If not specified file path is being used</span>
+<span class="var">group</span>: <span class="str">&lt;group id&gt;</span> <span class="comment"># ID of the group node belongs to. If not specified default group from the given directory is being used (if exists)</span>
+
+<span class="var">inputs</span>: <span class="comment"># List of the node inputs</span>
+  <span class="var">&lt;variable id&gt;</span>:
+    <span class="var">type</span>: <span class="str">&lt;variable type&gt;</span>
+    <span class="var">name</span>: <span class="str">&lt;name&gt;</span>
+    <span class="var">optional</span>: <span class="bool">true</span> <span class="comment"># (optional) if set to 'true' variable doesn't need to be connected for the node to be executed</span>
+  <span class="comment"># ...</span>
+
+<span class="var">outputs</span>: <span class="comment"># List of the node outputs</span>
+  <span class="var">&lt;variable id&gt;</span>:
+    <span class="var">type</span>: <span class="str">&lt;variable type&gt;</span>
+    <span class="var">name</span>: <span class="str">&lt;name&gt;</span>
+  <span class="comment"># ...</span>
+
+<span class="comment"># Optional:</span>
+<span class="var">custom_class</span>: <span class="bool">true</span> <span class="comment"># If set to 'true' node uses custom GUI class defined in the '&lt;node&gt;.js'</span>
+<span class="comment"># custom_class: ../my_custom_path/my_node.js # Instead of 'true' a relative path to the .js file could be used if the file is located in a different location or has a different name</span>
+<span class="var">custom_py_path</span>: <span class="str">&lt;node Python file path&gt;</span> <span class="comment"># a relative path to the .py file if the file is located in a different location or has a different name</span>
+---
+
+<span class="highlight">!description</span>
+
+A description shown on the node shelf
+
+<span class="highlight">!wiki</span>
+
+A wiki article describing the node usage
+
+![Example Image](some_path/link_to_the_image.png)
+
+Relative paths are always parsed relative to the location of this file
+
+Example LaTeX equation:
+
+\\[\frac{\frac{1}{x}+\frac{1}{y}}{y-z} = 0\\]
+
+</pre>
+
+<p>Example file:</p>
+
+<pre>---
+<span class="var">name</span>: <span class="str">Number Preview</span>
+<span class="var">id</span>: <span class="str">defaults.previews.number</span>
+<span class="var">group</span>: <span class="str">defaults.previews</span>
+
+<span class="var">inputs</span>:
+  <span class="var">value</span>:
+    <span class="var">type</span>: <span class="str">number</span>
+    <span class="var">name</span>: <span class="str">Number</span>
+
+<span class="var">outputs</span>:
+  <span class="var">value_out</span>:
+    <span class="var">type</span>: <span class="str">number</span>
+    <span class="var">name</span>: <span class="str">Number</span>
+
+<span class="var">custom_class</span>: <span class="bool">true</span>
+---
+
+<span class="highlight">!description</span>
+
+Shows a numerical value
+
+<span class="highlight">!wiki</span>
+
+This node allows you to preview and pass through numerical values being used in the analysis
+
+![Example Usage Preview](wiki/number_preview.png)
+</pre>
+
+
+	<!-- NODE.py -->
+
+	<h3>&lt;node&gt;.py</h3>
+
+	<p>File implementing node functionality.</p>
+
+	<pre><span class="hljs-comment" style="color: rgb(129, 142, 150);"># The .py file must contain this function that takes a dictonary with node inputs and node attributes as its inputs</span>
+<span class="hljs-function"><span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">def</span> <span class="hljs-title" style="font-weight: 700;">run</span><span class="hljs-params">(inputs: dict, attributes: dict)</span>:</span>
+
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);"># If optional input is not connected it defaults to 'None'</span>
+	<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">if</span> inputs[<span class="hljs-string" style="color: rgb(236, 118, 0);">'optional'</span>] <span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">is</span> <span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">None</span>:
+		inputs[<span class="hljs-string" style="color: rgb(236, 118, 0);">'optional'</span>] = <span class="hljs-string" style="color: rgb(236, 118, 0);">'Value'</span>
+
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);"># Raising an exception will show the error text on the node</span>
+	<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">if</span> inputs[<span class="hljs-string" style="color: rgb(236, 118, 0);">'some_error'</span>] == <span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">True</span>:
+		<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">raise</span> RuntimeError(<span class="hljs-string" style="color: rgb(236, 118, 0);">'No input'</span>)
+
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);"># Some code...</span>
+
+	outputs =\
+	{
+		<span class="hljs-string" style="color: rgb(236, 118, 0);">'value_out'</span>: inputs[<span class="hljs-string" style="color: rgb(236, 118, 0);">'value'</span>]
+	}
+
+	gui_variables =\
+	{
+		<span class="hljs-string" style="color: rgb(236, 118, 0);">'value'</span>: attributes[<span class="hljs-string" style="color: rgb(236, 118, 0);">'value'</span>]
+	}
+
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);"># The function must return a dictionary containing all the output values</span>
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);"># It could also return a dictionary containing values to be passed to the GUI as a second parameter</span>
+	<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">return</span> outputs, gui_variables
+</pre>
+
+	<h3>&lt;node&gt;.js</h3>
+
+	<p>If 'custom_class' in &lt;node&gt;.md was set to true this file must implement custom Node class extending the base Node.</p>
+
+	<pre><span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">import</span> <span class="hljs-type" style="color: rgb(140, 187, 173); font-weight: 700;">Node</span> from <span class="hljs-string" style="color: rgb(236, 118, 0);">"/js/editor/Node.js"</span>;
+<span class="hljs-comment" style="color: rgb(129, 142, 150);">// Optional import, Utils.js contains various helpful methods</span>
+<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">import</span> { createElement, createNodeTree, stopLMBPropagation } from <span class="hljs-string" style="color: rgb(236, 118, 0);">"/js/Utils.js"</span>;
+
+export <span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">default</span>
+<span class="hljs-class"><span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">class</span> <span class="hljs-title" style="color: rgb(255, 255, 255); font-weight: 700;">NumberPreviewNode</span> <span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">extends</span> <span class="hljs-title" style="color: rgb(255, 255, 255); font-weight: 700;">Node</span></span>
+{
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);">/**
+	 * It's being runned once; creates node contents when the node is being created
+	 */</span>
+	renderContents()
+	{
+		<span class="hljs-comment" style="color: rgb(129, 142, 150);">// Inserting node contents</span>
+		<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">this</span>.nodeContents.append(
+			<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">this</span>.inputsContainer,
+			<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">this</span>.outputsContainer
+		);
+
+		<span class="hljs-comment" style="color: rgb(129, 142, 150);">// Adding node inputs and outputs</span>
+		<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">this</span>.addInput (<span class="hljs-string" style="color: rgb(236, 118, 0);">"input_id"</span> , <span class="hljs-comment" style="color: rgb(129, 142, 150);">/* input type: */</span>  <span class="hljs-string" style="color: rgb(236, 118, 0);">"number"</span>,  <span class="hljs-string" style="color: rgb(236, 118, 0);">"Input title"</span>,  <span class="hljs-string" style="color: rgb(236, 118, 0);">"Input description"</span>);
+		<span class="hljs-keyword" style="color: rgb(147, 199, 99); font-weight: 700;">this</span>.addOutput(<span class="hljs-string" style="color: rgb(236, 118, 0);">"output_id"</span>, <span class="hljs-comment" style="color: rgb(129, 142, 150);">/* output type: */</span> <span class="hljs-string" style="color: rgb(236, 118, 0);">"number"</span>, <span class="hljs-string" style="color: rgb(236, 118, 0);">"Output title"</span>, <span class="hljs-string" style="color: rgb(236, 118, 0);">"Output description"</span>);
+	}
+
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);">/**
+	 * Runs when the node has been processeb by the back-end
+	 * @param {Object.&lt;string, any&gt;} data - dictionary containing gui variables recieved from the &lt;node&gt;.py
+	 */</span>
+	onProcessed(data)
+	{
+		console.log(data);
+	}
+
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);">/**
+	 * Runs when the exception has been thrown in the &lt;node&gt;.py
+	 * @param {string} error - error message
+	 */</span>
+	onError(error)
+	{
+
+	}
+
+	<span class="hljs-comment" style="color: rgb(129, 142, 150);">/**
+	 * Runs when the node has been marked to be processed again
+	 */</span>
+	onOutdated()
+	{
+
+	}
+}
+</pre>
+
+
+</body>
+</html>

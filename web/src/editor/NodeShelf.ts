@@ -1,6 +1,6 @@
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
-import Wiki from "./Wiki.js";
+import Wiki from "../Wiki.js";
 
 export default
 class NodeShelf
@@ -159,7 +159,7 @@ class NodeShelf
 			}
 		);
 
-		for (const nodeId of nodes)
+		for (const nodeId of nodes || [])
 		{
 			const nodeType = AssetLoader.nodesData[nodeId];
 			nodesBox.append(this.createNodeBox(nodeId, nodeType));

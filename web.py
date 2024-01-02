@@ -1,5 +1,8 @@
-from flask import Flask, send_file, send_from_directory
+import os.path
+
+from flask import Flask, send_file, send_from_directory, request
 from flask_socketio import SocketIO, emit
+from werkzeug.exceptions import NotFound
 
 import analysis
 import config
@@ -11,7 +14,8 @@ app = Flask(
 	static_folder='web'
 )
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
+socketio = SocketIO(app, max_http_buffer_size=1024 * 1024 * 1024)
 app.register_blueprint(web_api.api)
 
 
@@ -27,6 +31,21 @@ def index_route():
 @app.route("/modules/<path:path>")
 def modules_route(path):
 	return send_from_directory(config.MODULES_PATH, path)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+	if request.path[-1] == '/':
+		index_html = os.path.join(request.path[1:], 'index.html')
+	else:
+		index_html = request.path[1:] + '.html'
+
+	try:
+		return send_from_directory('web', index_html)
+	except NotFound:
+		pass
+
+	return '404: Page not found', 404
 
 
 @socketio.on('analysis_run')

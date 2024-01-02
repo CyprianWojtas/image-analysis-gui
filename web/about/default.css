@@ -1,0 +1,66 @@
+body
+{
+	background: #111;
+	color: #fff;
+	font-family: system-ui, sans-serif;
+	font-size: 12px;
+	max-width: 1200px;
+	margin: auto;
+	padding: 0.25rem 1rem 2rem;
+	line-height: 1.5;
+}
+
+a
+{
+	color: #aaf;
+}
+
+pre
+{
+	padding: 0.5rem 0.75rem;
+	tab-size: 4;
+	display: block;
+	overflow-x: auto;
+	background: #282b2e;
+	color: #e0e2e4;
+}
+
+pre .comment
+{
+	color: #fff8;
+	font-style: italic;
+}
+
+pre .var
+{
+	color: #99f;
+}
+
+pre .str
+{
+	color: #fb9;
+}
+
+pre .bool
+{
+	color: #99f;
+}
+
+pre .highlight
+{
+	color: #f9a;
+}
+
+pre .key
+{
+	color: #99f;
+}
+
+pre .fn
+{
+	color: #fe9;
+}
+.hljs-comment
+{
+	font-style: italic;
+}

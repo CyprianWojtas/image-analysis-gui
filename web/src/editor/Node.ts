@@ -5,7 +5,7 @@ import { NodeSerialisable } from "../apiTypes/Analysis.js";
 import AssetLoader from "./AssetLoader.js";
 import NodeEditor from "./NodeEditor.js";
 import { NodeInput, NodeOutput, NodeVariable, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
-import Wiki from "./Wiki.js";
+import Wiki from "../Wiki.js";
 
 
 class NodeEvent extends Event

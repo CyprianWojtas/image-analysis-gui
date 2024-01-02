@@ -5,19 +5,25 @@ import sys
 import config
 import md_parser
 
+nodes = {}
+groups = {}
 
-def get_module_info(module_path=''):
 
-	module_id = module_path[0:-3]
+def get_node_info(node_path=''):
 
-	parsed = md_parser.parse_file(os.path.join(config.MODULES_PATH, module_path))
-	module_data = parsed['data']
-	module_desc_parts = parsed['md_parts']
+	node_id = node_path[0:-3]
+
+	parsed = md_parser.parse_file(os.path.join(config.MODULES_PATH, node_path))
+	node_data = parsed['data']
+	node_desc_parts = parsed['md_parts']
+
+	if 'id' in node_data:
+		node_id = node_data['id']
 
 	inputs = []
 
-	if 'inputs' in module_data:
-		for input_id, input_value in module_data['inputs'].items():
+	if 'inputs' in node_data:
+		for input_id, input_value in node_data['inputs'].items():
 			inputs.append({
 				'id': input_id,
 				**input_value
@@ -25,30 +31,49 @@ def get_module_info(module_path=''):
 
 	outputs = []
 
-	if 'outputs' in module_data:
-		for output_id, output_value in module_data['outputs'].items():
+	if 'outputs' in node_data:
+		for output_id, output_value in node_data['outputs'].items():
 			outputs.append({
 				'id': output_id,
 				**output_value
 			})
 
 	return {
-		'id': module_id,
-		'name': module_data.get('name', 'Unnamed Node'),
-		'customClass': module_data.get('custom_class', False),
+		'id': node_id,
+		'group': node_data.get('group', None),
+		'path': node_path[0:-3],
+		'name': node_data.get('name', 'Unnamed Node'),
+		'customClass': node_data.get('custom_class', False),
+		'customPyPath': node_data.get('custom_py_path', None),
 		'description':
-			module_desc_parts['description']
-			if 'description' in module_desc_parts
-			else (parsed['md_text'] if not module_desc_parts else ''),
+			node_desc_parts['description']
+			if 'description' in node_desc_parts
+			else (parsed['md_text'] if not node_desc_parts else ''),
 
-		'wiki': module_desc_parts['wiki'] if 'wiki' in module_desc_parts else None,
+		'wiki': node_desc_parts['wiki'] if 'wiki' in node_desc_parts else None,
 		'inputs': inputs,
 		'outputs': outputs
 	}
 
 
-def get_custom_class(module_id):
-	path = os.path.join(config.MODULES_PATH, module_id + '.js')
+def get_custom_class(node_id):
+	nodes = load_python_modules()
+
+	if node_id not in nodes:
+		return None
+
+	node = nodes[node_id]
+
+	if not node.get('customClass'):
+		return None
+
+	if type(node.get('customClass')) is bool:
+		path = os.path.join(config.MODULES_PATH, node['path'] + '.js')
+	else:
+		path = os.path.join(config.MODULES_PATH, os.path.dirname(node['path']), node['customClass'])
+
+	print(path)
+
 	if os.path.exists(path) and os.path.isfile(path):
 		with open(path, 'r') as f:
 			module_class = f.read()
@@ -68,7 +93,8 @@ def get_group(group_path):
 	data = md_parser.parse_file(os.path.join(path, '_group.md'))
 
 	return {
-		'id': group_path,
+		'id': data['data'].get('id', group_path),
+		'path': group_path,
 		'name': data['data'].get('name', group_path),
 		'colour': data['data'].get('colour'),
 		'description': data['md_text']
@@ -83,7 +109,7 @@ def get_list(module_path='') -> tuple:
 
 	group_info = get_group(module_path)
 	if group_info:
-		groups[module_path] = group_info
+		groups[group_info['id']] = group_info
 
 	for file in os.listdir(path):
 
@@ -97,9 +123,10 @@ def get_list(module_path='') -> tuple:
 			modules |= submodules
 			groups |= subgroups
 		elif file_path[-3:].lower() == '.md':
-			module = get_module_info(file_path)
+			module = get_node_info(file_path)
 
-			module['group'] = module_path
+			if not module['group']:
+				module['group'] = group_info['id'] if group_info else module_path
 
 			modules[module['id']] = module
 
@@ -108,31 +135,34 @@ def get_list(module_path='') -> tuple:
 	return modules, groups
 
 
-modules = {}
-groups = {}
-
-
 def load_python_modules():
-	global modules, groups
+	global nodes, groups
 
-	if modules and groups:
-		return modules
+	if nodes and groups:
+		return nodes
 
-	modules, groups = get_list()
+	nodes, groups = get_list()
 
-	for module_id, module in modules.items():
+	for node_id, node in nodes.items():
 		try:
+			if node.get('customPyPath'):
+				path = os.path.join(config.MODULES_PATH, os.path.dirname(node['path']), node['customPyPath'])
+			else:
+				path = os.path.join(config.MODULES_PATH, node['path'] + '.py')
+
+			print(path)
+
 			spec = importlib.util.spec_from_file_location(
-				"module/" + module_id, config.MODULES_PATH + "/" + module_id + ".py"
+				"module." + node_id, path
 			)
 			module_py = importlib.util.module_from_spec(spec)
-			sys.modules["module/inputs/type_int"] = module_py
+			sys.modules["module." + node_id] = module_py
 			spec.loader.exec_module(module_py)
 
 			if hasattr(module_py, 'run'):
-				module['run'] = module_py.run
+				node['run'] = module_py.run
 		except FileNotFoundError:
 			continue
 
-	return modules
+	return nodes
 

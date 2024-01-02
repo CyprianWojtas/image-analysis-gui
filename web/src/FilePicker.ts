@@ -100,7 +100,20 @@ class FilePicker extends EventTarget
 								]
 							},
 							this.dirsListBox,
-							this.filesListBox
+							this.filesListBox,
+							{
+								name: "div",
+								class: "about",
+								childNodes:
+								[
+									{
+										name: "a",
+										href: "/about/",
+										target: "_blank",
+										childNodes: [ "About" ]
+									}
+								]
+							}
 						]
 					}
 				]

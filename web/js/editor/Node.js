@@ -3,7 +3,7 @@ import SocketConnection from "../SocketConnection.js";
 import { createElement, createNodeTree, stopLMBPropagation } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import { NodeInput, NodeOutput, VariableDragEndEvent, VariableDragStartEvent } from "./NodeVariables.js";
-import Wiki from "./Wiki.js";
+import Wiki from "../Wiki.js";
 class NodeEvent extends Event {
     constructor(eventName, node) {
         super(eventName, { bubbles: true });

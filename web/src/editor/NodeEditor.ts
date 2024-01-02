@@ -36,6 +36,7 @@ class NodeEditor
 								return;
 
 							this.metadata.title = e.target.value;
+							document.title = `${ this.metadata.title } | Image Analysis Tool`;
 							this.historyPush();
 						}
 					}
@@ -893,6 +894,7 @@ class NodeEditor
 		delete this.metadata.connections;
 
 		this.headerEl.querySelector("input").value = this.metadata.title || "New Analysis";
+		document.title = (this.metadata.title || "New Analysis") + " | Image Analysis Tool";
 
 		this.redrawConnestions();
 

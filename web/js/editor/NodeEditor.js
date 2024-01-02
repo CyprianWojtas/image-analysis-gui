@@ -20,6 +20,7 @@ export default class NodeEditor {
                             if (e.target.value == this.metadata.title)
                                 return;
                             this.metadata.title = e.target.value;
+                            document.title = `${this.metadata.title} | Image Analysis Tool`;
                             this.historyPush();
                         }
                     }
@@ -614,6 +615,7 @@ export default class NodeEditor {
         delete this.metadata.nodes;
         delete this.metadata.connections;
         this.headerEl.querySelector("input").value = this.metadata.title || "New Analysis";
+        document.title = (this.metadata.title || "New Analysis") + " | Image Analysis Tool";
         this.redrawConnestions();
         if (updateHistory)
             this.historyPush();

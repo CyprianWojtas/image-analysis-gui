@@ -18,6 +18,7 @@ export interface NodeTemplate
 	wiki: string;
 	inputs: NodeVariable[];
 	outputs: NodeVariable[];
+	path: string;
 }
 
 export interface NodeSerialisable
