@@ -101,22 +101,22 @@ def get_group(group_path):
 	}
 
 
-def get_list(module_path='') -> tuple:
+def get_list(modules_path='') -> tuple:
 
-	path = os.path.join(config.MODULES_PATH, module_path)
+	path = os.path.join(config.MODULES_PATH, modules_path)
 	modules = {}
 	groups = {}
 
-	group_info = get_group(module_path)
+	group_info = get_group(modules_path)
 	if group_info:
 		groups[group_info['id']] = group_info
 
 	for file in os.listdir(path):
 
-		if file == '_group.md':
+		if file == '_group.md' or file == '_variables':
 			continue
 
-		file_path = module_path + '/' + file if module_path else file
+		file_path = modules_path + '/' + file if modules_path else file
 
 		if os.path.isdir(os.path.join(config.MODULES_PATH, file_path)):
 			submodules, subgroups = get_list(file_path)
@@ -126,7 +126,7 @@ def get_list(module_path='') -> tuple:
 			module = get_node_info(file_path)
 
 			if not module['group']:
-				module['group'] = group_info['id'] if group_info else module_path
+				module['group'] = group_info['id'] if group_info else modules_path
 
 			modules[module['id']] = module
 
@@ -166,3 +166,37 @@ def load_python_modules():
 
 	return nodes
 
+
+def get_variables(modules_path=''):
+
+	path = os.path.join(config.MODULES_PATH, modules_path)
+	variables = {}
+
+	for dir_element in os.listdir(path):
+
+		dir_path = modules_path + '/' + dir_element if modules_path else dir_element
+
+		if dir_element == '_variables' and os.path.isdir(os.path.join(config.MODULES_PATH, dir_path)):
+			for var_file in os.listdir(os.path.join(config.MODULES_PATH, dir_path)):
+
+				if var_file[-3:].lower() != '.md':
+					continue
+
+				var_id = modules_path + '/' + var_file[:-3] if modules_path else var_file[:-3]
+				var_path = os.path.join(config.MODULES_PATH, dir_path, var_file)
+				variable = md_parser.parse_file(var_path)
+
+				if 'id' in variable['data']:
+					var_id = variable['data']['id']
+
+				variables[var_id] = {
+					'id': var_id,
+					'name': variable['data'].get('name', var_id),
+					'colour': variable['data'].get('colour', var_id),
+					'description': variable['md_text'].strip()
+				}
+
+		elif os.path.isdir(os.path.join(config.MODULES_PATH, dir_path)):
+			variables |= get_variables(dir_path)
+
+	return variables

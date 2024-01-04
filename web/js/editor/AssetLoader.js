@@ -3,7 +3,7 @@ export default class AssetLoader {
         const nodes = await (await fetch("/api/nodes")).json();
         this.nodesData = nodes.nodes;
         this.nodesGroups = nodes.groups;
-        this.variableTypes = await (await fetch("/api/variable-types.json")).json();
+        this.variableTypes = await (await fetch("/api/variables")).json();
         for (const nodeId in this.nodesData) {
             const node = this.nodesData[nodeId];
             if (!node.customClass)

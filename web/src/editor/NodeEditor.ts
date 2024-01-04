@@ -265,7 +265,7 @@ class NodeEditor
 		for (const vairiableTypeId in AssetLoader.variableTypes)
 		{
 			const vairiableType = AssetLoader.variableTypes[vairiableTypeId];
-			styleEl.innerHTML += `.nodeEditor .node .nodeVariableType_${ vairiableTypeId } .handle { background: ${ vairiableType.color }; }`;
+			styleEl.innerHTML += `.nodeEditor .node .nodeVariableType_${ vairiableTypeId } .handle { background: ${ vairiableType.colour }; }`;
 			styleEl.innerHTML +=
 			`
 				.nodeEditor.variableDraggedType_${ vairiableTypeId }.variableDragged_input .node .nodeOutput.nodeVariableType_${ vairiableTypeId } .handle,
@@ -278,7 +278,7 @@ class NodeEditor
 				.nodeEditor.variableDraggedType_${ vairiableTypeId } .node .nodeInput.dragged .handle,
 				.nodeEditor.variableDraggedType_${ vairiableTypeId } .node .nodeOutput.dragged .handle
 				{
-					box-shadow: 0 0 6px 4px ${ vairiableType.color };
+					box-shadow: 0 0 6px 4px ${ vairiableType.colour };
 				}
 			`;
 		}
@@ -420,13 +420,13 @@ class NodeEditor
 					this.drawConnection(
 						pos.x, pos.y,
 						(e.clientX - this.posX) / this.scale, (e.clientY - this.posY) / this.scale,
-						AssetLoader.variableTypes[this.draggedVariableType].color
+						AssetLoader.variableTypes[this.draggedVariableType].colour
 					);
 				else
 					this.drawConnection(
 						(e.clientX - this.posX) / this.scale, (e.clientY - this.posY) / this.scale,
 						pos.x, pos.y,
-						AssetLoader.variableTypes[this.draggedVariableType].color
+						AssetLoader.variableTypes[this.draggedVariableType].colour
 					);
 			}
 
@@ -769,7 +769,7 @@ class NodeEditor
 			const posOutput = this.nodes[nodeIdOutput].getHandlePosition(variableIdOutput);
 			const variableType = this.getVariable(nodeVarIdInput)?.type;
 
-			this.drawConnection(posInput.x, posInput.y, posOutput.x, posOutput.y, AssetLoader.variableTypes[variableType]?.color || "#fff");
+			this.drawConnection(posInput.x, posInput.y, posOutput.x, posOutput.y, AssetLoader.variableTypes[variableType]?.colour || "#fff");
 		}
 	}
 

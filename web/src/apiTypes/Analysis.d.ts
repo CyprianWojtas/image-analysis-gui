@@ -1,5 +1,7 @@
 import Node from "../editor/Node.js";
 
+// Node
+
 export interface NodeVariable
 {
 	id: string;
@@ -29,6 +31,25 @@ export interface NodeSerialisable
 	posY: number;
 	customInputs?: string[];
 	customOutputs?: string[];
+}
+
+// Variable type
+export interface VariableTemplate
+{
+	id: string;
+	name: string;
+	description: string;
+	colour: string;
+}
+
+// Group type
+export interface GroupTemplate
+{
+	id: string;
+	name: string;
+	path: string;
+	description: string;
+	colour: string;
 }
 
 export interface Analysis

@@ -24,6 +24,11 @@ def api_node_custom_class(node_id):
 	return "File not found", 404
 
 
+@api.route('/variables')
+def api_variables():
+	return modules.get_variables()
+
+
 @api.route('/files')
 def api_files():
 	path = request.args.get('path') or ''
