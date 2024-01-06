@@ -163,7 +163,6 @@ class Wiki {
         });
         return nodeBox;
     }
-    // ====== Opening / Closing ====== //
     static openArticle(nodeId) {
         var _a, _b, _c, _d;
         if (!AssetLoader.nodesData[nodeId])
@@ -171,8 +170,8 @@ class Wiki {
         this.openedArticleId = nodeId;
         (_a = this.nodesBox.querySelector(`.nodeType.selected`)) === null || _a === void 0 ? void 0 : _a.classList.remove("selected");
         (_b = this.searchBox.querySelector(`.nodeType.selected`)) === null || _b === void 0 ? void 0 : _b.classList.remove("selected");
-        (_c = this.nodesBox.querySelector(`.nodeType.nodeTypeId_${nodeId.replace("/", "\\/")}`)) === null || _c === void 0 ? void 0 : _c.classList.add("selected");
-        (_d = this.searchBox.querySelector(`.nodeType.nodeTypeId_${nodeId.replace("/", "\\/")}`)) === null || _d === void 0 ? void 0 : _d.classList.add("selected");
+        (_c = this.nodesBox.querySelector(`.nodeType.nodeTypeId_${CSS.escape(nodeId)}`)) === null || _c === void 0 ? void 0 : _c.classList.add("selected");
+        (_d = this.searchBox.querySelector(`.nodeType.nodeTypeId_${CSS.escape(nodeId)}`)) === null || _d === void 0 ? void 0 : _d.classList.add("selected");
         this.element.classList.remove("hidden");
         this.articleTitle.innerHTML = "";
         this.articleTitle.append(AssetLoader.nodesData[nodeId].name);

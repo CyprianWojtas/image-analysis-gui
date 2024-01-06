@@ -245,8 +245,8 @@ class Wiki
 
 		this.nodesBox.querySelector(`.nodeType.selected`)?.classList.remove("selected");
 		this.searchBox.querySelector(`.nodeType.selected`)?.classList.remove("selected");
-		this.nodesBox.querySelector(`.nodeType.nodeTypeId_${ nodeId.replace("/", "\\/") }`)?.classList.add("selected");
-		this.searchBox.querySelector(`.nodeType.nodeTypeId_${ nodeId.replace("/", "\\/") }`)?.classList.add("selected");
+		this.nodesBox.querySelector(`.nodeType.nodeTypeId_${ CSS.escape(nodeId) }`)?.classList.add("selected");
+		this.searchBox.querySelector(`.nodeType.nodeTypeId_${ CSS.escape(nodeId) }`)?.classList.add("selected");
 
 		this.element.classList.remove("hidden");
 

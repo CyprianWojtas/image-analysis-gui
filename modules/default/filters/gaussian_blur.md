@@ -20,11 +20,24 @@ outputs:
 
 !description
 
-Sends an image to the given URL
+Blurs the image using a Gaussian function (known also as Gaussian smoothing)
 
 !wiki
 
 The Gaussian Blur Filter is a commonly used image processing technique that applies a mathematical function known as a Gaussian function to blur an image. This filter is widely employed in various graphic design, photography, and computer vision applications to soften details, reduce noise, and create a more visually pleasing effect.
+
+## Usage Example
+
+![Usage Example](wiki/gaussian_blur.png)
+
+### Inputs:
+
+* **Image** - the image we want to apply the blur filter
+* **Blur Radius** - positive integer value; the size of the applied filter
+
+### Outputs:
+
+* **Image** - blurred image
 
 ## How it Works
 
@@ -38,11 +51,6 @@ where:
 - \\( G(x, y) \\) is the value of the Gaussian function at position \\((x, y)\\).
 - \\( \pi \\) is the mathematical constant pi.
 - \\( \sigma \\) is the standard deviation of the Gaussian distribution.
-
-## Parameters
-
-- **Radius/Standard Deviation (\\( \sigma \\)):** This parameter controls the extent of the blur. A larger radius results in a more pronounced blur effect.
-- **Boundary Conditions:** Some implementations of the Gaussian Blur Filter offer options for handling pixels near the image borders. Common methods include extending the image (padding) or wrapping around (tiling).
 
 ## Usage
 

@@ -42,21 +42,13 @@ export default class Node extends EventTarget {
     constructor(id, type, attributes = {}) {
         var _a;
         super();
-        /** Dictionary containing all custom node attributes (saved in analysis file) */
         this.attributes = {};
-        /** List containing names of all custom node inputs; if specified used as default inputs for the node */
         this.customInputs = [];
-        /** List containing names of all custom node outputs; if specified used as default outputs for the node */
         this.customOuptuts = [];
-        /** HTML element containing the node contents */
         this.nodeContents = createElement("div", { class: "nodeContents" });
-        /** HTML element containing the inputs and theif handles */
         this.inputsContainer = createElement("div", { class: "inputsContainer" });
-        /** HTML element containing the outputs and theif handles */
         this.outputsContainer = createElement("div", { class: "outputsContainer" });
-        /** HTML element displaying errors when running the node fails */
         this.errorBox = createElement("div", { class: "errorBox" });
-        //===== Variables =====//
         this.inputs = {};
         this.outputs = {};
         const nodeData = AssetLoader.nodesData[type];
@@ -167,9 +159,6 @@ export default class Node extends EventTarget {
         this.renderContents();
         this.moveTo(0, 0);
     }
-    /**
-     * Creates node contents when the node is being created
-     */
     renderContents() {
         this.nodeContents.append(this.inputsContainer, this.outputsContainer);
         const nodeData = AssetLoader.nodesData[this.type];
@@ -180,17 +169,10 @@ export default class Node extends EventTarget {
             this.addOutput(output.id, output.type, output.name, output.description);
         }
     }
-    //===== Node Status =====//
-    /**
-     * Marks the node as being done processing
-     */
     markAsProcessed() {
         this.element.classList.remove("processing");
         this.element.classList.add("processed");
     }
-    /**
-     * Shows the node processing error
-     */
     markAsError(error) {
         this.element.classList.remove("processing");
         this.element.classList.add("error");
@@ -198,18 +180,12 @@ export default class Node extends EventTarget {
         this.errorBox.append(error);
         this.onError(error);
     }
-    /**
-     * Marks node as outdated (unprocessed)
-     */
     markOutdated() {
         this.element.classList.remove("processing");
         this.element.classList.remove("processed");
         this.element.classList.remove("error");
         this.onOutdated();
     }
-    /**
-     * Creates a node input and appends it to the inputsContainer
-     */
     addInput(id, type, name, description) {
         const input = new NodeInput(id, type, name, description);
         input.addEventListener("variable_drag_start", (e) => {
@@ -225,9 +201,6 @@ export default class Node extends EventTarget {
         this.inputs[id].element.remove();
         delete this.inputs[id];
     }
-    /**
-     * Creates a node output and appends it to the outputsContainer
-     */
     addOutput(id, type, name, description) {
         const output = new NodeOutput(id, type, name, description);
         output.addEventListener("variable_drag_start", (e) => {
@@ -243,7 +216,6 @@ export default class Node extends EventTarget {
         this.outputs[id].element.remove();
         delete this.outputs[id];
     }
-    //===== Node Dragging =====//
     moveTo(posX, posY) {
         this.posX = posX;
         this.posY = posY;
@@ -328,7 +300,6 @@ export default class Node extends EventTarget {
         this.element.remove();
         this.dispatchEvent(new NodeRemoveEvent(this));
     }
-    // Parsing analysis output
     onProcessed(data) {
     }
     onError(error) {

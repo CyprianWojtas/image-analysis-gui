@@ -16,11 +16,8 @@ import FilePicker from "./FilePicker.js";
     const editorStyles = editor.createEditorStyles();
     document.head.append(editorStyles);
     document.body.append(editor.element);
-    // @ts-ignore
     window.editor = editor;
-    // @ts-ignore
     window.Settings = Settings;
-    // @ts-ignore
     window.SocketConnection = SocketConnection;
     if (window.location.hash) {
         editor.openFile(decodeURIComponent(window.location.hash.substring(1)));
@@ -32,9 +29,5 @@ import FilePicker from "./FilePicker.js";
         editor.openFile(e.path);
         window.location.hash = e.path;
     });
-    // setInterval(() =>
-    // {
-    // 	window.location.hash = encodeURIComponent(editor.toJSON());
-    // }, 1000);
 })();
 //# sourceMappingURL=main.js.map

@@ -1,8 +1,5 @@
 import katex from './katex.js';
-/* eslint no-constant-condition:0 */
 var findEndOfMath = function findEndOfMath(delimiter, text, startIndex) {
-    // Adapted from
-    // https://github.com/Khan/perseus/blob/master/src/perseus-markdown.jsx
     var index = startIndex;
     var braceLevel = 0;
     var delimLength = delimiter.length;
@@ -42,8 +39,8 @@ var splitAtDelimiters = function splitAtDelimiters(text, delimiters) {
                 type: "text",
                 data: text.slice(0, index)
             });
-            text = text.slice(index); // now text starts with delimiter
-        } // ... so this always succeeds:
+            text = text.slice(index);
+        }
         var i = delimiters.findIndex(delim => text.startsWith(delim.left));
         index = findEndOfMath(delimiters[i].right, text, delimiters[i].left.length);
         if (index === -1) {
@@ -67,16 +64,9 @@ var splitAtDelimiters = function splitAtDelimiters(text, delimiters) {
     }
     return data;
 };
-/* eslint no-console:0 */
-/* Note: optionsCopy is mutated by this method. If it is ever exposed in the
- * API, we should copy it before mutating.
- */
 var renderMathInText = function renderMathInText(text, optionsCopy) {
     var data = splitAtDelimiters(text, optionsCopy.delimiters);
     if (data.length === 1 && data[0].type === 'text') {
-        // There is no formula in the text.
-        // Let's return null which means there is no need to replace
-        // the current text node with a new one.
         return null;
     }
     var fragment = document.createDocumentFragment();
@@ -86,8 +76,7 @@ var renderMathInText = function renderMathInText(text, optionsCopy) {
         }
         else {
             var span = document.createElement("span");
-            var math = data[i].data; // Override any display mode defined in the settings with that
-            // defined by the text itself
+            var math = data[i].data;
             optionsCopy.displayMode = data[i].display;
             try {
                 if (optionsCopy.preProcess) {
@@ -112,10 +101,6 @@ var renderElem = function renderElem(elem, optionsCopy) {
     for (var i = 0; i < elem.childNodes.length; i++) {
         var childNode = elem.childNodes[i];
         if (childNode.nodeType === 3) {
-            // Text node
-            // Concatenate all sibling text nodes.
-            // Webkit browsers split very large text nodes into smaller ones,
-            // so the delimiters may be split across different nodes.
             var textContentConcat = childNode.textContent;
             var sibling = childNode.nextSibling;
             var nSiblings = 0;
@@ -126,7 +111,6 @@ var renderElem = function renderElem(elem, optionsCopy) {
             }
             var frag = renderMathInText(textContentConcat, optionsCopy);
             if (frag) {
-                // Remove extra text nodes
                 for (var j = 0; j < nSiblings; j++) {
                     childNode.nextSibling.remove();
                 }
@@ -134,33 +118,30 @@ var renderElem = function renderElem(elem, optionsCopy) {
                 elem.replaceChild(frag, childNode);
             }
             else {
-                // If the concatenated text does not contain math
-                // the siblings will not either
                 i += nSiblings;
             }
         }
         else if (childNode.nodeType === 1) {
             (function () {
-                // Element node
                 var className = ' ' + childNode.className + ' ';
                 var shouldRender = optionsCopy.ignoredTags.indexOf(childNode.nodeName.toLowerCase()) === -1 && optionsCopy.ignoredClasses.every(x => className.indexOf(' ' + x + ' ') === -1);
                 if (shouldRender) {
                     renderElem(childNode, optionsCopy);
                 }
             })();
-        } // Otherwise, it's something else, and ignore it.
+        }
     }
 };
 var renderMathInElement = function renderMathInElement(elem, options) {
     if (!elem) {
         throw new Error("No element provided to render");
     }
-    var optionsCopy = {}; // Object.assign(optionsCopy, option)
+    var optionsCopy = {};
     for (var option in options) {
         if (options.hasOwnProperty(option)) {
             optionsCopy[option] = options[option];
         }
-    } // default options
+    }
     optionsCopy.delimiters = optionsCopy.delimiters || [{
             left: "$$",
             right: "$$",
@@ -170,9 +151,6 @@ var renderMathInElement = function renderMathInElement(elem, options) {
             right: "\\)",
             display: false
         },
-        // {left: "$", right: "$", display: false},
-        // $ must come after $$
-        // Render AMS environments even if outside $$…$$ delimiters.
         {
             left: "\\begin{equation}",
             right: "\\end{equation}",
@@ -200,8 +178,7 @@ var renderMathInElement = function renderMathInElement(elem, options) {
         }];
     optionsCopy.ignoredTags = optionsCopy.ignoredTags || ["script", "noscript", "style", "textarea", "pre", "code", "option"];
     optionsCopy.ignoredClasses = optionsCopy.ignoredClasses || [];
-    optionsCopy.errorCallback = optionsCopy.errorCallback || console.error; // Enable sharing of global macros defined via `\gdef` between different
-    // math elements within a single call to `renderMathInElement`.
+    optionsCopy.errorCallback = optionsCopy.errorCallback || console.error;
     optionsCopy.macros = optionsCopy.macros || {};
     renderElem(elem, optionsCopy);
 };

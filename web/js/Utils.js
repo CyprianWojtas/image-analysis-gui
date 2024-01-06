@@ -1,9 +1,3 @@
-/**
- * Create new HTML element
- * @param nodeName - node name
- * @param attributes - `name: value` dictionary
- * @param eventListeners - `name: value` dictionary
- */
 export function createElement(nodeName, attributes = {}, eventListeners = {}) {
     let element = document.createElement(nodeName);
     for (let attribute in attributes)
@@ -18,7 +12,6 @@ export function createElement(nodeName, attributes = {}, eventListeners = {}) {
     }
     return element;
 }
-/** Create HTML node tree */
 export function createNodeTree(nodeTree) {
     const name = nodeTree.name;
     const listeners = nodeTree.listeners;
@@ -33,23 +26,16 @@ export function createNodeTree(nodeTree) {
             rootNode.append(childNode);
             continue;
         }
-        // @ts-ignore
         rootNode.append(createNodeTree(childNode));
     }
     return rootNode;
 }
-/**
- * Converts UNIX timestamp to time date string
- */
 export function unixToStr(timestamp) {
     if (!timestamp)
         return "—";
     const date = new Date(timestamp * 1000);
     return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")} ${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 }
-/**
- * Stops event propagation if the left mouse button is being used
- */
 export function stopLMBPropagation(e) {
     if (e.button != 0)
         return;

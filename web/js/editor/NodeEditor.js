@@ -106,11 +106,9 @@ export default class NodeEditor {
         this.analysisActive = false;
         this.analysisPaused = false;
         this.history = [];
-        // ===== Variable dragging varaibles ===== //
         this.draggedVariableId = null;
         this.draggedVariableType = null;
         this.droppedVariableId = null;
-        // ===== Data Import/Export ===== //
         this.undoHistory = [];
         this.element = createNodeTree({
             name: "div",
@@ -134,9 +132,7 @@ export default class NodeEditor {
                             this.addNode(nodeId, null, (e.clientX - this.posX) / this.scale, (e.clientY - this.posY) / this.scale);
                             this.historyPush();
                         },
-                        // Dragging canvas around
                         mousedown: e => this.dragStart(e),
-                        // Scaling the canvas
                         wheel: e => {
                             const proportionX = e.clientX / window.innerWidth;
                             const proportionY = e.clientY / window.innerHeight;
@@ -212,17 +208,12 @@ export default class NodeEditor {
         }
         return styleEl;
     }
-    //===== Node management =====//
     generateNodeId(nodeType) {
         const id = nodeType + "#" + Math.floor(Math.random() * 36 ** 4).toString(36);
         if (!this.nodes[id])
             return id;
         return this.generateNodeId(nodeType);
     }
-    /**
-     * Adds node of a given type
-     * @returns Added node or null on fail
-     */
     addNode(nodeType, nodeId = null, nodePosX = 0, nodePosY = 0, attributes = {}) {
         if (!AssetLoader.nodesData[nodeType])
             return null;
@@ -256,7 +247,6 @@ export default class NodeEditor {
             nodePosY = Math.round(nodePosY / 18) * 18;
         }
         node.moveTo(nodePosX, nodePosY);
-        // ===== Node dragging ===== //
         node.addEventListener("node_move", () => {
             this.redrawConnestions();
         });
@@ -267,7 +257,6 @@ export default class NodeEditor {
         node.addEventListener("node_drag_end", () => {
             this.element.classList.remove("nodeDragged");
         });
-        // ===== Variable dragging ===== //
         node.addEventListener("variable_drag_start", (e) => {
             this.draggedVariableType = e.variable.type;
             let isInput = e.variable.input;
@@ -409,9 +398,6 @@ export default class NodeEditor {
         }
         return null;
     }
-    /**
-     * Gets nodes connected to the given node outputs
-     */
     getConnectedNodes(nodeId) {
         const checkedNode = this.nodes[nodeId];
         if (!checkedNode)
@@ -440,7 +426,6 @@ export default class NodeEditor {
         if (this.analysisActive)
             SocketConnection.updateAnalysis(this.analysisId, this.toJSONObj(), outdatedNodes);
     }
-    //===== Drawing =====//
     resizeEditor() {
         this.c.width = window.innerWidth;
         this.c.height = window.innerHeight;
@@ -543,7 +528,6 @@ export default class NodeEditor {
             this.drawConnection(posInput.x, posInput.y, posOutput.x, posOutput.y, ((_b = AssetLoader.variableTypes[variableType]) === null || _b === void 0 ? void 0 : _b.colour) || "#fff");
         }
     }
-    // ===== Canvas movement ===== //
     moveTo(posX, posY) {
         this.posX = posX;
         this.posY = posY;
@@ -553,7 +537,6 @@ export default class NodeEditor {
     }
     setScale(newScale, propX = 0.5, propY = 0.5, updateInput = true) {
         if (newScale > 5 || newScale < 0.2) {
-            // Invalid value from input
             if (!updateInput)
                 this.scaleInputEl.value = (this.scale * 100).toFixed();
             return;
@@ -585,7 +568,6 @@ export default class NodeEditor {
         window.addEventListener("mousemove", moveEvent);
         window.addEventListener("mouseup", mouseupEvent);
     }
-    // ===== Data Import/Export ===== //
     toJSONObj() {
         const nodes = {};
         for (const nodeId in this.nodes)
@@ -670,7 +652,6 @@ export default class NodeEditor {
         this.saveFile();
         this.updateRunningAnalysis(Object.keys(this.nodes));
     }
-    // Analysis
     turnOn(startAutomatically = true) {
         this.analysisActive = true;
         this.element.classList.add("runningAnalysis");

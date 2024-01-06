@@ -1,6 +1,5 @@
 export function baseUrl(base) {
-    // extension code here
-    base = base.trim().replace(/\/+$/, '/'); // if multiple '/' at the end, just keep one
+    base = base.trim().replace(/\/+$/, '/');
     const reIsAbsolute = /^[\w+]+:\/\//;
     const isBaseAbsolute = reIsAbsolute.test(base);
     const dummyUrl = 'http://__dummy__';
@@ -12,11 +11,9 @@ export function baseUrl(base) {
                 return;
             }
             if (reIsAbsolute.test(token.href)) {
-                // the URL is absolute, do not touch it
                 return;
             }
             if (token.href.startsWith('#')) {
-                // the URL is a local reference
                 return;
             }
             if (isBaseAbsolute) {
@@ -24,13 +21,10 @@ export function baseUrl(base) {
                     token.href = new URL(token.href, base).href;
                 }
                 catch (e) {
-                    // ignore
                 }
             }
             else {
-                // base is not absolute
                 if (token.href.startsWith('/')) {
-                    // the URL is from root
                     return;
                 }
                 try {
@@ -38,7 +32,6 @@ export function baseUrl(base) {
                     token.href = temp.slice(dummyUrlLength);
                 }
                 catch (e) {
-                    // ignore
                 }
             }
         }

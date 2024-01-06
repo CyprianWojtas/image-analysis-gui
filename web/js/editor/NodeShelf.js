@@ -82,19 +82,6 @@ export default class NodeShelf {
                     class: "groupTitle",
                     childNodes: [
                         (group === null || group === void 0 ? void 0 : group.name) || groupId,
-                        // {
-                        // 	name: "button",
-                        // 	class: "wikiLink btn-circled",
-                        // 	childNodes: [ { name: "i", class: "icon-help" } ],
-                        // 	listeners:
-                        // 	{
-                        // 		click: e =>
-                        // 		{
-                        // 			e.stopPropagation();
-                        // 			Wiki.openArticle(groupId);
-                        // 		}
-                        // 	}
-                        // }
                     ],
                     listeners: {
                         click: () => {

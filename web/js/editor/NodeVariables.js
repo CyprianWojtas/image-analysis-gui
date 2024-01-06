@@ -23,9 +23,7 @@ export class VariableDragEndEvent extends VarDragEvent {
 export class NodeVariable extends EventTarget {
     constructor(id, type, name = null, description = null) {
         super();
-        /** Used to determine handle position in the node */
         this.posX = null;
-        /** Used to determine handle position in the node */
         this.posY = null;
         this.id = id;
         this.type = type;

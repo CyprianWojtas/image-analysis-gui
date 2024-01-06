@@ -46,10 +46,6 @@ export default class SocketConnection extends EventTarget {
     static init() {
         this.eventManager = new EventTarget();
         this.socket = io();
-        // this.socket.on("connect", () =>
-        // {
-        // 	this.dispatchEvent(new Event("connected"));
-        // });
         this.socket.on("analysis_node_processing", data => {
             this.dispatchEvent(new AnalysisNodeProcessingEvent(data.nodeId));
         });
