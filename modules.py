@@ -44,7 +44,7 @@ def get_node_info(node_path=''):
 		'path': node_path[0:-3],
 		'name': node_data.get('name', 'Unnamed Node'),
 		'customClass': node_data.get('custom_class', False),
-		'customPyPath': node_data.get('custom_py_path', None),
+		'codePath': node_data.get('custom_py_path', node_path[0:-3] + '.py'),
 		'description':
 			node_desc_parts['description']
 			if 'description' in node_desc_parts

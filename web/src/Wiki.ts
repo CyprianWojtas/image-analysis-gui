@@ -3,6 +3,8 @@ import { marked } from "./lib/marked.esm.js";
 import katex from "./lib/katex/auto-render.js";
 import AssetLoader from "./editor/AssetLoader.js";
 import { baseUrl as markedBaseUrl } from "./lib/marked-base-url.js";
+import Settings from "./Settings.js";
+import hljs from "./lib/highlight.js";
 
 export default
 class Wiki
@@ -241,6 +243,8 @@ class Wiki
 		if (!AssetLoader.nodesData[nodeId])
 			return;
 
+		const nodeData = AssetLoader.nodesData[nodeId];
+
 		this.openedArticleId = nodeId;
 
 		this.nodesBox.querySelector(`.nodeType.selected`)?.classList.remove("selected");
@@ -251,11 +255,11 @@ class Wiki
 		this.element.classList.remove("hidden");
 
 		this.articleTitle.innerHTML = "";
-		this.articleTitle.append(AssetLoader.nodesData[nodeId].name);
+		this.articleTitle.append(nodeData.name);
 
-		let articleText: string = AssetLoader.nodesData[nodeId].wiki || AssetLoader.nodesData[nodeId].description;
+		let articleText: string = nodeData.wiki || nodeData.description;
 
-		marked.use(markedBaseUrl(`/modules/${ AssetLoader.nodesData[nodeId].path }`));
+		marked.use(markedBaseUrl(`/modules/${ nodeData.path }`));
 
 		this.articleContent.innerHTML = marked.parse(articleText);
 
@@ -270,6 +274,24 @@ class Wiki
 				]
 			}
 		);
+
+		for (const pre of this.articleContent.querySelectorAll("pre"))
+			hljs.highlightElement(pre);
+		
+		if (Settings.get("wiki.showCode"))
+		{
+			(async () =>
+			{
+				const code = await (await fetch(`/modules/${ nodeData.codePath }`)).text();
+
+				const pre = createElement("pre", { class: "language-python" });
+				pre.append(code);
+
+				hljs.highlightElement(pre);
+
+				this.articleContent.append(createNodeTree({ name: "h2", childNodes: [ "Node Code" ] }), pre);
+			})();
+		}
 	}
 
 	static close()

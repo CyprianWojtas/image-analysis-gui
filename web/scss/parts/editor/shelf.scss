@@ -4,7 +4,7 @@
 	top: 5rem;
 	right: 0;
 	bottom: 0;
-	background: #080808;
+	background: var(--background-color);
 	padding: 10px;
 	width: 18rem;
 	overflow: auto;
@@ -30,6 +30,11 @@
 		transition: grid-template-rows 0.5s;
 		overflow: hidden;
 		border-bottom: 1px solid #fff4;
+
+		.lightMode &
+		{
+			border-bottom: 1px solid #0002;
+		}
 
 		&.expanded
 		{
@@ -75,6 +80,12 @@
 		transition: grid-template-rows 0.2s;
 		overflow: hidden;
 
+		.lightMode &
+		{
+			box-shadow: 0 0 1rem #0002;
+			background: #fff;
+		}
+
 		&.expanded
 		{
 			grid-template-rows: auto 1fr;
@@ -92,6 +103,11 @@
 			display: grid;
   			grid-template-columns: 1fr auto;
 
+			.lightMode &
+			{
+				background-image: linear-gradient(#fff8, #fff7);
+			}
+
 			.buttons
 			{
 				display: flex;
@@ -105,11 +121,21 @@
 				filter: contrast(1.1) brightness(1.5);
   				color: #0008;
 
+				.lightMode &
+				{
+					background-image: linear-gradient(#fff6, #fff6);
+				}
+
 				&:hover,
 				&:focus
 				{
 					background: #fff;
 					color: #000;
+					
+					.lightMode &
+					{
+						background-image: linear-gradient(#fff, #fff);
+					}
 				}
 			}
 		}
@@ -121,6 +147,11 @@
 			box-sizing: border-box;
 			overflow: hidden;
 			transition: padding 0.5s;
+
+			.lightMode &
+			{
+				box-shadow: inset 0 2rem 2rem -2rem #0002;
+			}
 		}
 
 		&.expanded > .nodeDescription

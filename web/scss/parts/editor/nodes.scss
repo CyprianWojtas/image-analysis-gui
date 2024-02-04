@@ -2,20 +2,35 @@
 {
 	position: absolute;
 	box-sizing: border-box;
-	background: #444;
+	background: var(--node-background-color);
 	border-radius: 6px;
 	box-shadow: 0 0 1rem #0008;
 	display: block;
 	white-space: nowrap;
 
+	.lightMode &
+	{
+		box-shadow: 0 0 1rem #0004;
+	}
+
 	&.processing
 	{
 		outline: 2px solid #ff0a;
 		animation: nodeProcessing 1.5s infinite alternate;
+
+		.lightMode &
+		{
+			outline: 2px solid #dd0;
+		}
 	}
 	&.processed
 	{
 		outline: 2px solid #8afa;
+
+		.lightMode &
+		{
+			outline: 2px solid #68f;
+		}
 	}
 	
 	.errorBox
@@ -51,6 +66,11 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 
+		.lightMode &
+		{
+			background-image: linear-gradient(#fff8, #fff7);
+		}
+
 		.buttons
 		{
 			position: absolute;
@@ -69,6 +89,11 @@
 			border-top-right-radius: 6px;
 			mask-image: linear-gradient(to right, #0000 0, #000 2rem);
 
+			.lightMode &
+			{
+				background-image: linear-gradient(#fff8, #fff7);
+			}
+
 			button
 			{
 				background: var(--node-colour, #888);
@@ -76,11 +101,21 @@
 				filter: contrast(1.1) brightness(1.5);
   				color: #0008;
 
+				.lightMode &
+				{
+					background-image: linear-gradient(#fff8, #fff8);
+				}
+
 				&:hover,
 				&:focus
 				{
 					background: #fff;
 					color: #000;
+
+					.lightMode &
+					{
+						background-image: linear-gradient(#fff, #fff);
+					}
 				}
 
 				&.btn-close:hover,
@@ -114,6 +149,11 @@
 		grid-template-columns: repeat(2, auto);
 		align-items: center;
 		box-shadow: inset 0 2rem 2rem -2rem #0004;
+
+		.lightMode &
+		{
+			box-shadow: inset 0 2rem 2rem -2rem #0002;
+		}
 	}
 
 	.nodeInput
@@ -188,13 +228,19 @@
 	textarea
 	{
 		background: #555;
-		color: #fff;
+		color: var(--text-color);
 		border: none;
 		border-bottom: 1px solid #fff6;
 		font-family: inherit;
 		font-size: 1.1rem;
 		padding: 0.25rem 0.5rem;
 		box-sizing: border-box;
+
+		.lightMode &
+		{
+			background: #fff;
+			border-bottom: 1px solid #0006;
+		}
 	}
 	input[type="number"]
 	{

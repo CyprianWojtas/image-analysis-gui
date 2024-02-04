@@ -3,6 +3,8 @@ import { marked } from "./lib/marked.esm.js";
 import katex from "./lib/katex/auto-render.js";
 import AssetLoader from "./editor/AssetLoader.js";
 import { baseUrl as markedBaseUrl } from "./lib/marked-base-url.js";
+import Settings from "./Settings.js";
+import hljs from "./lib/highlight.js";
 class Wiki {
     static init() {
         this.searchInput = createElement("input", {
@@ -167,6 +169,7 @@ class Wiki {
         var _a, _b, _c, _d;
         if (!AssetLoader.nodesData[nodeId])
             return;
+        const nodeData = AssetLoader.nodesData[nodeId];
         this.openedArticleId = nodeId;
         (_a = this.nodesBox.querySelector(`.nodeType.selected`)) === null || _a === void 0 ? void 0 : _a.classList.remove("selected");
         (_b = this.searchBox.querySelector(`.nodeType.selected`)) === null || _b === void 0 ? void 0 : _b.classList.remove("selected");
@@ -174,9 +177,9 @@ class Wiki {
         (_d = this.searchBox.querySelector(`.nodeType.nodeTypeId_${CSS.escape(nodeId)}`)) === null || _d === void 0 ? void 0 : _d.classList.add("selected");
         this.element.classList.remove("hidden");
         this.articleTitle.innerHTML = "";
-        this.articleTitle.append(AssetLoader.nodesData[nodeId].name);
-        let articleText = AssetLoader.nodesData[nodeId].wiki || AssetLoader.nodesData[nodeId].description;
-        marked.use(markedBaseUrl(`/modules/${AssetLoader.nodesData[nodeId].path}`));
+        this.articleTitle.append(nodeData.name);
+        let articleText = nodeData.wiki || nodeData.description;
+        marked.use(markedBaseUrl(`/modules/${nodeData.path}`));
         this.articleContent.innerHTML = marked.parse(articleText);
         katex(this.articleContent, {
             delimiters: [
@@ -186,6 +189,17 @@ class Wiki {
                 { left: '\\[', right: '\\]', display: true }
             ]
         });
+        for (const pre of this.articleContent.querySelectorAll("pre"))
+            hljs.highlightElement(pre);
+        if (Settings.get("wiki.showCode")) {
+            (async () => {
+                const code = await (await fetch(`/modules/${nodeData.codePath}`)).text();
+                const pre = createElement("pre", { class: "language-python" });
+                pre.append(code);
+                hljs.highlightElement(pre);
+                this.articleContent.append(createNodeTree({ name: "h2", childNodes: ["Node Code"] }), pre);
+            })();
+        }
     }
     static close() {
         this.element.classList.add("hidden");

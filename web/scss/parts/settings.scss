@@ -12,6 +12,11 @@
 		padding: 1rem;
 		align-items: center;
 
+		.lightMode &
+		{
+			background: #eee;
+		}
+
 		h1
 		{
 			margin: 0;
@@ -22,5 +27,22 @@
 	{
 		background: #222;
 		padding: 1rem;
+		display: grid;
+		gap: 0.5rem;
+		justify-content: center;
+		align-content: start;
+
+		.lightMode &
+		{
+			background: #fff;
+		}
+		
+		.settingOption
+		{
+			display: flex;
+			justify-content: space-between;
+			gap: 1rem;
+			// width: 300px;
+		}
 	}
 }

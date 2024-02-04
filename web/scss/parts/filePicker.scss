@@ -20,7 +20,7 @@
 
 	.files
 	{
-		background: #222;
+		background: var(--background-color);
 		padding: 1rem;
 		display: grid;
 		grid-template-rows: auto auto auto auto 1fr;
@@ -54,6 +54,11 @@
 			display: inline-block;
 			transition: background-color 0.2s, color 0.2s;
 
+			.lightMode &
+			{
+				background: #f8f8f8;
+			}
+
 			&:hover
 			{
 				background: #fff;
@@ -65,7 +70,7 @@
 				content: "»";
 				position: absolute;
 				right: -0.75rem;
-				color: #fff;
+				color: var(--text-color);
 			}
 		}
 	}
@@ -94,7 +99,7 @@
 
 	.file
 	{
-		background: #333;
+		background: var(--background-color2);
 		display: grid;
 		width: 100%;
 		padding: 1rem;
@@ -139,6 +144,12 @@
 		padding: 0.5rem;
 		display: flex;
 		align-items: center;
+		
+		.lightMode &
+		{
+			background: #f8f8f8;
+			color: #000;
+		}
 
 		input
 		{
@@ -151,6 +162,12 @@
 			border-bottom: 1px solid #fff6;
 			padding: 0.25rem 0.5rem;
 			width: 8.5rem;
+		
+			.lightMode &
+			{
+				background: #eee;
+				color: #000;
+			}
 		}
 
 		button
@@ -160,12 +177,23 @@
 			padding: 0.25rem 0.75rem;
 			cursor: pointer;
 			transition: background-color 0.2s, color 0.2s;
+		
+			.lightMode &
+			{
+				background: #eee;
+				color: #000;
+			}
 			
 			&:hover,
 			&:focus
 			{
 				background: #fff;
 				color: #000;
+
+				.lightMode &
+				{
+					outline: 1px solid #ddd;
+				}
 			}
 		}
 	}
@@ -177,6 +205,11 @@
 		padding: 1rem;
 		display: flex;
 		align-items: center;
+		
+		.lightMode &
+		{
+			background: #f8f8f8;
+		}
 
 		input
 		{
@@ -188,6 +221,12 @@
 			outline: none;
 			border-bottom: 1px solid #fff6;
 			padding: 0.25rem 0.5rem;
+		
+			.lightMode &
+			{
+				background: #eee;
+				color: #000;
+			}
 		}
 
 		button
@@ -197,12 +236,23 @@
 			padding: 0.25rem 0.75rem;
 			cursor: pointer;
 			transition: background-color 0.2s, color 0.2s;
+		
+			.lightMode &
+			{
+				background: #eee;
+				color: #000;
+			}
 			
 			&:hover,
 			&:focus
 			{
 				background: #fff;
 				color: #000;
+		
+				.lightMode &
+				{
+					outline: 1px solid #ddd;
+				}
 			}
 		}
 	}

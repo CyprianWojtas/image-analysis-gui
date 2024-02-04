@@ -17,7 +17,9 @@ class Settings
 	{
 		"editor.snapToGrid": true,
 		"editor.background": "lines",
-		"editor.connectionStyle": "bezier"
+		"editor.connectionStyle": "bezier",
+		"editor.lightMode": false,
+		"wiki.showCode": false
 	};
 
 	private static settings = {};

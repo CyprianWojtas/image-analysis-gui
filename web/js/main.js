@@ -10,6 +10,14 @@ import FilePicker from "./FilePicker.js";
     SocketConnection.init();
     SettingsPage.init();
     Wiki.init();
+    if (Settings.get("editor.lightMode"))
+        document.body.classList.add("lightMode");
+    Settings.addSettingsChangedListener("editor.lightMode", e => {
+        if (e.value)
+            document.body.classList.add("lightMode");
+        else
+            document.body.classList.remove("lightMode");
+    });
     const editor = new NodeEditor();
     const filePicker = new FilePicker();
     editor.filePicker = filePicker;

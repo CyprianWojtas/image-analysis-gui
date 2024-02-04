@@ -21,6 +21,7 @@ export interface NodeTemplate
 	inputs: NodeVariable[];
 	outputs: NodeVariable[];
 	path: string;
+	codePath: string;
 }
 
 export interface NodeSerialisable

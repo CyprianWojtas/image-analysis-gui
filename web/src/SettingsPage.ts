@@ -1,13 +1,16 @@
 import Settings from "./Settings.js";
-import { createNodeTree } from "./Utils.js";
+import { createElement, createNodeTree } from "./Utils.js";
 
 export default
 class SettingsPage
 {
 	static element: HTMLDivElement;
+	static settingsBox: HTMLDivElement;
 
 	static init()
 	{
+		this.settingsBox = <HTMLDivElement>createElement("div", { class: "settingsBox" } );
+
 		this.element = <HTMLDivElement>createNodeTree(
 			{
 				name: "div",
@@ -31,98 +34,35 @@ class SettingsPage
 							}
 						]
 					},
-					{
-						name: "div",
-						class: "settingsBox",
-						childNodes:
-						[
-							{
-								name: "label",
-								childNodes:
-								[
-									"Snap to grid ",
-									{
-										name: "input",
-										type: "checkbox",
-										checked: Settings.get("editor.snapToGrid"),
-										listeners:
-										{
-											input: e => Settings.set("editor.snapToGrid", e.target.checked)
-										}
-									}
-								]
-							},
-							{
-								name: "div",
-								childNodes:
-								[
-									"Editor background: ",
-									{
-										name: "select",
-										selected: Settings.get("editor.background"),
-										listeners:
-										{
-											change: e => Settings.set("editor.background", e.target.value)
-										},
-										childNodes:
-										[
-											{
-												name: "option",
-												value: "lines",
-												childNodes: [ "Lines" ]
-											},
-											{
-												name: "option",
-												value: "dots",
-												childNodes: [ "Dots" ]
-											},
-											{
-												name: "option",
-												value: "clear",
-												childNodes: [ "Clear" ]
-											}
-										]
-									}
-								]
-							},
-							{
-								name: "div",
-								childNodes:
-								[
-									"Connections appreance: ",
-									{
-										name: "select",
-										selected: Settings.get("editor.connectionStyle"),
-										listeners:
-										{
-											change: e => Settings.set("editor.connectionStyle", e.target.value)
-										},
-										childNodes:
-										[
-											{
-												name: "option",
-												value: "bezier",
-												childNodes: [ "Bezier Curves" ]
-											},
-											{
-												name: "option",
-												value: "straight",
-												childNodes: [ "Straight Lines" ]
-											},
-											{
-												name: "option",
-												value: "right",
-												childNodes: [ "Right Angles" ]
-											}
-										]
-									}
-								]
-							}
-						]
-					}
+					this.settingsBox
 				]
 			}
 		);
+
+		this.addToggleSetting("Snap to grid", "editor.snapToGrid");
+		this.addToggleSetting("Light mode", "editor.lightMode");
+
+		this.addSelectSetting(
+			"Editor background",
+			"editor.background",
+			[
+				[ "lines", "Lines" ],
+				[ "dots", "Dots" ],
+				[ "clear", "Clear" ]
+			]
+		);
+
+		this.addSelectSetting(
+			"Connections appreance",
+			"editor.connectionStyle",
+			[
+				[ "bezier", "Bezier Curves" ],
+				[ "straight", "Straight Lines" ],
+				[ "right", "Right Angles" ]
+			]
+		);
+
+		this.addToggleSetting("Show the node code", "wiki.showCode");
 
 		document.body.append(this.element);
 	}
@@ -135,5 +75,66 @@ class SettingsPage
 	static close()
 	{
 		this.element.classList.add("hidden");
+	}
+
+	static addToggleSetting(text: string, settingName: string)
+	{
+		const input = <HTMLInputElement>createElement(
+			"input",
+			{ type: "checkbox" },
+			{
+				change: e => Settings.set(settingName, e.target.checked)
+			}
+		);
+		
+		input.checked = Settings.get(settingName);
+
+		const element = createNodeTree(
+			{
+				name: "label",
+				class: "settingOption toggle",
+				childNodes:
+				[
+					text,
+					input
+				]
+			}
+		);
+
+		this.settingsBox.append(element);
+	}
+
+	static addSelectSetting(text: string, settingName: string, options: string[] | string[][])
+	{
+		const selectEl = <HTMLSelectElement>createElement("select", {}, { change: e => Settings.set(settingName, e.target.value) });
+
+		for (const option of options)
+		{
+			const optionEl = createElement(
+				"option",
+				{
+					value: typeof(option) == "string" ? option : option[0]
+				}
+			);
+
+			optionEl.append(typeof(option) == "string" ? option : option[1]);
+			selectEl.append(optionEl);
+		}
+
+		selectEl.value = Settings.get(settingName);
+
+		const element = createNodeTree(
+			{
+				name: "label",
+				class: "settingOption select",
+				childNodes:
+				[
+					text,
+					selectEl
+				]
+			}
+		);
+
+		this.settingsBox.append(element);
 	}
 }

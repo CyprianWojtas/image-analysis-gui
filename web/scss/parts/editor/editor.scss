@@ -9,7 +9,7 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		background: #111;
+		background: var(--background-color);
 		padding: 1rem;
 		z-index: 999;
 		display: grid;
@@ -62,6 +62,11 @@
 			{
 				background: #fff0;
 				color: #fff;
+
+				.lightMode &
+				{
+					color: #000;
+				}
 			}
 		}
 		
@@ -78,7 +83,7 @@
 	{
 		display: grid;
 		overflow: hidden;
-		background-color: #222;
+		background-color: var(--editor-background-color);
 		background-size: calc(1.5rem * var(--scale, 1)) calc(1.5rem * var(--scale, 1));
 		background-position: var(--background-position, 0px 0px);
 
@@ -92,6 +97,10 @@
 		> canvas
 		{
 			filter: drop-shadow(0 0 1rem #000);
+			.lightMode &
+			{
+				filter: drop-shadow(0 0 1rem #000a);
+			}
 		}
 
 		> canvas,
@@ -107,12 +116,25 @@
 		background-image:
 			repeating-linear-gradient(#fff1, #fff1 1px, #fff0 1px, #fff0 calc(1.5rem * var(--scale, 1))),
 			repeating-linear-gradient(90deg, #fff1, #fff1 1px, #fff0 1px, #fff0 calc(1.5rem * var(--scale, 1)));
+
+		.lightMode &
+		{
+			background-image:
+				repeating-linear-gradient(#0001, #0001 1px, #0000 1px, #0000 calc(1.5rem * var(--scale, 1))),
+				repeating-linear-gradient(90deg, #0001, #0001 1px, #0000 1px, #0000 calc(1.5rem * var(--scale, 1)));
+		}
 	}
 
 	&[data-background-pattern="dots"] .nodesBox
 	{
 		background-image:
 			radial-gradient(circle at 0 0, #fff4, #fff4 1px, #fff0 1px, #fff0 calc(1.5rem * var(--scale, 1)));
+
+		.lightMode &
+		{
+			background-image:
+				radial-gradient(circle at 0 0, #0004, #0004 1px, #0000 1px, #0000 calc(1.5rem * var(--scale, 1)));
+		}
 	}
 
 	
