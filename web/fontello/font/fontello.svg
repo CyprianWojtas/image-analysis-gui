@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg">
-<metadata>Copyright (C) 2023 by original authors @ fontello.com</metadata>
+<metadata>Copyright (C) 2024 by original authors @ fontello.com</metadata>
 <defs>
 <font id="fontello" horiz-adv-x="1000" >
 <font-face font-family="fontello" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
@@ -21,6 +21,10 @@
 <glyph glyph-name="pause" unicode="&#xe806;" d="M857 743v-786q0-14-10-25t-26-11h-285q-15 0-25 11t-11 25v786q0 14 11 25t25 11h285q15 0 26-11t10-25z m-500 0v-786q0-14-10-25t-26-11h-285q-15 0-25 11t-11 25v786q0 14 11 25t25 11h285q15 0 26-11t10-25z" horiz-adv-x="857.1" />
 
 <glyph glyph-name="play" unicode="&#xe807;" d="M772 333l-741-412q-13-7-22-2t-9 20v822q0 14 9 20t22-2l741-412q13-7 13-17t-13-17z" horiz-adv-x="785.7" />
+
+<glyph glyph-name="star" unicode="&#xe808;" d="M929 489q0-12-15-27l-202-197 48-279q0-4 0-12 0-11-6-19t-17-9q-10 0-22 7l-251 132-250-132q-12-7-23-7-11 0-17 9t-6 19q0 4 1 12l48 279-203 197q-14 15-14 27 0 21 31 26l280 40 126 254q11 23 27 23t28-23l125-254 280-40q32-5 32-26z" horiz-adv-x="928.6" />
+
+<glyph glyph-name="star-empty" unicode="&#xe809;" d="M635 290l170 166-235 34-106 213-105-213-236-34 171-166-41-235 211 111 211-111z m294 199q0-12-15-27l-202-197 48-279q0-4 0-12 0-28-23-28-10 0-22 7l-251 132-250-132q-12-7-23-7-11 0-17 9t-6 19q0 4 1 12l48 279-203 197q-14 15-14 27 0 21 31 26l280 40 126 254q11 23 27 23t28-23l125-254 280-40q32-5 32-26z" horiz-adv-x="928.6" />
 
 <glyph glyph-name="help" unicode="&#xf128;" d="M393 149v-134q0-9-7-15t-15-7h-134q-9 0-16 7t-7 15v134q0 9 7 16t16 6h134q9 0 15-6t7-16z m176 335q0-30-8-56t-20-43-31-33-32-25-34-19q-23-13-38-37t-15-37q0-10-7-18t-16-9h-134q-8 0-14 11t-6 20v26q0 46 37 87t79 60q33 16 47 32t14 42q0 24-26 41t-60 18q-36 0-60-16-20-14-60-64-7-9-17-9-7 0-14 4l-91 70q-8 6-9 14t3 16q89 148 259 148 45 0 90-17t81-46 59-72 23-88z" horiz-adv-x="571.4" />
 </font>

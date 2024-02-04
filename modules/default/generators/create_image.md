@@ -1,7 +1,7 @@
 ---
 name: Create Image
-id: default.inputs.image_create
-group: default.inputs
+id: default.generators.image_create
+group: default.generators
 
 inputs:
   width:

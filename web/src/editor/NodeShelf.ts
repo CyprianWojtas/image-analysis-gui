@@ -1,6 +1,7 @@
 import { createElement, createNodeTree } from "../Utils.js";
 import AssetLoader from "./AssetLoader.js";
 import Wiki from "../Wiki.js";
+import { NodeTemplate } from "../apiTypes/Analysis.js";
 
 export default
 class NodeShelf
@@ -9,11 +10,14 @@ class NodeShelf
 
 	private nodesBox: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodes" });
 	private searchBox: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "nodes", style: "display: none" });
+	private favouritesBox: HTMLDivElement = <HTMLDivElement>createElement("div", { class: "favourites" });
 	private searchInput: HTMLInputElement = <HTMLInputElement>createElement(
 		"input",
 		{ class: "searchInput", placeholder: "Search..." },
 		{ input: () => this.search(this.searchInput.value) }
 	);
+
+	private favouritedNodes: string[] = [ "defaults.image_arithmetics.subtract" ];
 
 	constructor()
 	{
@@ -37,6 +41,8 @@ class NodeShelf
 			}
 		);
 
+		this.favouritedNodes = JSON.parse(localStorage.getItem("favouritedNodes") || "[]");
+
 		this.loadGroups();
 	}
 
@@ -46,6 +52,14 @@ class NodeShelf
 		const ungroupedNodes = [];
 
 		this.nodesBox.innerHTML = "";
+		this.nodesBox.append(this.favouritesBox);
+
+		for (const nodeId of this.favouritedNodes)
+		{
+			const node = AssetLoader.nodesData[nodeId];
+			if (node)
+				this.favouritesBox.append(this.createNodeBox(nodeId, node));
+		}
 
 		for (const nodeId in AssetLoader.nodesData)
 		{
@@ -168,7 +182,10 @@ class NodeShelf
 		return groupBox;
 	}
 
-	private createNodeBox(nodeId: string, node: any)
+	/**
+	 * Creates the draggable node element
+	 */
+	private createNodeBox(nodeId: string, node: NodeTemplate, favourited: boolean = false)
 	{
 		const nodeDescription = createElement("div", { class: "nodeDescription" });
 		nodeDescription.innerHTML = node?.description || "";
@@ -195,17 +212,39 @@ class NodeShelf
 						[
 							node?.name || nodeId,
 							{
-								name: "button",
-								class: "wikiLink btn-circled",
-								childNodes: [ { name: "i", class: "icon-help" } ],
-								listeners:
-								{
-									click: e =>
+								name: "div",
+								class: "buttons",
+								childNodes:
+								[
 									{
-										e.stopPropagation();
-										Wiki.openArticle(nodeId);
+										name: "button",
+										class: "favBtn btn-circled",
+										childNodes: [ { name: "i", class: this.favouritedNodes.includes(nodeId) ? "icon-star" : "icon-star-empty" } ],
+										listeners:
+										{
+											click: e =>
+											{
+												e.stopPropagation();
+												this.toggleNodeFavourite(nodeId);
+												e.target.blur();
+												e.target.parentNode.blur();
+											}
+										}
+									},
+									{
+										name: "button",
+										class: "wikiLink btn-circled",
+										childNodes: [ { name: "i", class: "icon-help" } ],
+										listeners:
+										{
+											click: e =>
+											{
+												e.stopPropagation();
+												Wiki.openArticle(nodeId);
+											}
+										}
 									}
-								}
+								]
 							}
 						],
 						listeners:
@@ -222,5 +261,46 @@ class NodeShelf
 		);
 
 		return nodeBox;
+	}
+
+	favouriteNode(nodeId: string)
+	{
+		for (const favIcon of this.element.querySelectorAll(`.nodeTypeId_${ CSS.escape(nodeId) } .favBtn i`))
+		{
+			favIcon.classList.remove("icon-star-empty");
+			favIcon.classList.add("icon-star");
+		}
+		this.favouritedNodes.unshift(nodeId);
+
+		const node = AssetLoader.nodesData[nodeId];
+		if (node)
+			this.favouritesBox.prepend(this.createNodeBox(nodeId, node));
+
+		localStorage.setItem("favouritedNodes", JSON.stringify(this.favouritedNodes));
+	}
+
+	unfavouriteNode(nodeId: string)
+	{
+		this.favouritesBox.querySelector(`.nodeTypeId_${ CSS.escape(nodeId) }`)?.remove();
+
+		const index = this.favouritedNodes.indexOf(nodeId);
+		if (index > -1)
+			this.favouritedNodes.splice(index, 1);
+		
+		for (const favIcon of this.element.querySelectorAll(`.nodeTypeId_${ CSS.escape(nodeId) } .favBtn i`))
+		{
+			favIcon.classList.add("icon-star-empty");
+			favIcon.classList.remove("icon-star");
+		}
+
+		localStorage.setItem("favouritedNodes", JSON.stringify(this.favouritedNodes));
+	}
+
+	toggleNodeFavourite(nodeId: string)
+	{
+		if (this.favouritedNodes.includes(nodeId))
+			this.unfavouriteNode(nodeId);
+		else
+			this.favouriteNode(nodeId);
 	}
 }

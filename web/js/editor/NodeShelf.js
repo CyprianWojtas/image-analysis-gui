@@ -5,7 +5,9 @@ export default class NodeShelf {
     constructor() {
         this.nodesBox = createElement("div", { class: "nodes" });
         this.searchBox = createElement("div", { class: "nodes", style: "display: none" });
+        this.favouritesBox = createElement("div", { class: "favourites" });
         this.searchInput = createElement("input", { class: "searchInput", placeholder: "Search..." }, { input: () => this.search(this.searchInput.value) });
+        this.favouritedNodes = ["defaults.image_arithmetics.subtract"];
         this.element = createNodeTree({
             name: "div",
             class: "nodeShelf",
@@ -21,12 +23,19 @@ export default class NodeShelf {
                 this.searchBox
             ]
         });
+        this.favouritedNodes = JSON.parse(localStorage.getItem("favouritedNodes") || "[]");
         this.loadGroups();
     }
     loadGroups() {
         const groupedNodes = {};
         const ungroupedNodes = [];
         this.nodesBox.innerHTML = "";
+        this.nodesBox.append(this.favouritesBox);
+        for (const nodeId of this.favouritedNodes) {
+            const node = AssetLoader.nodesData[nodeId];
+            if (node)
+                this.favouritesBox.append(this.createNodeBox(nodeId, node));
+        }
         for (const nodeId in AssetLoader.nodesData) {
             const groupId = AssetLoader.nodesData[nodeId].group;
             if (AssetLoader.nodesGroups[groupId]) {
@@ -105,7 +114,7 @@ export default class NodeShelf {
         }
         return groupBox;
     }
-    createNodeBox(nodeId, node) {
+    createNodeBox(nodeId, node, favourited = false) {
         var _a;
         const nodeDescription = createElement("div", { class: "nodeDescription" });
         nodeDescription.innerHTML = (node === null || node === void 0 ? void 0 : node.description) || "";
@@ -126,15 +135,34 @@ export default class NodeShelf {
                     childNodes: [
                         (node === null || node === void 0 ? void 0 : node.name) || nodeId,
                         {
-                            name: "button",
-                            class: "wikiLink btn-circled",
-                            childNodes: [{ name: "i", class: "icon-help" }],
-                            listeners: {
-                                click: e => {
-                                    e.stopPropagation();
-                                    Wiki.openArticle(nodeId);
+                            name: "div",
+                            class: "buttons",
+                            childNodes: [
+                                {
+                                    name: "button",
+                                    class: "favBtn btn-circled",
+                                    childNodes: [{ name: "i", class: this.favouritedNodes.includes(nodeId) ? "icon-star" : "icon-star-empty" }],
+                                    listeners: {
+                                        click: e => {
+                                            e.stopPropagation();
+                                            this.toggleNodeFavourite(nodeId);
+                                            e.target.blur();
+                                            e.target.parentNode.blur();
+                                        }
+                                    }
+                                },
+                                {
+                                    name: "button",
+                                    class: "wikiLink btn-circled",
+                                    childNodes: [{ name: "i", class: "icon-help" }],
+                                    listeners: {
+                                        click: e => {
+                                            e.stopPropagation();
+                                            Wiki.openArticle(nodeId);
+                                        }
+                                    }
                                 }
-                            }
+                            ]
                         }
                     ],
                     listeners: {
@@ -147,6 +175,35 @@ export default class NodeShelf {
             ]
         });
         return nodeBox;
+    }
+    favouriteNode(nodeId) {
+        for (const favIcon of this.element.querySelectorAll(`.nodeTypeId_${CSS.escape(nodeId)} .favBtn i`)) {
+            favIcon.classList.remove("icon-star-empty");
+            favIcon.classList.add("icon-star");
+        }
+        this.favouritedNodes.unshift(nodeId);
+        const node = AssetLoader.nodesData[nodeId];
+        if (node)
+            this.favouritesBox.prepend(this.createNodeBox(nodeId, node));
+        localStorage.setItem("favouritedNodes", JSON.stringify(this.favouritedNodes));
+    }
+    unfavouriteNode(nodeId) {
+        var _a;
+        (_a = this.favouritesBox.querySelector(`.nodeTypeId_${CSS.escape(nodeId)}`)) === null || _a === void 0 ? void 0 : _a.remove();
+        const index = this.favouritedNodes.indexOf(nodeId);
+        if (index > -1)
+            this.favouritedNodes.splice(index, 1);
+        for (const favIcon of this.element.querySelectorAll(`.nodeTypeId_${CSS.escape(nodeId)} .favBtn i`)) {
+            favIcon.classList.add("icon-star-empty");
+            favIcon.classList.remove("icon-star");
+        }
+        localStorage.setItem("favouritedNodes", JSON.stringify(this.favouritedNodes));
+    }
+    toggleNodeFavourite(nodeId) {
+        if (this.favouritedNodes.includes(nodeId))
+            this.unfavouriteNode(nodeId);
+        else
+            this.favouriteNode(nodeId);
     }
 }
 //# sourceMappingURL=NodeShelf.js.map

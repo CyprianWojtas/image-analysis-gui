@@ -10,8 +10,14 @@ def run(inputs, attributes):
 	size = inputs['image'].shape
 
 	if size[0] > 512 or size[1] > 512:
-		width  = size[1] * 512 // size[0] if size[1] > size[0] else 512
-		height = size[0] * 512 // size[1] if size[1] < size[0] else 512
+		width  = size[1] * 512 // size[0] if size[1] < size[0] else 512
+		height = size[0] * 512 // size[1] if size[1] > size[0] else 512
+
+		if width == 0:
+			width = 1
+
+		if height == 0:
+			height = 1
 
 		resized_image = cv2.resize(inputs['image'], (width, height), interpolation = cv2.INTER_AREA)
 

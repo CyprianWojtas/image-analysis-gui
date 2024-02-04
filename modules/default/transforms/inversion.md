@@ -1,5 +1,5 @@
 ---
-name: Inversion Filter
+name: Invert
 id: defaults.transforms.inversion
 group: defaults.transforms
 

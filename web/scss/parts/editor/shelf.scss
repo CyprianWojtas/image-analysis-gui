@@ -84,17 +84,22 @@
 		{
 			background: var(--node-colour, #333);
 			background-image: linear-gradient(#fff1, #0001);
-			padding: 5px 2.5rem 5px 10px;
+			padding: 5px 7px 5px 10px;
 			border-radius: 6px 6px 0 0;
 			user-select: none;
 			position: relative;
 			cursor: pointer;
+			display: grid;
+  			grid-template-columns: 1fr auto;
 
-			.wikiLink
+			.buttons
 			{
-				position: absolute;
-				right: 0.5rem;
+				display: flex;
+				gap: 5px;
+			}
 
+			.btn-circled
+			{
 				background: var(--node-colour, #888);
 				background-image: linear-gradient(#fff3, #fff3);
 				filter: contrast(1.1) brightness(1.5);

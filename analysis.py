@@ -31,16 +31,24 @@ class Analysis:
 
 		while self.nodes_to_solve:
 			solved_nodes = []
-			for node_id in self.nodes_to_solve.keys():
-				if self.run_node(node_id):
-					solved_nodes.append(node_id)
+			try:
+				for node_id in self.nodes_to_solve.keys():
+					if self.run_node(node_id):
+						solved_nodes.append(node_id)
+			except RuntimeError:
+				# The analysis has been invoked again before it finished processing, and it's being run again
+				print('Node solving has been interrupted')
 
 			if not solved_nodes:
 				print('No more nodes can be solved!')
 				return None
 
-			for node_id in solved_nodes:
-				del self.nodes_to_solve[node_id]
+			try:
+				for node_id in solved_nodes:
+					del self.nodes_to_solve[node_id]
+			except KeyError:
+				# The analysis has been invoked again before it finished processing, and it's being run again
+				print('Node solving has been interrupted')
 
 		print('Analysis finished!')
 
@@ -96,13 +104,13 @@ class Analysis:
 		if not runnable:
 			return False
 
-		print(f'Running: {node_id}')
-		emit('analysis_node_processing', {'analysisId': self.analysis_id, 'nodeId': node_id})
+		# print(f'Running: {node_id}')
+		emit('analysis_node_processing', {'analysisId': self.analysis_id, 'nodeId': node_id}, broadcast=True)
 
 		try:
 			node_outputs = self.modules[node['type']]['run'](inputs_dict, node['attributes'])
 		except Exception as err:
-			emit('analysis_node_error', {'analysisId': self.analysis_id, 'nodeId': node_id, 'error': str(err)})
+			emit('analysis_node_error', {'analysisId': self.analysis_id, 'nodeId': node_id, 'error': str(err)}, broadcast=True)
 			self.errors[node_id] = str(err)
 			return True
 
@@ -116,11 +124,12 @@ class Analysis:
 					'analysisId': self.analysis_id,
 					'nodeId': node_id,
 					'data': node_outputs[1]
-				}
+				},
+				broadcast=True
 			)
 			node_outputs = node_outputs[0]
 		else:
-			emit('analysis_node_processed', {'analysisId': self.analysis_id, 'nodeId': node_id})
+			emit('analysis_node_processed', {'analysisId': self.analysis_id, 'nodeId': node_id}, broadcast=True)
 
 		for node_output_id, node_output in node_outputs.items():
 			output_id = node_id + "?" + node_output_id
