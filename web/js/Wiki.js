@@ -193,11 +193,19 @@ class Wiki {
             hljs.highlightElement(pre);
         if (Settings.get("wiki.showCode")) {
             (async () => {
+                console.log(nodeData);
                 const code = await (await fetch(`/modules/${nodeData.codePath}`)).text();
                 const pre = createElement("pre", { class: "language-python" });
                 pre.append(code);
                 hljs.highlightElement(pre);
                 this.articleContent.append(createNodeTree({ name: "h2", childNodes: ["Node Code"] }), pre);
+                if (nodeData.customClass) {
+                    const codeJS = await (await fetch(`/api/nodes/${nodeId}`)).text();
+                    const pre = createElement("pre", { class: "language-javascript" });
+                    pre.append(codeJS);
+                    hljs.highlightElement(pre);
+                    this.articleContent.append(createNodeTree({ name: "h2", childNodes: ["Node Class Code"] }), pre);
+                }
             })();
         }
     }

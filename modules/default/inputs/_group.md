@@ -4,4 +4,4 @@ id: default.inputs
 colour: "#185735"
 ---
 
-Input data directly from the editor
+Data inputs in editor

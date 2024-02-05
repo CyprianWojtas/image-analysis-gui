@@ -37,27 +37,6 @@ For an RGB image, the three color channels (Red, Green, and Blue) are combined t
 
 In image editing software or programming libraries, the Channel Join Filter is typically accessible through specific functions or methods. After performing individual channel operations, users can recombine the channels to restore the original color image.
 
-```python
-# Example usage in Python with OpenCV
-import cv2
-
-# Load individual color channels
-blue_channel = cv2.imread('blue_channel.jpg', cv2.IMREAD_GRAYSCALE)
-green_channel = cv2.imread('green_channel.jpg', cv2.IMREAD_GRAYSCALE)
-red_channel = cv2.imread('red_channel.jpg', cv2.IMREAD_GRAYSCALE)
-
-# Join the channels to reconstruct the original image
-reconstructed_image = cv2.merge([blue_channel, green_channel, red_channel])
-
-# Display the individual channels and the reconstructed image
-cv2.imshow('Blue Channel', blue_channel)
-cv2.imshow('Green Channel', green_channel)
-cv2.imshow('Red Channel', red_channel)
-cv2.imshow('Reconstructed Image', reconstructed_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
-
 ## Applications
 
 - **Selective Editing:** After performing operations on individual channels, recombine them to see the overall impact on the image.

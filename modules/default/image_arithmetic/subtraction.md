@@ -18,6 +18,10 @@ outputs:
 
 ---
 
+!description
+
+Subtracts two images from eachother
+
 !wiki
 
 The Image Subtraction Operation is a fundamental technique in image processing that involves subtracting the pixel values of one image from another. This operation is commonly used to highlight the differences or changes between two images, revealing unique features or emphasizing specific details.
@@ -34,28 +38,6 @@ It's important to note that the subtraction may result in negative values, and d
 
 Image Subtraction is utilized in various applications, such as motion detection, background removal, and change detection. In programming and image processing tools, users can apply image subtraction through dedicated functions or algorithms.
 
-```python
-# Example usage in Python with OpenCV
-import cv2
-import numpy as np
-
-# Load two images
-image1 = cv2.imread('image1.jpg')
-image2 = cv2.imread('image2.jpg')
-
-# Ensure both images have the same dimensions
-image2 = cv2.resize(image2, (image1.shape[1], image1.shape[0]))
-
-# Perform Image Subtraction
-result_image = cv2.subtract(image1, image2)
-
-# Display the original images and the result
-cv2.imshow('Image 1', image1)
-cv2.imshow('Image 2', image2)
-cv2.imshow('Result Image', result_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
 
 ## Applications
 

@@ -33,34 +33,6 @@ The process of object labeling involves the following steps:
 
 3. **Object Labeling:** The labeled image is generated, where each object or region is uniquely identified by its label. This labeled image can be used for further analysis or visualization.
 
-## Usage
-
-Object labeling filters are commonly implemented using image processing libraries and frameworks, such as OpenCV or scikit-image in Python. Here's a simple example using OpenCV:
-
-```python
-# Example usage in Python with OpenCV
-import cv2
-import numpy as np
-
-# Load an image
-image = cv2.imread('object_labeling_image.jpg')
-
-# Convert the image to grayscale
-gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-# Apply image segmentation (e.g., thresholding)
-_, binary_image = cv2.threshold(gray_image, 128, 255, cv2.THRESH_BINARY)
-
-# Find contours and label objects
-_, labeled_image, stats, _ = cv2.connectedComponentsWithStats(binary_image, connectivity=8)
-
-# Display the original image and the labeled image
-cv2.imshow('Original Image', image)
-cv2.imshow('Labeled Image', labeled_image.astype(np.uint8) * 50)  # Scale for better visualization
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
-
 ## Applications
 
 - **Object Recognition:** Identifying and distinguishing objects in an image.

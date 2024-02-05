@@ -43,24 +43,6 @@ Binarisation is achieved by establishing a threshold value, which determines whe
 
 Binarisation filters are widely used in various applications, including document analysis, optical character recognition (OCR), and image segmentation. In programming and image editing tools, users can apply binarisation through specific functions or filters.
 
-```python
-# Example usage in Python with OpenCV
-import cv2
-import numpy as np
-
-# Load a grayscale image
-image = cv2.imread('input_image.jpg', cv2.IMREAD_GRAYSCALE)
-
-# Apply Binarisation
-_, binary_image = cv2.threshold(image, 128, 255, cv2.THRESH_BINARY)
-
-# Display the original and binary images
-cv2.imshow('Original Image', image)
-cv2.imshow('Binary Image', binary_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
-
 ## Applications
 
 * **Document Processing:** Enhancing text readability and extracting information from scanned documents.

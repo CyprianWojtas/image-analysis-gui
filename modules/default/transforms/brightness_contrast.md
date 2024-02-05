@@ -48,24 +48,6 @@ Contrast, on the other hand, is the difference in intensity between the light an
 
 In image editing software or programming libraries, the Brightness and Contrast Adjustment filter is typically accessible through dedicated functions or sliders. Users can experiment with different parameter values to achieve the desired visual effect.
 
-```python
-# Example usage in Python with OpenCV
-import cv2
-import numpy as np
-
-# Load an image
-image = cv2.imread('input_image.jpg')
-
-# Adjust Brightness and Contrast
-adjusted_image = cv2.convertScaleAbs(image, alpha=1.5, beta=20)
-
-# Display the original and adjusted images
-cv2.imshow('Original Image', image)
-cv2.imshow('Adjusted Image', adjusted_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
-
 ## Applications
 
 - **Photography Enhancement:** Correcting underexposed or overexposed images.

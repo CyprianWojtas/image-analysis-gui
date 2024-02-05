@@ -1,7 +1,7 @@
 ---
 name: Generators
-colour: "#6c2b12"
 id: default.generators
+colour: "#435718"
 ---
 
-Creating image functions
+Functions for image creation 

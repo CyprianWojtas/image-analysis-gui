@@ -39,25 +39,6 @@ For an RGB image, the three color channels (Red, Green, and Blue) are extracted,
 
 In image editing software or programming libraries, the Channel Split Filter is often accessible through specific functions or methods. After splitting the channels, users can apply various operations or enhancements to individual color components.
 
-```python
-# Example usage in Python with OpenCV
-import cv2
-
-# Load an RGB image
-image = cv2.imread('input_image.jpg')
-
-# Split the channels
-blue_channel, green_channel, red_channel = cv2.split(image)
-
-# Display the original image and its individual channels
-cv2.imshow('Original Image', image)
-cv2.imshow('Blue Channel', blue_channel)
-cv2.imshow('Green Channel', green_channel)
-cv2.imshow('Red Channel', red_channel)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
-
 ## Applications
 
 - **Color Analysis:** Studying the contribution of each color channel to the overall image.

@@ -42,4 +42,4 @@ Creates an image from given parametres
 
 !wiki
 
-Creates an image from given parametres
+The Create Image function generates a new image from user-defined width, height, color repesented by RGB values.

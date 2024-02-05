@@ -1,6 +1,6 @@
 ---
 name: Analysis
-colour: "#29374d"
+colour: "#272b5b"
 id: default.analysis
 ---
 

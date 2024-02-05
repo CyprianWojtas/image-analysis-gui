@@ -32,29 +32,13 @@ The operation of the Image Median Filter involves sliding a window or kernel ove
 
 ## Parameters
 
-- **Kernel Size:** The size of the neighborhood or window used for calculating the median. A larger kernel size can provide more effective noise reduction but may result in some loss of image detail.
+- **Image**: The input image to be processed using the Maximum Filter.
+- **Filter Radius:** The size of the neighborhood or window used for calculating the median. A larger kernel size can provide more effective noise reduction but may result in some loss of image detail.
 
 ## Usage
 
 In image editing software or programming libraries, the Image Median Filter is typically accessible through specific functions or filters. Users can apply the filter with different kernel sizes based on the characteristics of the image and the level of noise present.
 
-```python
-# Example usage in Python with OpenCV
-import cv2
-import numpy as np
-
-# Load an image
-image = cv2.imread('input_image.jpg')
-
-# Apply Median Filter
-median_filtered_image = cv2.medianBlur(image, ksize=3)
-
-# Display the original and median-filtered images
-cv2.imshow('Original Image', image)
-cv2.imshow('Median Filtered Image', median_filtered_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
 
 ## Applications
 

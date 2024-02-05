@@ -23,6 +23,6 @@ Shows the image
 
 !wiki
 
-Shows the image
+The Image Preview component enables users to view uploaded or processed images directly within the Image Analysis Tool's interface. It offers functionalities for displaying images, zooming in/out, panning, and adjusting the display settings for enhanced visualization and analysis.
 
 ![Preview node in action](wiki/preview.png)
