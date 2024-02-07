@@ -52,28 +52,6 @@ where:
 - \\( \pi \\) is the mathematical constant pi.
 - \\( \sigma \\) is the standard deviation of the Gaussian distribution.
 
-## Usage
-
-In image editing software or programming libraries, the Gaussian Blur Filter is typically accessible through a filter or function with adjustable parameters. Users can experiment with different radius values to achieve the desired level of blurring.
-
-```python
-# Example usage in Python with OpenCV
-import cv2
-import numpy as np
-
-# Load an image
-image = cv2.imread('input_image.jpg')
-
-# Apply Gaussian Blur
-blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
-
-# Display the original and blurred images
-cv2.imshow('Original Image', image)
-cv2.imshow('Blurred Image', blurred_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-```
-
 ## Applications
 
 * **Photography:** Softening skin tones, reducing noise, or creating artistic effects.

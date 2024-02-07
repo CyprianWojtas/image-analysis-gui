@@ -54,7 +54,7 @@ input
 {
 	cursor: pointer;
 	background: #fff2;
-	color: #fff;
+	color: var(--text-color);
 	text-align: center;
 	padding: 0.25em 0.5em;
 	transition: 0.2s background-color, 0.2s color;

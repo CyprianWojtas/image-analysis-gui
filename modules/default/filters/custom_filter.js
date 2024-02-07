@@ -117,13 +117,16 @@ class CustomFilterNode extends Node
 					"input",
 					{
 						type: "number",
-						value: this.attributes.kernel[iX][iY],
+						value: this.attributes.kernel[iY][iX],
 						style: "width: 2rem; text-align: center;padding: 0.25rem;font-size: 0.75rem;"
 					},
 					{
 						blur: () =>
 						{
-							this.attributes.kernel[iX][iY] = inputEl.valueAsNumber;
+							if (isNaN(inputEl.valueAsNumber))
+								inputEl.value = 0;
+
+							this.attributes.kernel[iY][iX] = inputEl.valueAsNumber;
 							this.sendUpdate();
 						},
 						mousedown: e => e.stopPropagation(),
@@ -136,7 +139,7 @@ class CustomFilterNode extends Node
 				);
 
 				if (iX == middleCellX && iY == middleCellY)
-					inputEl.style.background = "#558";
+					inputEl.style.backgroundImage = "linear-gradient(#00f2, #00f2)";
 				this.kernelTable.append(inputEl);
 			}
 		}
@@ -146,19 +149,19 @@ class CustomFilterNode extends Node
 
 	shiftKernel(sizeX, sizeY)
 	{
-		const shiftX = Math.floor(this.attributes.kernel.length    / 2) - Math.floor(sizeX / 2);
-		const shiftY = Math.floor(this.attributes.kernel[0].length / 2) - Math.floor(sizeY / 2);
+		const shiftX = Math.floor(this.attributes.kernel[0].length / 2) - Math.floor(sizeX / 2);
+		const shiftY = Math.floor(this.attributes.kernel.length    / 2) - Math.floor(sizeY / 2);
 
 		console.log(shiftX, shiftY, sizeX, sizeY);
 		const newKernel = [];
 
-		for (let iX = 0; iX < sizeX; iX++)
+		for (let iY = 0; iY < sizeY; iY++)
 		{
-			newKernel[iX] = [];
+			newKernel[iY] = [];
 
-			for (let iY = 0; iY < sizeY; iY++)	
+			for (let iX = 0; iX < sizeX; iX++)
 			{
-				newKernel[iX][iY] = this.attributes.kernel?.[iX + shiftX]?.[iY + shiftY] || 0;
+				newKernel[iY][iX] = this.attributes.kernel?.[iY + shiftY]?.[iX + shiftX] || 0;
 			}
 		}
 
